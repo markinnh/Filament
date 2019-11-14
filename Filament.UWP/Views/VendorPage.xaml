@@ -1,0 +1,139 @@
+﻿<Page
+    x:Class="Filament.UWP.Views.VendorPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Style="{StaticResource PageStyle}"
+    xmlns:model="using:Filament_Data"
+    xmlns:views="using:Filament.UWP.Views"
+    xmlns:behaviors="using:Filament.UWP.Behaviors"
+    behaviors:NavigationViewHeaderBehavior.HeaderMode="Never"
+    mc:Ignorable="d">
+    <Page.Transitions>
+        <TransitionCollection>
+            <NavigationThemeTransition />
+        </TransitionCollection>
+    </Page.Transitions>
+    <Page.Resources>
+        <DataTemplate x:Key="ItemTemplate" x:DataType="model:VendorDefn">
+            <!--<FontIcon
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    FontSize="32"
+                    Glyph="{x:Bind Symbol}" />-->
+            <StackPanel
+                    
+                    Margin="{StaticResource SmallLeftMargin}"
+                    VerticalAlignment="Center">
+                <TextBlock Style="{ThemeResource ListTitleStyle}" Text="{x:Bind Name,Mode=OneWay}" Margin="5" />
+                <TextBlock Text="{x:Bind WebUrl,Mode=OneWay}" Margin="5"/>
+            </StackPanel>
+
+        </DataTemplate>
+
+        <DataTemplate x:Key="DetailsTemplate">
+            <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+                <views:VendorDetailControl MasterMenuItem="{Binding}" />
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="NoSelectionContentTemplate">
+            <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+                <TextBlock
+                    x:Uid="Vendor_NoSelection"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource SubtitleTextBlockStyle}"
+                    TextAlignment="Center" />
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="MasterHeaderTemplate">
+            <Grid Height="40">
+                <TextBlock
+                    x:Name="headerText"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource ListTitleStyle}"
+                    Text="{Binding}" />
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="MinimalMasterHeaderTemplate">
+            <Grid Height="40">
+                <TextBlock
+                    x:Name="headerText"
+                    Margin="96,0,0,0"
+                    Text="{Binding}"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource ListTitleStyle}" />
+            </Grid>
+        </DataTemplate>
+    </Page.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <!--<controls:Menu Grid.Row="0">
+            <controls:MenuItem x:Uid="MenuEdit">
+                <controls:MenuItem x:Uid="MenuAddNew" Foreground="Black"/>
+                <controls:MenuItem x:Uid="MenuDeleteSelected"/>
+            </controls:MenuItem>
+        </controls:Menu>-->
+        <StackPanel Orientation="Horizontal" Grid.Row="0">
+            <Button>
+                <Button.Content>
+                    <SymbolIcon Symbol="Add"/>
+                </Button.Content>
+                <Button.Flyout>
+                <Flyout>
+                    <StackPanel>
+                        <TextBlock x:Uid="AddVendorDefn"/>
+                        <Button x:Uid="ConfirmYes"
+                                Command="{x:Bind ViewModel.AddVendor}"/>
+                    </StackPanel>
+                    </Flyout>
+                </Button.Flyout>
+            </Button>
+            <!--<Button x:Uid="Delete">
+                <Button.Flyout>
+                    <Flyout>
+                        <StackPanel>
+                            <TextBlock x:Uid="DeleteVendorDefn"/>
+                            <Button x:Uid="ConfirmYes"/>
+                        </StackPanel>
+                    </Flyout>
+                </Button.Flyout>
+            </Button>-->
+        </StackPanel>
+        <Grid x:Name="ContentArea" Grid.Row="1">
+            <VisualStateManager.VisualStateGroups>
+                <VisualStateGroup>
+                    <VisualState>
+                        <VisualState.StateTriggers>
+                            <!--641 is the default CompactModeThresholdWidth in NavigationView -->
+                            <AdaptiveTrigger MinWindowWidth="641" />
+                        </VisualState.StateTriggers>
+                        <VisualState.Setters>
+                            <Setter Target="MasterDetailsViewControl.MasterHeaderTemplate" Value="{StaticResource MasterHeaderTemplate}" />
+                        </VisualState.Setters>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateManager.VisualStateGroups>
+            <controls:MasterDetailsView
+            x:Name="MasterDetailsViewControl"
+            x:Uid="Vendor"
+            Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}"
+            BorderBrush="Transparent"
+            DetailsTemplate="{StaticResource DetailsTemplate}"
+            ItemsSource="{x:Bind ViewModel.Vendors}"
+            ItemTemplate="{StaticResource ItemTemplate}"
+            BackButtonBehavior="Automatic"
+            MasterHeaderTemplate="{StaticResource MinimalMasterHeaderTemplate}"
+            NoSelectionContentTemplate="{StaticResource NoSelectionContentTemplate}"
+            SelectedItem="{x:Bind ViewModel.Selected, Mode=TwoWay}"
+            Grid.Row="1"/>
+        </Grid>
+    </Grid>
+</Page>
