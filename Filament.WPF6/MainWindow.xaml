@@ -1,0 +1,46 @@
+﻿<Window x:Class="Filament.WPF6.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Filament.WPF6"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <ToolBar>
+            <ToolBarPanel>
+                <ComboBox Name="SelectShowFlag"
+                          Width="100"  
+                          SelectionChanged="ComboBox_SelectionChanged"
+                          ItemsSource="{Binding Mode=OneWay, Source={StaticResource DataFromShowAllFlag}}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                        
+                        <Run Text="{Binding . ,Converter={StaticResource  EnumDescriptionConverter},Mode=OneWay}"/>
+                            </TextBlock>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </ToolBarPanel>
+        </ToolBar>
+        <TabControl 
+            HorizontalAlignment="Stretch" 
+            VerticalAlignment="Stretch"
+            Grid.Row="1">
+            <TabItem Header="Filament">
+                <Frame Source="Pages\FilamentDefnPage.xaml" NavigationUIVisibility="Hidden"/>
+            </TabItem>
+            <TabItem Header="Vendor">
+                <Frame Source="Pages\VendorDefnPage.xaml" NavigationUIVisibility="Hidden"/>
+            </TabItem>
+            <TabItem Header="By Vendor">
+                <Frame Source="Pages\ByFilamentPage.xaml" NavigationUIVisibility="Hidden"/>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>

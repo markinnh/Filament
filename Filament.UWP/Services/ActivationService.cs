@@ -30,6 +30,7 @@ namespace Filament.UWP.Services
 
         public async Task ActivateAsync(object activationArgs)
         {
+            
             if (IsInteractive(activationArgs))
             {
                 // Initialize services that you need before app activation

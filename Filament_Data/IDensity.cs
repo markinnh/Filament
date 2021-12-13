@@ -6,6 +6,6 @@ namespace Filament_Data
 {
     public interface IDensity
     {
-        float Density { get; }
+        double Density { get; }
     }
 }

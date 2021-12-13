@@ -1,0 +1,173 @@
+﻿<Page x:Class="Filament.WPF.Pages.DefineFilamentPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Filament.WPF.Pages"
+      xmlns:vm="clr-namespace:Filament.WPF.ViewModel"
+      xmlns:fila="clr-namespace:Filament_Data.JsonModel;assembly=Filament_Data"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800" Height="450"
+      Title="DefineFilamentPage" Background="{StaticResource StandardBackground}">
+    <Page.DataContext>
+        <vm:DefineFilamentViewModel/>
+    </Page.DataContext>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="175"/>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TextBlock Text="Define Filament"
+                   FontSize="{StaticResource TitleSize}"
+                   Grid.ColumnSpan="3"/>
+        <Label Content="Defined Filament"
+               Grid.Row="1"/>
+        <ListBox Grid.Row="2"
+                 Grid.RowSpan="5"
+                 ItemsSource="{Binding DataFile.Document.Filaments}"
+                 SelectedItem="{Binding EditItem}"
+                 Background="{StaticResource StandardBackground}" VerticalAlignment="Top" ItemTemplate="{StaticResource JsonFilamentForList}">
+            <!--<ListBox.ItemTemplate>
+                <DataTemplate DataType="{x:Type fila:FilamentDefn}">
+                    <StackPanel ToolTip="{Binding MaterialType, Converter={StaticResource DescriptionConverter}}">
+                        <TextBlock>
+                            <Run Text="Material Type : "
+                                 FontWeight="Bold"/>
+                            <Run Text="{Binding MaterialType}" />
+                        </TextBlock>
+                        <TextBlock>
+                            <Run Text="Diameter : "
+                                 FontWeight="Bold"/>
+                            <Run Text="{Binding Diameter}"/>
+                            <Run Text="mm"/>
+                        </TextBlock>
+                        <TextBlock ToolTip="In grams per cubic centimeter">
+                            <Run Text="Density : "
+                                 FontWeight="Bold"/>
+                            <Run Text="{Binding Density, Mode=OneWay}"/>
+                        </TextBlock>
+                        <TextBlock ToolTip="milligrams per millimeter">
+                            <Run Text="mg/mm"
+                                 FontWeight="Bold"/>
+                            <Run Text="{Binding MgPerMM,Mode=OneWay,StringFormat={}{0:#.#####}}"/>
+                        </TextBlock>
+                        <Separator/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>-->
+        </ListBox>
+        <Label Content="Filament Type"
+               Grid.Row="1"
+               Grid.Column="1"/>
+        <ComboBox Grid.Row="1"
+                  Grid.Column="2"
+                  HorizontalAlignment="Stretch"
+                  Margin="3"
+                  ItemsSource="{Binding Source={StaticResource dataFromMaterialType}}"
+                  SelectedItem="{Binding EditItem.MaterialType}"
+                  Background="{StaticResource StandardBackground}">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock>
+                        <Run Text="{Binding .,Mode=OneWay}"/>
+                        <Run Text="{Binding . ,Converter={StaticResource DescriptionConverter},Mode=OneTime,StringFormat='({0})'}"/>
+                    </TextBlock>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+        <Label Content="Diameter"
+               Grid.Row="2"
+               Grid.Column="1"/>
+        <TextBox
+            Grid.Row="2"
+            Grid.Column="2"
+            Text="{Binding EditItem.Diameter}"
+            Background="{StaticResource StandardBackground}"/>
+        <Label Content="Density Measurement Type"
+               Grid.Row="3"
+               Grid.Column="1"/>
+        <ComboBox Grid.Row="3"
+                  Grid.Column="2"
+                  Margin="3"
+                  ItemsSource="{Binding Source={StaticResource dataFromDensityEditType}}"
+                  SelectedItem="{Binding EditorType}"
+                  Background="{StaticResource StandardBackground}"/>
+        <GroupBox Header="Defined Density"
+            Grid.Row="4"
+            Grid.Column="1"
+            Grid.ColumnSpan="2"
+            Visibility="{Binding DefinedDensityVisible,Converter={StaticResource BooleanToVisibility}}"
+                  Margin="5">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="190"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Label Content="Density"
+                       />
+                <TextBox Grid.Column="1"
+                         Text="{Binding EditItem.DensityUnion.V1.Density,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                         Background="{StaticResource StandardBackground}"/>
+            </Grid>
+        </GroupBox>
+
+        <DataGrid Grid.Row="5"
+                  Grid.Column="1"
+                  Grid.ColumnSpan="2"
+                  
+                  ItemsSource="{Binding EditMeasuredDensity}"
+                  Visibility="{Binding MeasuredDensityVisible,Converter={StaticResource BooleanToVisibility}}" AutoGenerateColumns="False"
+                  CellEditEnding="DataGrid_CellEditEnding" RowEditEnding="DataGrid_RowEditEnding"
+                  Background="{StaticResource StandardBackground}" AlternatingRowBackground="{StaticResource StandardBackground}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding Diameter,UpdateSourceTrigger=PropertyChanged}" ClipboardContentBinding="{x:Null}" Header="Diameter" Width="100"/>
+                <DataGridTextColumn Binding="{Binding Length,UpdateSourceTrigger=PropertyChanged}" ClipboardContentBinding="{x:Null}" Header="Length" Width="100"/>
+                <DataGridTextColumn Binding="{Binding Weight,UpdateSourceTrigger=LostFocus}" ClipboardContentBinding="{x:Null}" Header="Weight" Width="100"/>
+                <DataGridTextColumn Binding="{Binding DensityInGmPerCC}" ClipboardContentBinding="{x:Null}" Header="Density" IsReadOnly="True" Width="100"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <GroupBox Header="Average Density"
+                  Grid.Row="4"
+                  Grid.Column="1"
+                  Grid.ColumnSpan="2"
+                  Visibility="{Binding MeasuredDensityVisible,Converter={StaticResource BooleanToVisibility}}"
+                  Margin="5">
+            <StackPanel>
+                <TextBlock>
+                    <Run Text="Average Measured Density : "/>
+                    <Run Text="{Binding EditMeasuredDensity.Density, Mode=OneWay}"/>
+                </TextBlock>
+            </StackPanel>
+        </GroupBox>
+        <StackPanel Orientation="Horizontal"
+                    Grid.Row="6"
+                    Grid.Column="1"
+                    Grid.ColumnSpan="2"
+                    VerticalAlignment="Bottom"
+                    Margin="0,50,0,0">
+            <Button Content="New"
+                    Style="{StaticResource CommandButton}"
+                    Command="{Binding NewCommand}"
+                    IsEnabled="{Binding CanAddNew}"/>
+            <Button Content="Update"
+                    Style="{StaticResource CommandButton}"
+                    Command="{Binding SaveCommand}"
+                    IsEnabled="{Binding EditItem.IsModified,Mode=OneWay}"/>
+        </StackPanel>
+    </Grid>
+</Page>
