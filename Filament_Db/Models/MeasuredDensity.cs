@@ -10,8 +10,23 @@ namespace Filament_Db.Models
     /// <summary>
     /// determine the density of filament using empirical measurement
     /// </summary>
-    public class MeasuredDensity : Observable, IDensity
+    public class MeasuredDensity : DatabaseObject, IDensity
     {
+        public static event InDataOpsChangedHandler? InDataOpsChanged;
+
+        private static bool inDataOps;
+        public static bool InDataOps
+        {
+            get => inDataOps;
+            set
+            {
+                inDataOps = value;
+
+                // Notify all the FilamentDefn objects of change to InDataOps state, allowing them to update the UI.
+                InDataOpsChanged?.Invoke(EventArgs.Empty);
+            }
+        }
+        public override bool InDataOperations => InDataOps;
         [NotMapped]
         public static dynamic? Initializer { get; set; }
         private int measuredDensityId;

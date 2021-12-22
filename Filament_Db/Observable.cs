@@ -14,7 +14,7 @@ namespace Filament_Db
     {
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        protected virtual bool Set<T>(ref T target, T value, [CallerMemberName] string? propertyName = null)
+        protected virtual bool Set<T>(ref T target, T value,bool blockUpdate=false, [CallerMemberName] string? propertyName = null)
         {
             if (!string.IsNullOrEmpty(propertyName))
             {
@@ -90,6 +90,31 @@ namespace Filament_Db
         //    if(PropertyChanged?.GetInvocationList().Cast<PropertyChangedEventHandler>().Contains(handler)??false)
         //        PropertyChanged-=handler;
         //}
+        internal virtual void WatchContained()
+        {
+            System.Diagnostics.Debug.WriteLine($"Watch contained not implemented in {GetType().Name}");
+        }
+        internal virtual void UnWatchContained()
+        {
+            System.Diagnostics.Debug.WriteLine($"Unwatch contained not implemented in {GetType().Name}");
+        }
+        protected virtual void WatchContainedHandler(object? sender,PropertyChangedEventArgs e)
+        {
+            
+            System.Diagnostics.Debug.WriteLine($"Contained Property watch not set up in {GetType().Name}");
+        }
+        public void Subscribe(PropertyChangedEventHandler handler)
+        {
+            if(handler!=null)
+                if(!PropertyChanged?.GetInvocationList().Contains(handler)??true)
+                    PropertyChanged+= handler;
+        }
+        public void Unsubscribe(PropertyChangedEventHandler handler)
+        {
+            if (handler != null)
+                if (!PropertyChanged?.GetInvocationList()?.Contains(handler) ?? false)
+                    PropertyChanged -= handler;
+        }
         ~Observable()
         {
             if (PropertyChanged != null)

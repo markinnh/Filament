@@ -11,6 +11,7 @@ using Filament_Db.Models;
 using Microsoft.EntityFrameworkCore;
 using MyLibraryStandard.Attributes;
 using Microsoft.Toolkit.Mvvm.Input;
+using Filament_Db;
 
 namespace Filament.WPF6.ViewModels
 {
@@ -74,7 +75,7 @@ namespace Filament.WPF6.ViewModels
         {
             if (selectedItem?.DensityAlias?.MeasuredDensity.Count == 0 && selectedItem.MaterialType == Filament_Db.MaterialType.PLA)
             {
-                Random random = new Random();
+                Random random = Singleton<Random>.Instance;
                 const int minRandom = 990;
                 const int maxRandom = 1030;
                 SelectedItem?.DensityAlias?.MeasuredDensity.Add(new MeasuredDensity(2.98, random.Next(minRandom, maxRandom)));

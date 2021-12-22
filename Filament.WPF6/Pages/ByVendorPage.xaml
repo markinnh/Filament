@@ -1,0 +1,114 @@
+﻿<Page x:Class="Filament.WPF6.Pages.ByFilamentPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Filament.WPF6"
+      xmlns:vm="clr-namespace:Filament.WPF6.ViewModels"
+      xmlns:model="clr-namespace:Filament_Db.Models;assembly=Filament_Db"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="ByFilamentPage" Name="ByVendorPage">
+    <Page.DataContext>
+        <vm:ByVendorViewModel/>
+    </Page.DataContext>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TreeView ItemsSource="{Binding Items}"
+                  SelectedItemChanged="TreeView_SelectedItemChanged"
+                  Height="{StaticResource StandardListViewHeight}"
+                  VerticalAlignment="Top"
+                  Margin="5"
+                    >
+            <TreeView.Resources>
+                <HierarchicalDataTemplate DataType="{x:Type model:VendorDefn}" ItemsSource="{Binding SpoolDefns}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{StaticResource EditIconSymbol}"
+                                   Style="{StaticResource FontIcon}"
+                                   Visibility="{Binding IsModified,Converter={StaticResource VisibilityConverter}}"/>
+                        <TextBlock Text="{Binding Name}">
+                            <TextBlock.ToolTip>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Name}"/>
+                                    <TextBlock Text="{Binding WebUrl}"/>
+                                    <CheckBox IsChecked="{Binding FoundOnAmazon}" 
+                                          IsEnabled="False"
+                                          Content="Found On Amazon"/>
+                                    <TextBlock Text="{StaticResource EditIconSymbol}" 
+                                           Style="{StaticResource FontIcon}"
+                                           Visibility="{Binding IsModified,Mode=OneWay,Converter={StaticResource VisibilityConverter}}"/>
+                                </StackPanel>
+                            </TextBlock.ToolTip>
+                    </TextBlock>
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+                <HierarchicalDataTemplate DataType="{x:Type model:SpoolDefn}" ItemsSource="{Binding FilteredInventory}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{StaticResource EditIconSymbol}"
+                                   Style="{StaticResource FontIcon}"
+                                   Visibility="{Binding IsModified,Converter={StaticResource VisibilityConverter}}"/>
+                        <TextBlock>
+                        <Run Text="{Binding Weight,Converter={StaticResource ConvertToMetricWeight},ConverterParameter='Kilograms'}"/>
+                        </TextBlock>
+                        
+                        <CheckBox IsChecked="{Binding ShowInUse,Mode=TwoWay}" ToolTip="Show in use spools only"
+                                  VerticalAlignment="Center"/>
+                        <StackPanel.ToolTip>
+                           <TextBlock>
+                            <Run Text="Spool #"/>
+                            <Run Text="{Binding SpoolDefnID}"/>
+                        </TextBlock> 
+                        </StackPanel.ToolTip>
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+                <DataTemplate DataType="{x:Type model:InventorySpool}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{StaticResource EditIconSymbol}"
+                                   Style="{StaticResource FontIcon}"
+                                   Visibility="{Binding IsModified,Converter={StaticResource VisibilityConverter}}"/>
+                        <Rectangle Fill="{Binding ColorName,Converter={StaticResource ColorFromNameConverter}}"
+                                   Width="30"
+                                   Height="16"/>
+                        <TextBlock Text="{Binding FilamentDefn.MaterialType}"/>
+                        
+                        <StackPanel.ToolTip>
+                            <TextBlock>
+                            <Run Text="Inventory #"/>
+                            <Run Text="{Binding InventorySpoolId}"/>
+                        </TextBlock>
+                        </StackPanel.ToolTip>
+                    </StackPanel>
+                </DataTemplate>
+            </TreeView.Resources>
+            
+        </TreeView>
+        <ContentControl Content="{Binding SelectedItem}"
+                        ContentTemplateSelector="{StaticResource EditTemplateSelector}"
+                        Grid.Column="1"/>
+        <StackPanel Orientation="Horizontal"
+                    Grid.Column="1"
+                    Grid.Row="1">
+            <Button Content="Add Vendor"
+                    Style="{StaticResource CommandButton}"
+                    />
+            <Button Content="Update"
+                    Style="{StaticResource CommandButton}"
+                    ToolTip="Update selected item"
+                    Command="{Binding UpdateCommand}"
+                    IsEnabled="{Binding SelectedItem.IsModified,Mode=OneWay}"/>
+            <Button Content="Delete"
+                    Style="{StaticResource CommandButton}"
+                    ToolTip="Delete the selected item"
+                    Command="{Binding DeleteSelectedCommand}"
+                    IsEnabled="{Binding SelectedItem.SupportsDelete,Mode=OneWay}"
+                    Visibility="{Binding SelectedItem.SupportsDelete,Converter={StaticResource VisibilityConverter}}"/>
+        </StackPanel>
+    </Grid>
+</Page>

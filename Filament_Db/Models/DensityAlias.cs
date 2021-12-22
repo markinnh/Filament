@@ -7,13 +7,31 @@ using System.ComponentModel.DataAnnotations.Schema;
 using MyLibraryStandard.Attributes;
 using MyLibraryStandard;
 using System.Reflection;
+using System.ComponentModel;
 
 namespace Filament_Db.Models
 {
     public enum DensityType { Defined = 0x8000, Measured }
-    public class DensityAlias : Observable, IDensity, INotifyContainer
+    public class DensityAlias : DatabaseObject, IDensity, INotifyContainer
     {
         const int MinimumDensityMeasurementsRequired = 3;
+        
+        public static event InDataOpsChangedHandler? InDataOpsChanged;
+
+        private static bool inDataOps;
+        public static bool InDataOps
+        {
+            get => inDataOps;
+            set
+            {
+                inDataOps = value;
+
+                // Notify all the FilamentDefn objects of change to InDataOps state, allowing them to update the UI.
+                InDataOpsChanged?.Invoke(EventArgs.Empty);
+            }
+        }
+        public override bool InDataOperations => InDataOps;
+        public override bool InDatabase => densityAliasId!=default;
         [NotMapped]
         public bool LinkedToCollectionChangedEH { get; set; } = false;
         [NotMapped]
@@ -78,7 +96,22 @@ namespace Filament_Db.Models
                 foreach (var handler in handlers)
                     NotifyContainer -= handler;
             }
-
+            UnWatchContained();
+        }
+        internal override void WatchContained()
+        {
+            foreach(var item in MeasuredDensity)
+                item.Subscribe(WatchContainedHandler);
+        }
+        internal override void UnWatchContained()
+        {
+            foreach (var item in MeasuredDensity)
+                item.Unsubscribe(WatchContainedHandler);
+        }
+        protected override void WatchContainedHandler(object? sender, PropertyChangedEventArgs e)
+        {
+            if(e.PropertyName == nameof(IsModified))
+                OnPropertyChanged(nameof(IsModified));
         }
         private void Col_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {

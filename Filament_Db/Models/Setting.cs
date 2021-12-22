@@ -2,14 +2,34 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace Filament_Db.Models
 {
-    public class Setting
+    public class Setting : DatabaseObject
     {
+        public static event InDataOpsChangedHandler InDataOpsChanged;
+
+        private static bool inDataOps;
+        public static bool InDataOps
+        {
+            get => inDataOps;
+            set
+            {
+                inDataOps = value;
+
+                // Notify all the FilamentDefn objects of change to InDataOps state, allowing them to update the UI.
+                InDataOpsChanged?.Invoke(EventArgs.Empty);
+            }
+        }
+        public override bool InDataOperations => InDataOps;
+        public override bool InDatabase => SettingId != default;
         public int SettingId { get; set; }
-        public string Name { get; set; }
-        public string Value { get; set; }
+        private string settingName;
+        public string Name { get => settingName; set => Set(ref settingName, value); }
+
+        private string settingValue;
+        public string Value { get => settingValue; set => Set(ref settingValue, value); }
 
         public Setting() { }
         public Setting(string name, object value)
@@ -38,22 +58,29 @@ namespace Filament_Db.Models
         {
             if (value != null)
             {
-                if (FilamentContext.GetSetting(s => s.Name == settingName) is Setting setting)
+                if (Singleton<DataLayer>.Instance.GetSingleSetting(s => s.Name == settingName) is Setting setting)
                 {
 #pragma warning disable CS8601 // Possible null reference assignment.
                     setting.Value = value.ToString();
+
+
 #pragma warning restore CS8601 // Possible null reference assignment.
                     FilamentContext.UpdateItems(setting);
                 }
                 else
                 {
 #pragma warning disable CS8604 // Possible null reference argument.
-                    FilamentContext.AddAll(1,new Setting(settingName, value.ToString()));
+                    if (new Setting(settingName, value) is Setting newSetting)
+                    {
+                        FilamentContext.AddAll(1, newSetting);
+
+                        Singleton<DataLayer>.Instance.Add(newSetting);
+                    }
 #pragma warning restore CS8604 // Possible null reference argument.
                 }
             }
         }
-        public static Setting? GetSetting(string settingName) => FilamentContext.GetSetting(s => s.Name == settingName);
+        public static Setting? GetSetting(string settingName) => Singleton<DataLayer>.Instance.GetFilteredSettings(s => s.Name == settingName).SingleOrDefault();
 
         public static implicit operator int(Setting setting)
         {

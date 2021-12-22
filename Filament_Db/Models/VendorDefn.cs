@@ -31,6 +31,7 @@ namespace Filament_Db.Models
         }
         public override bool InDataOperations => InDataOps;
         public override bool IsModified { get => base.IsModified || SpoolDefns?.Count(sd => sd.IsModified) > 0; set => base.IsModified = value; }
+        public override bool InDatabase => vendorID != default;
         //public const string _3DSolutechName = "3D Solutech";
         //public const string HatchBoxName = "HatchBox";
         //public const string SunluName = "Sunlu";
@@ -59,7 +60,7 @@ namespace Filament_Db.Models
         public string Name
         {
             get => name;
-            set => Set<string>(ref name, value, nameof(Name));
+            set => Set<string>(ref name, value);
         }
 
         private bool foundOnAmazon;
@@ -72,7 +73,7 @@ namespace Filament_Db.Models
         public bool FoundOnAmazon
         {
             get => foundOnAmazon;
-            set => Set<bool>(ref foundOnAmazon, value, nameof(FoundOnAmazon));
+            set => Set<bool>(ref foundOnAmazon, value);
         }
 
         private string? webUrl;
@@ -85,7 +86,7 @@ namespace Filament_Db.Models
         public string? WebUrl
         {
             get => webUrl;
-            set => Set<string>(ref webUrl, value, nameof(WebUrl));
+            set => Set<string>(ref webUrl, value);
         }
 
         public Uri WebUri => !string.IsNullOrEmpty(webUrl) ? new Uri(webUrl, UriKind.Absolute) : new Uri("https://www.google.com");
@@ -99,7 +100,7 @@ namespace Filament_Db.Models
         public bool StopUsing
         {
             get => stopUsing;
-            set => Set<bool>(ref stopUsing, value, nameof(StopUsing));
+            set => Set<bool>(ref stopUsing, value);
         }
 
         public IEnumerable<SpoolDefn> SpoolDefns { get; set; }
@@ -158,7 +159,27 @@ namespace Filament_Db.Models
             OnPropertyChanged(nameof(CanEdit));
             //throw new NotImplementedException();
         }
-
+        internal override void WatchContained()
+        {
+            foreach (var spool in SpoolDefns)
+            {
+                spool.Subscribe(WatchContainedHandler);
+                spool.WatchContained();
+            }
+        }
+        internal override void UnWatchContained()
+        {
+            foreach (var spool in SpoolDefns)
+            {
+                spool.Unsubscribe(WatchContainedHandler);
+                spool.UnWatchContained();
+            }
+        }
+        protected override void WatchContainedHandler(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(IsModified))
+                OnPropertyChanged(nameof(IsModified));
+        }
         /// <summary>
         /// Creates the vendor.
         /// </summary>
@@ -184,11 +205,26 @@ namespace Filament_Db.Models
             IsModified = false;
             InDataOps = false;
         }
+        public static void SetDataOperationsState(bool state)
+        {
+            InDataOps = state;
+            SpoolDefn.InDataOps = state;
+            InventorySpool.InDataOps = state;
+            DepthMeasurement.InDataOps = state;
+        }
         public override void SetContainedModifiedState(bool state)
         {
             if (SpoolDefns != null)
                 foreach (var spec in SpoolDefns)
+                {
                     spec.IsModified = state;
+                    foreach (var inv in spec.Inventory)
+                    {
+                        inv.IsModified = state;
+                        foreach (var dm in inv.DepthMeasurements)
+                            dm.IsModified = state;
+                    }
+                }
         }
     }
 }

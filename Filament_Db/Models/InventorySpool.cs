@@ -7,6 +7,8 @@ using System.Drawing;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Collections.ObjectModel;
 using Filament_Db.DataContext;
+using MyLibraryStandard.Attributes;
+using System.ComponentModel;
 
 namespace Filament_Db.Models
 {
@@ -29,12 +31,17 @@ namespace Filament_Db.Models
         public override bool InDataOperations => inDataOps;
 
         public override bool IsModified { get => base.IsModified || DepthMeasurements.Count(dm => dm.IsModified) > 0; set => base.IsModified = value; }
+
+        public override bool IsValid => FilamentDefn!=null && !string.IsNullOrEmpty(ColorName) && SpoolDefn!=null;
+
+        public override bool SupportsDelete => true;
+        public override bool InDatabase => InventorySpoolId !=default; 
         public int InventorySpoolId { get; set; }
 
         public int FilamentDefnId { get; set; }
 
         private FilamentDefn? filamentDefn;
-
+        [Affected(Names =new string[] {nameof(IsValid)})]
         public FilamentDefn? FilamentDefn
         {
             get => filamentDefn;
@@ -77,6 +84,14 @@ namespace Filament_Db.Models
             get => dateOpened;
             set => Set(ref dateOpened, value);
         }
+        private bool stopUsing;
+
+        public bool StopUsing
+        {
+            get => stopUsing;
+            set => Set<bool>(ref stopUsing, value);
+        }
+
         [NotMapped]
         public int AgeInDays => (DateTime.Today - DateOpened).Days;
         [NotMapped]
@@ -93,29 +108,75 @@ namespace Filament_Db.Models
         public virtual ICollection<DepthMeasurement> DepthMeasurements { get; set; }
         [NotMapped]
         public IEnumerable<FilamentDefn>? Filaments => GetFilaments();
-
+        
         protected IEnumerable<FilamentDefn>? GetFilaments()
         {
-            if (Setting.GetSetting("SelectShowFlag") is Setting setting)
+            if (Singleton<DataLayer>.Instance.GetFilteredSettings(se=> se.Name=="SelectShowFlag").SingleOrDefault() is Setting setting)
             {
                 if (setting.Value == "ShowAll")
-                    return FilamentContext.GetAllFilaments();
+                    return Singleton<DataLayer>.Instance.FilamentList;
                 else
-                    return FilamentContext.GetFilaments(fi => !fi.StopUsing);
+                    return Singleton<DataLayer>.Instance.GetFilteredFilaments(fi => !fi.StopUsing);
             }
             else
-                return FilamentContext.GetAllFilaments();
+                return Singleton<DataLayer>.Instance.FilamentList;
         }
         public InventorySpool()
         {
             DepthMeasurements = new ObservableCollection<DepthMeasurement>();
+            if(DepthMeasurements is ObservableCollection<DepthMeasurement> Measurement)
+                Measurement.CollectionChanged += Measurement_CollectionChanged;
             if (!InDataOpsChanged?.GetInvocationList().Contains(InventorySpool_InDataOpsChanged) ?? true)
                 InDataOpsChanged += InventorySpool_InDataOpsChanged;
         }
+        
+        internal override void WatchContained()
+        {
+            foreach(var dm in DepthMeasurements)
+                dm.Subscribe(WatchContainedHandler);
+        }
+        internal override void UnWatchContained()
+        {
+            foreach (var dm in DepthMeasurements)
+                dm.Unsubscribe(WatchContainedHandler);
+        }
+        protected override void WatchContainedHandler(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(IsModified))
+                OnPropertyChanged(nameof(IsModified));
+
+        }
+        private void Measurement_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add && e.NewItems != null)
+            {
+                foreach (var item in e.NewItems)
+                    if (item is DepthMeasurement measurement)
+                    {
+                        measurement.InventorySpool = this;
+                        measurement.Subscribe(WatchContainedHandler);
+                    }
+                OnPropertyChanged(nameof(IsModified));
+            }
+            else if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
+                IsModified = true;
+            //throw new NotImplementedException();
+        }
+
+        private void HandleMeasurementPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            //throw new NotImplementedException();
+        }
+
         ~InventorySpool()
         {
             if (InDataOpsChanged?.GetInvocationList().Contains(InventorySpool_InDataOpsChanged) ?? false)
                 InDataOpsChanged -= InventorySpool_InDataOpsChanged;
+
+            if(DepthMeasurements is ObservableCollection<DepthMeasurement> measurements)
+                measurements.CollectionChanged -= Measurement_CollectionChanged;
+            
+            UnWatchContained();
         }
         private void InventorySpool_InDataOpsChanged(EventArgs args)
         {
@@ -124,7 +185,39 @@ namespace Filament_Db.Models
         }
         public override void UpdateItem()
         {
-            throw new NotImplementedException();
+            if (IsValid)
+            {
+                using (FilamentContext context = new FilamentContext())
+                {
+                    int expectedUpdateCount = 0;
+
+                    expectedUpdateCount += context.SetDataItemsState(DepthMeasurements.Where(dm => Added(dm)), Microsoft.EntityFrameworkCore.EntityState.Added);
+                    expectedUpdateCount += context.SetDataItemsState(DepthMeasurements.Where((dm) => Modified(dm)), Microsoft.EntityFrameworkCore.EntityState.Modified);
+
+                    if (InDatabase)
+                        context.Update(this);
+                    else
+                        context.Add(this);
+
+                    var changeCount = context.SaveChanges();
+                    
+                }
+                SetContainedModifiedState(false);
+            }
+        }
+        public override void SetContainedModifiedState(bool state)
+        {
+            IsModified = state;
+            foreach(var dm in DepthMeasurements)
+                dm.IsModified = state;
+        }
+
+        public void Link(List<FilamentDefn> filaments)
+        {
+            if(FilamentDefnId!= default)
+            {
+                FilamentDefn=filaments.Single(fil=>fil.FilamentDefnId==FilamentDefnId);
+            }
         }
     }
 }

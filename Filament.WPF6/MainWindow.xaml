@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Filament.WPF6"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800" SizeToContent="WidthAndHeight">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -20,7 +20,6 @@
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock>
-                        
                         <Run Text="{Binding . ,Converter={StaticResource  EnumDescriptionConverter},Mode=OneWay}"/>
                             </TextBlock>
                         </DataTemplate>
@@ -39,7 +38,7 @@
                 <Frame Source="Pages\VendorDefnPage.xaml" NavigationUIVisibility="Hidden"/>
             </TabItem>
             <TabItem Header="By Vendor">
-                <Frame Source="Pages\ByFilamentPage.xaml" NavigationUIVisibility="Hidden"/>
+                <Frame Source="Pages\ByVendorPage.xaml" NavigationUIVisibility="Hidden"/>
             </TabItem>
         </TabControl>
     </Grid>

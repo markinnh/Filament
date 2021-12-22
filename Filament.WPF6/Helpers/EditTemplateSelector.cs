@@ -15,6 +15,7 @@ namespace Filament.WPF6.Helpers
         public DataTemplate? EditFilamentTemplate { get; set; }
         public DataTemplate? EditVendorTemplate { get; set; }
         public DataTemplate? EditSpoolDefnTemplate { get; set; }
+        public DataTemplate? EditInventorySpoolTemplate { get; set; }
         public DataTemplate? NoEditorTemplate { get; set; }
 
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
@@ -28,6 +29,8 @@ namespace Filament.WPF6.Helpers
                 return EditVendorTemplate;
             else if (item is SpoolDefn)
                 return EditSpoolDefnTemplate;
+            else if (item is InventorySpool)
+                return EditInventorySpoolTemplate;
             else {
                 WriteLine($"Need to develop a template for {item.GetType().Name}");
                 return NoEditorTemplate;

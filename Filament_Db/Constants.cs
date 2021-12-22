@@ -1,9 +1,64 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace Filament_Db
 {
+    public enum SupportedWeight
+    {
+        [Description("(g)")]
+        Gram,
+        [Description("(kg)")]
+        Kilogram,
+        [Description("(oz)")]
+        Ounce,
+        [Description("(lb)")]
+        Pound
+    }
+    public enum ConvertToWeight
+    {
+        [Description("grams")]
+        Grams,
+        [Description ("milligrams")]
+        Millgrams,
+        [Description("kilograms")]
+        Kilograms,
+    }
+    public enum SupportedLength
+    {
+        [Description("millimeter (mm)")]
+        Millimeter,
+        [Description("meters (m)")]
+        Meter,
+        [Description("inches (in)")]
+        Inches
+    }
+    public enum ConvertToLength
+    {
+        [Description("millimeter")]
+        Millimeter,
+        [Description("centimeter")]
+        Centimeter,
+        [Description("meter")]
+        Meter
+    }
+    public enum SupportedVolume
+    {
+        [Description("cubic centimeter")]
+        CubicCentimeter,
+        [Description("cubic millimeter")]
+        CubicMillimeter,
+        [Description("cubic inches")]
+        CubicInches
+    }
+    public enum ConvertToVolume
+    {
+        [Description("Cubic Centimeter")]
+        CubicCentimeter,
+        [Description("Cubic Millimeter")]
+        CubicMillimeter
+    }
     public class Constants
     {
         public const double BasicPLADensity = 1.24;
@@ -28,5 +83,28 @@ namespace Filament_Db
         public const string SunluName = "Sunlu";
         public const string DefaultVendorName = "Generic";
 
+        // Conversion factors
+        public const double CubicInchesToCubicMillimeters = 16387.064;
+        public const double CubicInchesToCubicCentimeters = 16.387064;
+        public const double CubicMillimetersToCubicCentimeter = .001;
+        public const double CubicCentimetersToCubicInches = 0.0610237441;
+
+        
+        public const double InchToMillimeters = 25.4;
+        public const double FootToMillimeter = 304.8;
+        public const double MillimetersToMeters = 1e-3;
+        public const double MillimetersToCentimeters = .1;
+        public const double MetersToMillimeter = 1e3;
+        public const double CentimetersToMillimeters = 10;
+        public const double PoundToGram = 453.592;
+        public const double PoundToKg = .453592;
+        public const double PoundToMilligram = 453592;
+        public const double OunceToGram = 28.3495;
+        public const double OunceToMilligram = 28349.5;
+        public const double GramToOunce = 0.0352739907;
+        
+
+        public const double KilogramToMillgram = 1000000;
+        public const double GramToMilligram = 1000;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Filament.WPF6.Helpers;
+using Filament_Db;
 using Filament_Db.DataContext;
 using Filament_Db.Models;
 using Microsoft.Toolkit.Mvvm.Input;
@@ -11,7 +12,7 @@ using System.Windows.Input;
 
 namespace Filament.WPF6.ViewModels
 {
-    public class FilamentDefnViewModel : BaseBrowserViewModel<FilamentDefn,FilamentDefn>
+    public class FilamentDefnViewModel : BaseBrowserViewModel<FilamentDefn, FilamentDefn>
     {
         protected override void DerivedInitItems()
         {
@@ -27,10 +28,11 @@ namespace Filament.WPF6.ViewModels
 
         protected override void PrepareForDataOperations() => FilamentDefn.InDataOps = true;
 
-        protected override IEnumerable<FilamentDefn>? GetAllItems()=>FilamentContext.GetAllFilaments();
-        protected override IEnumerable<FilamentDefn>? GetInUseItems() => FilamentContext.GetFilaments(f => !f.StopUsing);
+        protected override IEnumerable<FilamentDefn>? GetAllItems() => Singleton<DataLayer>.Instance.FilamentList;
+        protected override IEnumerable<FilamentDefn>? GetInUseItems() => Singleton<DataLayer>.Instance.GetFilteredFilaments(f => !f.StopUsing);
 
-        protected override IEnumerable<FilamentDefn>? GetFilteredItems(Func<FilamentDefn, bool> predicate)=>FilamentContext.GetFilaments(predicate);
+        protected override IEnumerable<FilamentDefn>? GetFilteredItems(Func<FilamentDefn, bool> predicate) =>
+            Singleton<DataLayer>.Instance.GetFilteredFilaments(predicate);
         //protected override void ShowAllItems()
         //{
         //    if (FilamentContext.GetAllFilaments() is IEnumerable<FilamentDefn> filaments)
@@ -40,16 +42,10 @@ namespace Filament.WPF6.ViewModels
         //}
         protected override void PostItemsInitialization()
         {
-            if(Items != null)
-            foreach (var filament in Items)
-                filament.InitNotificationHandler();
-        }
-        protected override void PreItemsInitialization()
-        {
             if (Items != null)
-                foreach (var filament in Items)
-                    filament.ReleaseNotificationHandler();
+                SelectedItem = Items.First();
         }
+
         //protected void InitItems(IEnumerable<FilamentDefn> filaments)
         //{
         //    if (Items != null)
@@ -85,7 +81,8 @@ namespace Filament.WPF6.ViewModels
             if (SelectedItem != null)
             {
                 //PrepareForDataOperations();
-                FilamentContext.UpdateSpec(SelectedItem);
+                SelectedItem.UpdateItem();
+                //FilamentContext.UpdateSpec(SelectedItem);
                 SelectedItem.IsModified = false;
                 //FinishedDataOperations();
             }
@@ -103,7 +100,7 @@ namespace Filament.WPF6.ViewModels
         {
             if (SelectedItem?.DensityAlias?.MeasuredDensity.Count == 0 && SelectedItem.MaterialType == Filament_Db.MaterialType.PLA)
             {
-                Random random = new Random();
+                Random random = Singleton<Random>.Instance;
                 const int minRandom = 990;
                 const int maxRandom = 1030;
                 SelectedItem?.DensityAlias?.MeasuredDensity.Add(new MeasuredDensity(2.98, random.Next(minRandom, maxRandom)));

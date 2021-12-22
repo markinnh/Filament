@@ -58,8 +58,8 @@ namespace Filament_Db.Migrations
                     b.Property<int>("InventorySpoolId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("IsIntrinsic")
-                        .HasColumnType("INTEGER");
+                    b.Property<DateTime>("MeasureDateTime")
+                        .HasColumnType("TEXT");
 
                     b.Property<double>("PercentOffset")
                         .HasColumnType("REAL");
@@ -113,10 +113,10 @@ namespace Filament_Db.Migrations
                     b.Property<int>("FilamentDefnId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("IsIntrinsic")
+                    b.Property<int>("SpoolDefnId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("SpoolDefnId")
+                    b.Property<bool>("StopUsing")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("InventorySpoolId");
@@ -181,7 +181,7 @@ namespace Filament_Db.Migrations
                     b.Property<double>("DrumDiameter")
                         .HasColumnType("REAL");
 
-                    b.Property<bool>("IsIntrinsic")
+                    b.Property<bool>("ShowInUse")
                         .HasColumnType("INTEGER");
 
                     b.Property<double>("SpoolDiameter")
@@ -216,9 +216,6 @@ namespace Filament_Db.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("FoundOnAmazon")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsIntrinsic")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")

@@ -16,11 +16,11 @@ using System.Windows.Input;
 
 namespace Filament.WPF6.ViewModels
 {
-    public abstract class BaseBrowserViewModel<TBrowse,TSelect> : Observable where TBrowse : DatabaseObject, new()
+    public abstract class BaseBrowserViewModel<TBrowse, TSelect> : Observable where TBrowse : DatabaseObject, new()
         where TSelect : DatabaseObject, new()
     {
         private ObservableCollection<TBrowse> _browse;
-        public ObservableCollection<TBrowse>? Items { get=>_browse; set=>Set(ref _browse,value); }
+        public ObservableCollection<TBrowse>? Items { get => _browse; set => Set(ref _browse, value); }
         private TSelect? selectedItem;
 
         public TSelect? SelectedItem
@@ -158,7 +158,7 @@ namespace Filament.WPF6.ViewModels
         {
             System.Diagnostics.Debug.WriteLine($"No post processing has been conducted in {GetType().Name}.");
         }
-        
+
         protected abstract void DerivedInitItems();
 
         protected abstract void PrepareForDataOperations();
@@ -243,23 +243,34 @@ namespace Filament.WPF6.ViewModels
         }
         protected virtual void DeleteSelectedHandler()
         {
-            try
+            if (SelectedItem != null)
             {
-                if (SelectedItem != null)
-                {
-                    if (!SelectedItem.IsIntrinsic)
-                    {
-                        PrepareForDataOperations();
+                if (SelectedItem.InDatabase)
+                    FilamentContext.DeleteItems(SelectedItem);
+            }
+            // TODO: This needs a lot of work and consideration whether to support deleting items.
+            //try
+            //{
+            //    if (SelectedItem != null)
+            //    {
+            //        if (SelectedItem is FilamentDefn filament)
+            //        {
+            //            if (!filament.IsIntrinsic)
+            //            {
+            //                PrepareForDataOperations();
 
-                        FilamentContext.DeleteItems(SelectedItem);
-                        FinishedDataOperations();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Unable to complete data operations.  The following error was returned.  {ex.Message}, Inner Exception : {ex.InnerException?.Message}");
-            }
+            //                FilamentContext.DeleteItems(SelectedItem);
+            //                FinishedDataOperations();
+            //            }
+            //        }
+
+
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    System.Diagnostics.Debug.WriteLine($"Unable to complete data operations.  The following error was returned.  {ex.Message}, Inner Exception : {ex.InnerException?.Message}");
+            //}
         }
         protected void LinkRange(IList ts)
         {

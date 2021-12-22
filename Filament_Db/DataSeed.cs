@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Filament_Db.DataContext;
 using Filament_Db.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,7 +12,11 @@ namespace Filament_Db
         const double AddVendorDefn = 0.15;
         public static void Seed()
         {
-            var setting = DataContext.FilamentContext.GetSetting(s => s.Name == "SeedData");
+            using (FilamentContext context=new FilamentContext())
+            {
+                context.Database.Migrate();
+            }
+            var setting = Singleton<DataLayer>.Instance.GetSingleSetting(s => s.Name == "SeedData");
             if (setting is null)
                 InitialSeeding();
             else
@@ -34,7 +39,7 @@ namespace Filament_Db
         }
         public static void VerifySeed()
         {
-            if (DataContext.FilamentContext.GetSetting(s => s.Name == "SeedData") is Setting setting)
+            if (Singleton<DataLayer>.Instance.GetSingleSetting(s => s.Name == "SeedData") is Setting setting)
             {
                 if (setting == InitialSeed)
                 {
@@ -44,22 +49,6 @@ namespace Filament_Db
                     }
                 }
             }
-            //using(DataContext.FilamentContext ctx = new())
-            //{
-            //    if (ctx != null)
-            //    {
-            //        if(ctx.Settings?.FirstOrDefault(s => s.Name == "SeedData") is Setting setting)
-            //        {
-            //            if (setting == InitialSeed)
-            //            {
-            //                if(ctx.FilamentDefn?.Include("DensityAlias").Include("DensityAlias.MeasuredDensity").FirstOrDefault() is FilamentDefn definition)
-            //                {
-            //                    System.Diagnostics.Debug.WriteLine($"Filament Type : {definition.MaterialType}, Density : {definition.DensityAlias.Density}, Density Type : {definition.DensityAlias.DensityType}");
-            //                }
-            //            }
-            //        }
-            //    }
-            //}
         }
         private static void InitialSeeding()
         {
@@ -88,6 +77,7 @@ namespace Filament_Db
             {
                             new FilamentDefn()
                             {
+                                IsIntrinsic = true,
                                 DensityAlias= new DensityAlias()
                                 {
                                     DefinedDensity=Constants.BasicPLADensity,
@@ -96,6 +86,7 @@ namespace Filament_Db
                             },
                             new FilamentDefn()
                             {
+                                IsIntrinsic = true,
                                 MaterialType= MaterialType.ABS,
                                 DensityAlias= new DensityAlias()
                                 {
@@ -105,6 +96,7 @@ namespace Filament_Db
                             },
                             new FilamentDefn(MaterialType.PETG)
                             {
+                                IsIntrinsic = true,
                                 DensityAlias = new DensityAlias()
                                 {
                                     DefinedDensity= Constants.BasicPETGDensity,
@@ -113,6 +105,7 @@ namespace Filament_Db
                             },
                             new FilamentDefn(MaterialType.Nylon)
                             {
+                                IsIntrinsic = true,
                                 DensityAlias = new()
                                 {
                                     DensityType= DensityType.Defined,
@@ -121,6 +114,7 @@ namespace Filament_Db
                             },
                             new FilamentDefn(MaterialType.PC)
                             {
+                                IsIntrinsic = true,
                                 DensityAlias = new()
                                 {
                                     DensityType=DensityType.Defined,
@@ -129,6 +123,7 @@ namespace Filament_Db
                             },
                             new FilamentDefn(MaterialType.Wood)
                             {
+                                IsIntrinsic = true,
                                 DensityAlias = new()
                                 {
                                     DensityType = DensityType.Defined,

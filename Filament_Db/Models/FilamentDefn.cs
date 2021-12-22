@@ -34,6 +34,11 @@ namespace Filament_Db.Models
             }
         }
         public override bool InDataOperations => InDataOps;
+        public override bool CanEdit => base.CanEdit&& !isIntrinsic;
+        public override bool InDatabase => FilamentDefnId != default;
+
+        public override bool SupportsDelete => true && !IsIntrinsic;
+
         public int FilamentDefnId { get; set; }
         /// <summary>
         /// Standard filament diameter in mm
@@ -110,6 +115,13 @@ namespace Filament_Db.Models
                     densityAlias.NotifyContainer += DensityAlias_NotifyContainer;
             }
         }
+        private bool isIntrinsic;
+
+        public bool IsIntrinsic
+        {
+            get => isIntrinsic;
+            set => Set<bool>(ref isIntrinsic, value);
+        }
         #region UI Assist Items, not mapped
         [NotMapped]
         public bool MeasuredDensityVisible => DensityAlias?.DensityType == DensityType.Measured;
@@ -135,7 +147,21 @@ namespace Filament_Db.Models
             OnPropertyChanged(nameof(CanEdit));
             //throw new NotImplementedException();
         }
-
+        internal override void WatchContained()
+        {
+            DensityAlias?.Subscribe(WatchContainedHandler);
+            DensityAlias?.WatchContained();
+        }
+        internal override void UnWatchContained()
+        {
+            DensityAlias?.Unsubscribe(WatchContainedHandler);
+            DensityAlias?.UnWatchContained();
+        }
+        protected override void WatchContainedHandler(object? sender, PropertyChangedEventArgs e)
+        {
+            if(e.PropertyName==nameof(IsModified))
+                OnPropertyChanged(nameof(IsModified));
+        }
         public void InitNotificationHandler()
         {
             if (densityAlias != null)
@@ -152,7 +178,6 @@ namespace Filament_Db.Models
                 densityAlias.UnSubscribe(DensityAlias_NotifyContainer);
 
             InDataOpsChanged -= FilamentDefn_InDataOpsChanged;
-
         }
 
         // TODO: Fix before serialization works.  This cannot be an object, it must be a defined type or json serialization will fail.  Its probably a bad programming practice too.  
@@ -239,6 +264,11 @@ namespace Filament_Db.Models
             FilamentContext.UpdateSpec(this);
             IsModified = false;
             InDataOps=false;
+        }
+
+        public static void SetDataOperationsState(bool state)
+        {
+            InDataOps=state;
         }
     }
 }

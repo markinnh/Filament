@@ -5,7 +5,8 @@ using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations.Schema;
 //using System.Text.Json.Serialization;
 using System.Linq;
-
+using MyLibraryStandard.Attributes;
+using System.Windows.Input;
 
 namespace Filament_Db.Models
 {
@@ -29,30 +30,40 @@ namespace Filament_Db.Models
         public override bool InDataOperations => InDataOps;
 
         public override bool IsModified { get => base.IsModified || Inventory?.Count(inv => inv.IsModified) > 0; set => base.IsModified = value; }
-        private double spoolDiameter;
+
+        public override bool IsValid => spoolDiameter != double.NaN && drumDiameter != double.NaN
+            && weight != double.NaN && spoolWidth != double.NaN && Vendor != null;
+
+        public override bool InDatabase => SpoolDefnID != default;
+
+
+        private double spoolDiameter = double.NaN;
         /// <summary>
         /// Gets or sets the spool diameter.
         /// </summary>
         /// <value>
         /// The spool diameter.
         /// </value>
+        [Affected(Names = new string[] { nameof(IsValid) })]
         public double SpoolDiameter { get => spoolDiameter; set => Set<double>(ref spoolDiameter, value); }
-        private double drumDiameter;
+        private double drumDiameter = double.NaN;
         /// <summary>
         /// Gets or sets the minimum diameter.
         /// </summary>
         /// <value>
         /// The minimum diameter.
         /// </value>
+        [Affected(Names = new string[] { nameof(IsValid) })]
         public double DrumDiameter { get => drumDiameter; set => Set<double>(ref drumDiameter, value); }
 
-        private double spoolWidth;
+        private double spoolWidth = double.NaN;
         /// <summary>
         /// Gets or sets the width of the spool.
         /// </summary>
         /// <value>
         /// The width of the spool.
         /// </value>
+        [Affected(Names = new string[] { nameof(IsValid) })]
         public double SpoolWidth
         {
             get => spoolWidth;
@@ -112,6 +123,7 @@ namespace Filament_Db.Models
         /// <value>
         /// The weight.
         /// </value>
+        [Affected(Names = new string[] { nameof(IsValid) })]
         public double Weight
         {
             get => weight;
@@ -156,10 +168,28 @@ namespace Filament_Db.Models
         public VendorDefn Vendor
         {
             get => vendor;
-            set => Set<VendorDefn>(ref vendor, value);
+            set
+            {
+                if (Set<VendorDefn>(ref vendor, value) && vendor != null && !InDataOperations)
+                    vendorID = vendor.VendorDefnId;
+            }
+        }
+
+        private bool showInUse;
+
+        public bool ShowInUse
+        {
+            get => showInUse;
+            set
+            {
+                Set<bool>(ref showInUse, value);
+                OnPropertyChanged(nameof(FilteredInventory));
+            }
         }
 
         public virtual IEnumerable<InventorySpool> Inventory { get; set; }
+        [NotMapped]
+        public IEnumerable<InventorySpool> FilteredInventory => showInUse ? Inventory.Where(inv => !inv.StopUsing) : Inventory;
         /// <summary>
         /// Gets the name of the spool.
         /// </summary>
@@ -178,30 +208,46 @@ namespace Filament_Db.Models
 
             //Init();
         }
-        [NotMapped]
-        public bool InventoryNull => Inventory is null;
-
-
+        public void LinkToInventorySpools()
+        {
+            foreach (var inventory in Inventory)
+                inventory.Subscribe(InventorySpool_PropertyChanged);
+        }
+        
         private void OInventory_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             System.Diagnostics.Debug.WriteLine($"Collection changed {e.Action}, count {e.NewItems?.Count}");
             if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add && e.NewItems != null)
+            {
                 foreach (var item in e.NewItems)
                     if (item is InventorySpool inventorySpool)
                     {
                         inventorySpool.SpoolDefn = this;
                         inventorySpool.SpoolDefnId = spoolDefnID;
-                        inventorySpool.PropertyChanged += InventorySpool_PropertyChanged;
+                        inventorySpool.Subscribe(InventorySpool_PropertyChanged);
                     }
-
+                OnPropertyChanged(nameof(IsModified));
+            }
+            else if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Remove && e.OldItems != null)
+            {
+                foreach (var item in e.OldItems)
+                {
+                    if (item is InventorySpool spool)
+                    {
+                        //FilamentContext.DeleteItems(e.OldItems);
+                    }
+                }
+                IsModified = true;
+            }
 
             //throw new NotImplementedException();
         }
 
         private void InventorySpool_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine($"Property Changed for {e.PropertyName}");
-            OnPropertyChanged(nameof(IsModified));
+            System.Diagnostics.Debug.WriteLine($"Property Changed in {sender?.GetType().Name} for {e.PropertyName}");
+            if (e.PropertyName == nameof(IsModified))
+                OnPropertyChanged(nameof(IsModified));
             //throw new NotImplementedException();
         }
 
@@ -229,7 +275,45 @@ namespace Filament_Db.Models
 
         public override void UpdateItem()
         {
-            throw new NotImplementedException();
+            if (IsValid)
+            {
+                using (FilamentContext context = new())
+                {
+                    int expectedUpdate = 0;
+                    expectedUpdate += context.SetDataItemsState<InventorySpool>(Inventory.Where(inv => Added(inv)), Microsoft.EntityFrameworkCore.EntityState.Added);
+                    expectedUpdate += context.SetDataItemsState(Inventory.Where(inv => Modified(inv)), Microsoft.EntityFrameworkCore.EntityState.Modified);
+                    //expectedUpdate += context.SetDataItemsState(Inventory.Where(inv => inv.MarkedForDeletion && inv.InDatabase), Microsoft.EntityFrameworkCore.EntityState.Deleted);
+                    foreach (var inv in Inventory)
+                    {
+                        expectedUpdate += context.SetDataItemsState(inv.DepthMeasurements.Where(dm => Added(dm)), Microsoft.EntityFrameworkCore.EntityState.Added);
+                        expectedUpdate += context.SetDataItemsState(inv.DepthMeasurements.Where(dm => Modified(dm)), Microsoft.EntityFrameworkCore.EntityState.Modified);
+                        //expectedUpdate += context.SetDataItemsState(inv.DepthMeasurements.Where(dm => dm.MarkedForDeletion && dm.InDatabase), Microsoft.EntityFrameworkCore.EntityState.Deleted);
+                    }
+
+                    try
+                    {
+                        if (InDatabase)
+                            context.Update(this);
+                        else
+                            context.Add(this);
+
+                        var updateCount = context.SaveChanges();
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Unable to complete data operation, {ex.Message}");
+                    }
+                }
+            }
+            //throw new NotImplementedException();
+        }
+        public override void SetContainedModifiedState(bool state)
+        {
+            IsModified = state;
+            foreach (var inv in Inventory)
+            {
+                inv.SetContainedModifiedState(state);
+            }
         }
     }
 }

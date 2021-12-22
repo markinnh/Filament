@@ -113,12 +113,13 @@ namespace Filament_Db.DataContext
                         {
                             SetDataItemsState<DepthMeasurement>(context,inv.DepthMeasurements.Where(dm=>dm.InventorySpoolId==default), EntityState.Added);
                             SetDataItemsState<DepthMeasurement>(context,inv.DepthMeasurements.Where(dm=>dm.InventorySpoolId!=default&& dm.IsModified), EntityState.Modified);
+          
                         }
                     }
                     //foreach(var item in vendorDefn.SpoolDefns.Where())
                     //    context.Entry<SpoolDefn>(item).State= EntityState.Modified;
 
-                    context.Update<VendorDefn>(vendorDefn);
+                    context.Update(vendorDefn);
                     context.SaveChanges();
                 }
             }
@@ -165,7 +166,7 @@ namespace Filament_Db.DataContext
                     return -1;
             }
         }
-        public static FilamentDefn[]? GetAllFilaments()
+        public static List<FilamentDefn>? GetAllFilaments()
         {
             using (FilamentContext ctx = new FilamentContext())
             {
@@ -174,7 +175,7 @@ namespace Filament_Db.DataContext
                         .Include("DensityAlias")
                         .Include("DensityAlias.MeasuredDensity")
                         .AsNoTracking()
-                        .ToArray();
+                        .ToList();
                 else
                     return null;
             }
@@ -288,6 +289,17 @@ namespace Filament_Db.DataContext
             if(items != null)
                 foreach(TItem item in items)
                     context.Entry<TItem>(item).State = state;
+        }
+        internal int SetDataItemsState<TItem>( IEnumerable<TItem> items, EntityState state) where TItem : class
+        {
+            if (items != null) { 
+                foreach (TItem item in items)
+                   Entry<TItem>(item).State = state;
+
+                return items.Count();
+            }
+            else
+                return 0;
         }
     }
 }

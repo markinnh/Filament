@@ -57,20 +57,11 @@ namespace Filament.WPF6.ViewModels
             //}
             FinishedDataOperations();
         }
-        protected override IEnumerable<VendorDefn>? GetAllItems() => FilamentContext.GetAllVendors();
-        protected override IEnumerable<VendorDefn>? GetInUseItems() => FilamentContext.GetSomeVendors(v => !v.StopUsing);
+        protected override IEnumerable<VendorDefn>? GetAllItems() => Singleton<DataLayer>.Instance.VendorList;
+        protected override IEnumerable<VendorDefn>? GetInUseItems() => Singleton<DataLayer>.Instance.GetFilteredVendors(v => !v.StopUsing);
 
-        protected override IEnumerable<VendorDefn>? GetFilteredItems(Func<VendorDefn, bool> predicate) => FilamentContext.GetSomeVendors(predicate);
+        protected override IEnumerable<VendorDefn>? GetFilteredItems(Func<VendorDefn, bool> predicate) => Singleton<DataLayer>.Instance.GetFilteredVendors(predicate);
 
-        // The ByVendorViewModel will be providing data for both views.
-        protected override void ShowAllItems()
-        {
-            //base.ShowAllItems();
-        }
-        protected override void ShowInUseItems()
-        {
-            //base.ShowInUseItems();
-        }
         protected override void UpdateSelectedItemHander()
         {
             if (SelectedItem != null)

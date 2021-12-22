@@ -1,4 +1,5 @@
 ﻿using Filament.WPF6.ViewModels;
+using Filament_Db;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,8 +29,8 @@ namespace Filament.WPF6.Pages
 
         private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            if (DataContext is ByVendorViewModel viewModel)
-                viewModel.SelectedObject = e.NewValue;
+            if (DataContext is ByVendorViewModel viewModel && e.NewValue is DatabaseObject databaseObject)
+                viewModel.SelectedItem = databaseObject;
         }
     }
 }

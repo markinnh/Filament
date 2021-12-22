@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Filament_Db.DataContext;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -32,6 +33,8 @@ namespace Filament_Db.Models
         }
         public override bool InDataOperations => inDataOps;
 
+        public override bool InDatabase => DepthMeasurementId != default;
+
         public int DepthMeasurementId { get; set; }
         private double depth1 = FilamentStartingDepth;
         public double Depth1
@@ -39,7 +42,7 @@ namespace Filament_Db.Models
             get => depth1;
             set
             {
-                if (Set<double>(ref depth1, value, nameof(Depth1)))
+                if (Set<double>(ref depth1, value))
                 {
                     //depth1 = value;
 
@@ -54,12 +57,21 @@ namespace Filament_Db.Models
             get => depth2;
             set
             {
-                if (Set<double>(ref depth2, value, nameof(Depth2)))
+                if (Set<double>(ref depth2, value))
                 {
                     UpdateCalcs();
                 }
             }
         }
+
+        private DateTime measureDateTime=DateTime.Today;
+
+        public DateTime MeasureDateTime
+        {
+            get => measureDateTime;
+            set => Set<DateTime>(ref measureDateTime, value);
+        }
+
         [NotMapped]
         public double AverageDepth => (depth1 + depth2) / 2;
 
@@ -68,7 +80,7 @@ namespace Filament_Db.Models
         {
             get => percentOffset; set
             {
-                if (Set<double>(ref percentOffset, value, nameof(PercentOffset)))
+                if (Set<double>(ref percentOffset, value))
                 {
                     UpdateCalcs();
                 }
@@ -81,13 +93,13 @@ namespace Filament_Db.Models
             get { return adjustForWind; }
             set
             {
-                if (Set<bool>(ref adjustForWind, value, nameof(AdjustForWind)))
+                if (Set<bool>(ref adjustForWind, value))
                 {
                     UpdateCalcs();
                 }
             }
         }
-
+        
         public double FilamentRemainingInMillimeters => CalcRemaining();
         public double FilamentRemainingInMeters => (double)Math.Round(CalcRemaining() / 1000f, digitsOfPrecision);
         public double FilamentRemainingInGrams => CalcGramsRemaining();
@@ -113,7 +125,7 @@ namespace Filament_Db.Models
                 var percentUtilization = .95f;
                 double length = 0.0f;
                 double windAmount = (InventorySpool.SpoolDefn.SpoolWidth / InventorySpool.FilamentDefn.Diameter) * percentUtilization;
-                var maxDiameter = InventorySpool.SpoolDefn.SpoolDiameter - (2 * ((Depth1 + Depth2) / 2));
+                var maxDiameter = InventorySpool.SpoolDefn.SpoolDiameter - (2 * AverageDepth);
                 var curDiameter = InventorySpool.SpoolDefn.DrumDiameter;
                 var loop = 0;
                 while (curDiameter < maxDiameter)
@@ -154,7 +166,7 @@ namespace Filament_Db.Models
 
         public override void UpdateItem()
         {
-            throw new NotImplementedException();
+            
         }
     }
 }
