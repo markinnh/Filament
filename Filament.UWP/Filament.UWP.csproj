@@ -126,6 +126,8 @@
     <Compile Include="Behaviors\NavigationViewHeaderMode.cs" />
     <Compile Include="Behaviors\TreeViewCollapseBehavior.cs" />
     <Compile Include="Helpers\DateTimeOffsetConverter.cs" />
+    <Compile Include="Helpers\EnumDescriptionConverter.cs" />
+    <Compile Include="Helpers\EnumListProvider.cs" />
     <Compile Include="Helpers\EnumToBooleanConverter.cs" />
     <Compile Include="Helpers\LengthWithUnitsConverter.cs" />
     <Compile Include="Helpers\RoamingAppSettings.cs" />
@@ -141,11 +143,18 @@
     <Compile Include="Services\ThemeSelectorService.cs" />
     <Compile Include="TemplateSelectors\InventoryTemplateSelector.cs" />
     <Compile Include="TemplateSelectors\SampleDataTemplateSelector.cs" />
+    <Compile Include="ViewModels\FilamentDefnViewModel.cs" />
     <Compile Include="ViewModels\InventoryViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
     <Compile Include="ViewModels\VendorViewModel.cs" />
+    <Compile Include="Views\FilamentDefnDetailControl.xaml.cs">
+      <DependentUpon>FilamentDefnDetailControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\FilamentDefnPage.xaml.cs">
+      <DependentUpon>FilamentDefnPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\InventoryPage.xaml.cs">
       <DependentUpon>InventoryPage.xaml</DependentUpon>
     </Compile>
@@ -194,6 +203,14 @@
     <Page Include="Styles\TextBlock.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\FilamentDefnDetailControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\FilamentDefnPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\InventoryPage.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -304,6 +321,12 @@
       <Project>{E7CDFDC1-E142-4291-958F-D37FE1ECA868}</Project>
       <Name>Filament.UWP.Core</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="MyLibraryStandard, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\MyLibrary\MyLibraryStandard\bin\Debug\netstandard2.0\MyLibraryStandard.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

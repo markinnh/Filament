@@ -35,7 +35,8 @@
             -->
             <winui:NavigationViewItem x:Uid="Shell_Main" Icon="Document" helpers:NavHelper.NavigateTo="views:MainPage" />
             <winui:NavigationViewItem x:Uid="Shell_Vendor" Icon="Folder" helpers:NavHelper.NavigateTo="views:VendorPage" />
-            <winui:NavigationViewItem x:Uid="Shell_Filament" Icon="Folder" helpers:NavHelper.NavigateTo="views:InventoryPage" />
+            <winui:NavigationViewItem x:Uid="Shell_FilamentDefn" Icon="Folder" helpers:NavHelper.NavigateTo="views:FilamentDefnPage"/>
+            <winui:NavigationViewItem x:Uid="Shell_Inventory" Icon="Folder" helpers:NavHelper.NavigateTo="views:InventoryPage" />
         </winui:NavigationView.MenuItems>
         <i:Interaction.Behaviors>
             <behaviors:NavigationViewHeaderBehavior

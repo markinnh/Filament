@@ -25,17 +25,20 @@ namespace Filament.UWP.ViewModels
             set { Set(ref _selected, value); }
         }
 
-        public ObservableCollection<VendorDefn> Vendors { get; } = new ObservableCollection<VendorDefn>(Core.Helpers.Singleton<DataContext.DataLayer>.Instance.VendorList);
+        private ObservableCollection<VendorDefn> vendors;
+
+        public ObservableCollection<VendorDefn> Vendors
+        {
+            get => vendors;
+            set => Set<ObservableCollection<VendorDefn>>(ref vendors, value);
+        }
+
+        //public ObservableCollection<VendorDefn> Vendors { get; protected set; } = new ObservableCollection<VendorDefn>();
         private ICommand addVendor;
         public ICommand AddVendor
         {
-            get
-            {
-                if (addVendor == null)
-                    addVendor = new RelayCommand(HandleAddVendor, HandleCanAdd);
-                return addVendor;
-            }
-            set { addVendor = value; }
+            get => addVendor ?? (addVendor = new RelayCommand(HandleAddVendor, HandleCanAdd));
+            
         }
 
         private bool HandleCanAdd()
@@ -46,17 +49,26 @@ namespace Filament.UWP.ViewModels
 
         private void HandleAddVendor()
         {
-            Selected = new VendorDefn();
+            var newVendor = new VendorDefn();
+            Vendors.Add(newVendor);
+            Selected = newVendor;
             //Vendors.Add(Selected, true);
         }
 
         public VendorViewModel()
         {
-            AddVendor = new RelayCommand(HandleAddVendor);
+            //AddVendor = new RelayCommand(HandleAddVendor);
         }
 
         public void LoadDataAsync()
         {
+            var data = Core.Helpers.Singleton<DataContext.DataLayer>.Instance.VendorList;
+            if (data is ObservableCollection<VendorDefn> odata)
+                Vendors = odata;
+            else
+                foreach(var v in data)
+                    Vendors.Add(v);
+
             Selected = Vendors.First();
         }
     }

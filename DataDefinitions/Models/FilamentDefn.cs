@@ -222,6 +222,7 @@ namespace DataDefinitions.Models
             Init();
             Diameter = StandardFilamentDiameter;
             //DensityUnion = new DefinedDensity(DefinedDensity.BasicPLADensity);
+            DensityAlias = new DensityAlias() { DensityType=DensityType.Defined};
             MaterialType = MaterialType.PLA;
         }
         /// <summary>

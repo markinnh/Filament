@@ -222,7 +222,7 @@ namespace DataDefinitions.Models
                 dm.IsModified = state;
         }
 
-        public void Link(List<FilamentDefn> filaments)
+        public void Link(IEnumerable<FilamentDefn> filaments)
         {
             if (FilamentDefnId != default)
             {

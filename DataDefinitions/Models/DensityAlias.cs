@@ -16,7 +16,7 @@ namespace DataDefinitions.Models
     public class DensityAlias : DatabaseObject, IDensity, INotifyContainer
     {
         const int MinimumDensityMeasurementsRequired = 3;
-        
+
         public static event InDataOpsChangedHandler InDataOpsChanged;
 
         private static bool inDataOps;
@@ -35,10 +35,10 @@ namespace DataDefinitions.Models
         [JsonIgnore]
         public override bool InDataOperations => InDataOps;
         [JsonIgnore]
-        public override bool InDatabase => densityAliasId!=default;
-        [NotMapped,JsonIgnore]
+        public override bool InDatabase => densityAliasId != default;
+        [NotMapped, JsonIgnore]
         public bool LinkedToCollectionChangedEH { get; set; } = false;
-        [NotMapped,JsonIgnore]
+        [NotMapped, JsonIgnore]
         public bool IsLinkedToNotifyContainer => NotifyContainer != null;
         private int densityAliasId;
 
@@ -74,8 +74,8 @@ namespace DataDefinitions.Models
         public int FilamentDefnId { get; set; }
         [JsonIgnore]
         public FilamentDefn FilamentDefn { get; set; }
-        
-        [NotMapped,JsonIgnore, ContainerPropertiesAffected(new[] { nameof(Models.FilamentDefn.MgPerMM) })]
+
+        [NotMapped, JsonIgnore, ContainerPropertiesAffected(new[] { nameof(Models.FilamentDefn.MgPerMM) })]
         public double Density
         {
             get => densityType == DensityType.Defined ? definedDensity :
@@ -103,9 +103,26 @@ namespace DataDefinitions.Models
             }
             UnWatchContained();
         }
+        public void Prepopulate()
+        {
+#if DEBUG
+            if (DensityType == DensityType.Measured)
+            {
+                MeasuredDensity.Clear();
+                Random random = new Random();
+                const int minRandom = 990;
+                const int maxRandom = 1030;
+                MeasuredDensity?.Add(new MeasuredDensity(2.98, random.Next(minRandom, maxRandom)));
+                MeasuredDensity?.Add(new MeasuredDensity(2.99, random.Next(minRandom, maxRandom)));
+                MeasuredDensity?.Add(new MeasuredDensity(3, random.Next(minRandom, maxRandom)));
+                OnPropertyChanged(nameof(Density));
+            }
+#else
+#endif
+        }
         internal override void WatchContained()
         {
-            foreach(var item in MeasuredDensity)
+            foreach (var item in MeasuredDensity)
                 item.Subscribe(WatchContainedHandler);
         }
         internal override void UnWatchContained()
@@ -115,7 +132,7 @@ namespace DataDefinitions.Models
         }
         protected override void WatchContainedHandler(object sender, PropertyChangedEventArgs e)
         {
-            if(e.PropertyName == nameof(IsModified))
+            if (e.PropertyName == nameof(IsModified))
                 OnPropertyChanged(nameof(IsModified));
         }
         private void Col_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)

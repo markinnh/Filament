@@ -12,8 +12,4 @@
    <ItemGroup>
      <Folder Include="File\" />
    </ItemGroup>
-
-   <ItemGroup>
-     <ProjectReference Include="..\DataDefinitions\DataDefinitions.csproj" />
-   </ItemGroup>
 </Project>

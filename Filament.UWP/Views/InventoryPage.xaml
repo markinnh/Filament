@@ -16,7 +16,7 @@
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     Style="{StaticResource PageStyle}"
     behaviors:NavigationViewHeaderBehavior.HeaderMode="Never"
-    mc:Ignorable="d" Name="InvPage">
+    mc:Ignorable="d" x:Name="InvPage">
 
     <Page.Resources>
         <CollectionViewSource x:Key="SupportedColors" Source="{x:Bind ViewModel.SupportedColors}"/>
@@ -132,7 +132,7 @@
                                             <DataTemplate x:DataType="mdl:FilamentDefn">
                                                 <TextBlock >
                                                     <Run Text="{Binding MaterialType}"/>
-                                                    <Run Text="Id : "/>
+                                                    <Run Text=" Id : "/>
                                                     <Run Text="{Binding FilamentDefnId}"/>
                                                 </TextBlock>
                                             </DataTemplate>
@@ -142,7 +142,17 @@
                             </controls:DataGridTemplateColumn.CellEditingTemplate>
                         </controls:DataGridTemplateColumn>
                         <controls:DataGridTextColumn Header="Days In Use" Binding="{Binding AgeInDays,Mode=OneWay}" IsReadOnly="True"/>
-
+                        <controls:DataGridTemplateColumn Header="Remove" Width="75">
+                            <controls:DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button x:Name="DeleteChild" Command="{Binding DataContext.DeleteChildCommand, ElementName=InvPage}"
+                                            Tag="{Binding}"
+                                             Click="DeleteChild_Click">
+                                        <SymbolIcon Symbol="Delete"></SymbolIcon>
+                                    </Button>
+                                </DataTemplate>
+                            </controls:DataGridTemplateColumn.CellTemplate>
+                        </controls:DataGridTemplateColumn>
 
                     </controls:DataGrid.Columns>
                 </controls:DataGrid>

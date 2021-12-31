@@ -132,7 +132,7 @@
             Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}"
             BorderBrush="Transparent"
             DetailsTemplate="{StaticResource DetailsTemplate}"
-            ItemsSource="{x:Bind ViewModel.Vendors}"
+            ItemsSource="{x:Bind ViewModel.Vendors,Mode=OneWay}"
             ItemTemplate="{StaticResource ItemTemplate}"
             BackButtonBehavior="Automatic"
             ListHeaderTemplate="{StaticResource MinimalMasterHeaderTemplate}"

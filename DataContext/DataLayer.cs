@@ -1,6 +1,7 @@
 ﻿using DataDefinitions.Models;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -10,8 +11,8 @@ namespace DataContext
 {
     public class DataLayer : INotifyPropertyChanged
     {
-        protected List<VendorDefn> Vendors { get; set; }
-        protected List<FilamentDefn> Filaments { get; set; }
+        protected ObservableCollection<VendorDefn> Vendors { get; set; }
+        protected ObservableCollection<FilamentDefn> Filaments { get; set; }
         protected List<Setting> Settings { get; set; }
         public Func<VendorDefn, bool> FilterVendor { get; set; }
         public Func<FilamentDefn, bool> FilterFilament { get; set; }
@@ -22,7 +23,7 @@ namespace DataContext
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        
+
         public IEnumerable<Setting> GetFilteredSettings(Func<Setting, bool> func) => Settings.Where(x => func(x));
         public Setting GetSingleSetting(Func<Setting, bool> func) => GetFilteredSettings(func).SingleOrDefault();
         public IEnumerable<VendorDefn> GetFilteredVendors(Func<VendorDefn, bool> func) => Vendors.Where(v => func(v));
@@ -48,12 +49,12 @@ namespace DataContext
             VendorDefn.SetDataOperationsState(true);
 
             if (FilamentContext.GetAllVendors() is List<VendorDefn> v)
-                Vendors = v;
+                Vendors = new ObservableCollection<VendorDefn>(v);
 
 
             FilamentDefn.SetDataOperationsState(true);
             if (FilamentContext.GetAllFilaments() is List<FilamentDefn> fi)
-                Filaments = fi;
+                Filaments = new ObservableCollection<FilamentDefn>(fi);
 
 
 
@@ -82,7 +83,7 @@ namespace DataContext
             if (Filaments != null)
                 foreach (var filament in Filaments)
                     filament.ReleaseNotificationHandler();
-            if (PropertyChanged.GetInvocationList().Cast<PropertyChangedEventHandler>() is IEnumerable<PropertyChangedEventHandler> handlers)
+            if (PropertyChanged?.GetInvocationList().Cast<PropertyChangedEventHandler>() is IEnumerable<PropertyChangedEventHandler> handlers)
             {
                 foreach (PropertyChangedEventHandler handler in handlers)
                     PropertyChanged -= handler;

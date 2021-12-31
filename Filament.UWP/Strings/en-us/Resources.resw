@@ -186,7 +186,7 @@
     <comment>Title for VendorPage</comment>
   </data>
   <data name="Shell_Vendor.Content" xml:space="preserve">
-    <value>Vendor</value>
+    <value>Vendor Definitions</value>
     <comment>Navigation view item name for Vendor</comment>
   </data>
   <data name="Inventory_NoSelection.Text" xml:space="preserve">
@@ -267,5 +267,32 @@
   <data name="Filament.ListHeader" xml:space="preserve">
     <value>Filament</value>
     <comment>Title for FilamentPage</comment>
+  </data>
+  <data name="FilamentDefn_NoSelection.Text" xml:space="preserve">
+    <value>Select an item from the list.</value>
+    <comment>No selection text for FilamentDefn</comment>
+  </data>
+  <data name="FilamentDefn.ListHeader" xml:space="preserve">
+    <value>Filament Definition</value>
+    <comment>Title for FilamentDefnPage</comment>
+  </data>
+  <data name="Shell_FilamentDefn.Content" xml:space="preserve">
+    <value>Filament Definitions</value>
+    <comment>Navigation view item name for FilamentDefn</comment>
+  </data>
+  <data name="FilamentDefineDensityType.Header" xml:space="preserve">
+    <value>Density Type</value>
+  </data>
+  <data name="FilamentDefineDiameter.Header" xml:space="preserve">
+    <value>Diameter</value>
+  </data>
+  <data name="FilamentDefineMaterialType.Header" xml:space="preserve">
+    <value>Material Type</value>
+  </data>
+  <data name="FilamentDefineTitle.Text" xml:space="preserve">
+    <value>Filament Definition</value>
+  </data>
+  <data name="FilamentDefineMeasured.Header" xml:space="preserve">
+    <value>Defined Density</value>
   </data>
 </root>

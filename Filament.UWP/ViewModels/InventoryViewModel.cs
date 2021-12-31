@@ -39,6 +39,14 @@ namespace Filament.UWP.ViewModels
 
         private ICommand _saveSelectedCommand;
         public ICommand SaveSelectedCommand => _saveSelectedCommand ?? (_saveSelectedCommand = new RelayCommand(HandleSaveSelectedCommand));
+        private ICommand _deleteChildCommand;
+        public ICommand DeleteChildCommand => _deleteChildCommand ?? (_deleteChildCommand = new RelayCommand<object>(HandleDeleteChildCommand));
+
+        internal void HandleDeleteChildCommand(object obj)
+        {
+            System.Diagnostics.Debug.WriteLine($"Made it the delete child command, item passed is a {obj?.GetType().Name??"null object"}");
+            //throw new NotImplementedException();
+        }
 
         private void HandleSaveSelectedCommand()
         {

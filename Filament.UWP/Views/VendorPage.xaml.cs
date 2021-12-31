@@ -19,7 +19,7 @@ namespace Filament.UWP.Views
 
         private void VendorPage_Loaded(object sender, RoutedEventArgs e)
         {
-            //ViewModel.LoadDataAsync(MasterDetailsViewControl.ViewState);
+            ViewModel.LoadDataAsync();
         }
     }
 }

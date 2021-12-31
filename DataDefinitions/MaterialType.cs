@@ -30,6 +30,8 @@ namespace DataDefinitions
         /// </summary>
         [Description("Polycarbonate")]
         PC,
+        [Description("Poly vinyl alcohol")]
+        PVA,
         Wood,
         Metal,
         Bio,
@@ -40,7 +42,10 @@ namespace DataDefinitions
         [Description("Glow In The Dark (PLA)")]
         GID_PLA,
         Magnetic,
+        [Description("Color changing, usually PLA")]
         ColorChanging,
-        ClayCeramic
+        ClayCeramic,
+        [Description("Polystyrene")]
+        HIPS
     }
 }
