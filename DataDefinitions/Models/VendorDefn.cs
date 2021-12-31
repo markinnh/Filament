@@ -1,0 +1,238 @@
+﻿
+
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.Text;
+using static System.Diagnostics.Debug;
+using System.Linq;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace DataDefinitions.Models
+{
+    // TODO: Develop a UI for VendorDefn; Add, Delete, Update
+    // TODO: Develop a DataObject class the sit between data classes and Observable since the data is going to be disconnected from the DbContext
+    public class VendorDefn : DatabaseObject, IDataErrorInfo
+    {
+        public static event InDataOpsChangedHandler InDataOpsChanged;
+
+        private static bool inDataOps;
+        public static bool InDataOps
+        {
+            get => inDataOps;
+            set
+            {
+                inDataOps = value;
+
+                // Notify all the FilamentDefn objects of change to InDataOps state, allowing them to update the UI.
+                InDataOpsChanged?.Invoke(EventArgs.Empty);
+            }
+        }
+        public override bool InDataOperations => InDataOps;
+        public override bool IsModified { get => base.IsModified || SpoolDefns?.Count(sd => sd.IsModified) > 0; set => base.IsModified = value; }
+        protected override bool HasContainedItems => true;
+        public override bool InDatabase => vendorID != default;
+        //public const string _3DSolutechName = "3D Solutech";
+        //public const string HatchBoxName = "HatchBox";
+        //public const string SunluName = "Sunlu";
+        //public const string DefaultVendorName = "Generic";
+        private int vendorID;
+        /// <summary>
+        /// Gets or sets the vendor identifier.
+        /// </summary>
+        /// <value>
+        /// The vendor identifier.
+        /// </value>
+        public int VendorDefnId
+        {
+            get => vendorID;
+            set => Set<int>(ref vendorID, value);
+        }
+
+        private string name;
+        /// <summary>
+        /// Gets or sets the name.
+        /// </summary>
+        /// <value>
+        /// The name.
+        /// </value>
+        [Required]
+        public string Name
+        {
+            get => name;
+            set => Set<string>(ref name, value);
+        }
+
+        private bool foundOnAmazon;
+        /// <summary>
+        /// Gets or sets a value indicating whether [found on amazon].
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if [found on amazon]; otherwise, <c>false</c>.
+        /// </value>
+        public bool FoundOnAmazon
+        {
+            get => foundOnAmazon;
+            set => Set<bool>(ref foundOnAmazon, value);
+        }
+
+        private string webUrl;
+        /// <summary>
+        /// Gets or sets the web URL.
+        /// </summary>
+        /// <value>
+        /// The web URL.
+        /// </value>
+        public string WebUrl
+        {
+            get => webUrl;
+            set => Set<string>(ref webUrl, value);
+        }
+
+        public Uri WebUri => !string.IsNullOrEmpty(webUrl) ? new Uri(webUrl, UriKind.Absolute) : new Uri("https://www.google.com");
+        private bool stopUsing;
+        /// <summary>
+        /// Gets or sets a value indicating whether to stop using.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if [stop using]; otherwise, <c>false</c>.
+        /// </value>
+        public bool StopUsing
+        {
+            get => stopUsing;
+            set => Set<bool>(ref stopUsing, value);
+        }
+        [NotMapped]
+        public bool CollectionNotInitialized { get => SpoolDefns == null; }
+        public ObservableCollection<SpoolDefn> SpoolDefns { get; set; }
+
+        public string Error => null;
+
+        public string this[string columnName]
+        {
+            get
+            {
+                if (columnName == nameof(Name) && string.IsNullOrEmpty(Name))
+                    return $"{nameof(Name)} is a required entry";
+                else
+                    return string.Empty;
+            }
+        }
+        public VendorDefn()
+        {
+            Name = "Undefined";
+            InDataOpsChanged += VendorDefn_InDataOpsChanged;
+            SpoolDefns = new ObservableCollection<SpoolDefn>();
+            if (SpoolDefns is ObservableCollection<SpoolDefn> defns)
+                defns.CollectionChanged += Defns_CollectionChanged;
+        }
+
+        
+        private void Defns_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+
+            if (e.NewItems != null)
+                foreach (var item in e.NewItems)
+                    if (item is Observable spoolDefn)
+                    {
+                        spoolDefn.PropertyChanged += SpoolDefn_PropertyChanged;
+                        //defn.Vendor = this;
+                        //defn.VendorDefnId = VendorDefnId;
+                    }
+            if (!InDataOperations)
+                IsModified = true;
+            //throw new NotImplementedException();
+        }
+
+        private void SpoolDefn_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            WriteLine($"Contained property changed for : {e.PropertyName}");
+            if (e.PropertyName == nameof(IsModified))
+                OnPropertyChanged(nameof(IsModified));
+            //throw new NotImplementedException();
+        }
+
+        ~VendorDefn()
+        {
+            InDataOpsChanged -= VendorDefn_InDataOpsChanged;
+        }
+        private void VendorDefn_InDataOpsChanged(EventArgs args)
+        {
+            OnPropertyChanged(nameof(CanEdit));
+            //throw new NotImplementedException();
+        }
+        internal override void WatchContained()
+        {
+            foreach (var spool in SpoolDefns)
+            {
+                spool.Subscribe(WatchContainedHandler);
+                spool.WatchContained();
+            }
+        }
+        internal override void UnWatchContained()
+        {
+            foreach (var spool in SpoolDefns)
+            {
+                spool.Unsubscribe(WatchContainedHandler);
+                spool.UnWatchContained();
+            }
+        }
+        protected override void WatchContainedHandler(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(IsModified))
+                OnPropertyChanged(nameof(IsModified));
+        }
+        /// <summary>
+        /// Creates the vendor.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="foundOnAmazon">if set to <c>true</c> [found on amazon].</param>
+        /// <param name="url">The URL.</param>
+        /// <param name="document">The document.</param>
+        /// <returns></returns>
+        public static VendorDefn CreateVendor(string name, bool foundOnAmazon, string url)
+        {
+            var result = new VendorDefn()
+            {
+                Name = name,
+                FoundOnAmazon = foundOnAmazon,
+                WebUrl = url
+            };
+            return result;
+        }
+        protected override void UpdateContainedItemEntryState<TContext>(TContext context)
+        {
+            if (InDatabase)
+            {
+                context.SetDataItemsState<SpoolDefn>(SpoolDefns.Where(sd => Modified(sd)), Microsoft.EntityFrameworkCore.EntityState.Modified);
+                context.SetDataItemsState<SpoolDefn>(SpoolDefns.Where(sd => Added(sd)), Microsoft.EntityFrameworkCore.EntityState.Added);
+            }
+            else
+                context.SetDataItemsState<DatabaseObject>(SpoolDefns.Where(Added), Microsoft.EntityFrameworkCore.EntityState.Added);
+
+        }
+        public static void SetDataOperationsState(bool state)
+        {
+            InDataOps = state;
+            SpoolDefn.InDataOps = state;
+            InventorySpool.InDataOps = state;
+            DepthMeasurement.InDataOps = state;
+        }
+        public override void SetContainedModifiedState(bool state)
+        {
+            if (SpoolDefns != null)
+                foreach (var spec in SpoolDefns)
+                {
+                    spec.IsModified = state;
+                    foreach (var inv in spec.Inventory)
+                    {
+                        inv.IsModified = state;
+                        foreach (var dm in inv.DepthMeasurements)
+                            dm.IsModified = state;
+                    }
+                }
+        }
+    }
+}

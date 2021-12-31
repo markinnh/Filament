@@ -1,7 +1,7 @@
 ﻿using Filament.WPF6.Helpers;
-using Filament_Db;
-using Filament_Db.DataContext;
-using Filament_Db.Models;
+using DataDefinitions;
+using DataContext;
+using DataDefinitions.Models;
 using Microsoft.Toolkit.Mvvm.Input;
 using Microsoft.Toolkit.Mvvm.Messaging;
 using System;
@@ -66,7 +66,7 @@ namespace Filament.WPF6.ViewModels
         {
             if (SelectedItem != null)
             {
-                FilamentContext.UpdateSpec(SelectedItem);
+                SelectedItem.UpdateItem<FilamentContext>();
                 if (Items?.Count(i => i.VendorDefnId == SelectedItem.VendorDefnId) == 0)
                     Items.Add(SelectedItem);
 

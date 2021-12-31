@@ -6,10 +6,14 @@ namespace HintLib
     public class HashedObject : BaseObject
     {
         [JsonIgnore]
-        public override bool IsModified { get => base.IsModified || CurrentCrc != SavedCrc; set => base.IsModified = value; }
+        public override bool IsModified { get => base.IsModified && WatchingCrc ? CurrentCrc != SavedCrc : false; set => base.IsModified = value; }
         protected static event EventHandler? PrepareToSerialize;
         [JsonIgnore, NotMapped]
         public virtual bool InDatabase { get; } = false;
+        [JsonIgnore, NotMapped]
+        protected virtual bool WatchingCrc { get; } = true;
+        [JsonIgnore,NotMapped]
+        public virtual string DisplayType { get; } =string.Empty;
         public int SavedCrc { get; set; }
         /// <summary>
         /// Calculates the Crc for the specified object, when the function is not overridden it returns the HashCode
@@ -53,25 +57,26 @@ namespace HintLib
                         SetEntityStateOnDependentItems(ctx);
                         ctx.Update(this);
                         ctx.SaveChanges();
-                        IsModified = false;
+                        SetItemModifiedState(false);
                     }
                     else
                     {
                         ctx.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Added;
                         ctx.Add(this);
                         ctx.SaveChanges(true);
-                        IsModified = false;
+                        SetItemModifiedState(false);
                     }
                 }
             }
         }
-        [NotMapped,JsonIgnore]
+        [NotMapped, JsonIgnore]
         protected virtual bool HasDependentCollections => false;
+
         protected Func<HashedObject, bool> Added = (hashedObject) => hashedObject.IsModified && !hashedObject.InDatabase;
         protected Func<HashedObject, bool> Modified = (hashedObject) => hashedObject.IsModified && hashedObject.InDatabase;
         protected virtual void SetEntityStateOnDependentItems(Context.HintContext context)
         {
-            System.Diagnostics.Debug.WriteLine($"Link dependent items not implemented for {GetType().Name}, it {(HasDependentCollections?"is":"is not")} required.");
+            System.Diagnostics.Debug.WriteLine($"Link dependent items not implemented for {GetType().Name}, it is {(HasDependentCollections ? String.Empty : "not")} required.");
         }
         public virtual void SetItemModifiedState(bool state)
         {

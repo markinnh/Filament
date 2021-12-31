@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Filament_Data\Filament_Data.csproj" />
+    <ProjectReference Include="..\DataDefinitions\DataDefinitions.csproj" />
   </ItemGroup>
 
 </Project>

@@ -22,7 +22,8 @@ This is a starting hint.  You can <Span Foreground=""Red"">edit</Span> it as you
         public int HintId { get; set; }
         [JsonIgnore,NotMapped]
         public override bool InDatabase => HintId!=default;
-
+        [JsonIgnore,NotMapped]
+        public override string DisplayType => "Hint";
         private string tags = String.Empty;
 
         public string Tags
@@ -77,24 +78,24 @@ This is a starting hint.  You can <Span Foreground=""Red"">edit</Span> it as you
             SavedCrc = GetCrc();
         }
 
-        #region NamedColorProvider
-        [JsonIgnore,NotMapped]
-        public static IOrderedEnumerable<ColorUsageTracker> Colors { get; } = GetTrackers();
+        //#region NamedColorProvider
+        //[JsonIgnore,NotMapped]
+        //public static IOrderedEnumerable<ColorUsageTracker> Colors { get; } = GetTrackers();
         
-        private static IOrderedEnumerable<ColorUsageTracker> GetTrackers()
-        {
+        //private static IOrderedEnumerable<ColorUsageTracker> GetTrackers()
+        //{
 
-            string[] primaryColors = { "Black", "White", "Red", "Green", "Yellow", "Blue",
-                "Gray", "Olive", "Maroon", "Purple","Silver","Fuschia","Lime","Navy","Teal","Aqua" };
-            var drawingColorNames = from string c in typeof(Color).GetProperties(BindingFlags.Static | BindingFlags.Public).Select(c => c.Name)
-                                    select new ColorUsageTracker() { Color = c, UsageCount = primaryColors.Contains(c) ? 5 : 0 };
+        //    string[] primaryColors = { "Black", "White", "Red", "Green", "Yellow", "Blue",
+        //        "Gray", "Olive", "Maroon", "Purple","Silver","Fuschia","Lime","Navy","Teal","Aqua" };
+        //    var drawingColorNames = from string c in typeof(Color).GetProperties(BindingFlags.Static | BindingFlags.Public).Select(c => c.Name)
+        //                            select new ColorUsageTracker() { Color = c, UsageCount = primaryColors.Contains(c) ? 5 : 0 };
 
-            var trackers = from ColorUsageTracker c in drawingColorNames
-                           orderby c.UsageCount descending
-                           select c;
-            return trackers;
-        }
-        #endregion
+        //    var trackers = from ColorUsageTracker c in drawingColorNames
+        //                   orderby c.UsageCount descending
+        //                   select c;
+        //    return trackers;
+        //}
+        //#endregion
 
     }
 }

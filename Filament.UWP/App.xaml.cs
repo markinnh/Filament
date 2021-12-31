@@ -1,9 +1,11 @@
 ﻿using System;
-
+using Filament.UWP.Core.Helpers;
 using Filament.UWP.Services;
 
 using Windows.ApplicationModel.Activation;
 using Windows.UI.Xaml;
+using Filament.UWP.Helpers;
+using Microsoft.EntityFrameworkCore;
 
 namespace Filament.UWP
 {
@@ -19,7 +21,16 @@ namespace Filament.UWP
         public App()
         {
             InitializeComponent();
-
+            if (Singleton<RoamingAppSettings>.Instance.UpdateMigration)
+            {
+                using(DataContext.FilamentContext context=new DataContext.FilamentContext())
+                {
+                    System.Diagnostics.Debug.WriteLine("In migrate database routine.");
+                    //context.Database.Migrate();
+                    DataContext.DataSeed.Seed<DataContext.FilamentContext>();
+                    Singleton<RoamingAppSettings>.Instance.UpdateMigration = false;
+                }
+            }
             // Deferred execution until used. Check https://msdn.microsoft.com/library/dd642331(v=vs.110).aspx for further info on Lazy<T> class.
             _activationService = new Lazy<ActivationService>(CreateActivationService);
             

@@ -16,8 +16,8 @@ namespace Filament.WPF6
         public App()
         {
             
-            Filament_Db.DataSeed.Seed();
-            Filament_Db.DataSeed.VerifySeed();
+            DataContext.DataSeed.Seed<DataContext.FilamentContext>();
+            DataContext.DataSeed.VerifySeed();
         }
     }
 }

@@ -13,8 +13,8 @@ namespace HintLib
         public DataLayer()
         {
             BaseObject.InDataOps = true;
-            var iEnumerable = Context.HintContext.GetHintProjects();
-            if(iEnumerable != null)
+            //var iEnumerable = Context.HintContext.GetHintProjects();
+            if(Context.HintContext.GetHintProjects() is IEnumerable<HintProject> iEnumerable)
                 Projects=new ObservableCollection<HintProject>(iEnumerable);
             else
                 Projects=new ObservableCollection<HintProject>();

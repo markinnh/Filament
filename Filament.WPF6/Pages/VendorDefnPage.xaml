@@ -4,7 +4,6 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:Filament.WPF6.Pages"
-      xmlns:model="clr-namespace:Filament_Db.Models;assembly=Filament_Db"
       xmlns:vm="clr-namespace:Filament.WPF6.ViewModels"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"

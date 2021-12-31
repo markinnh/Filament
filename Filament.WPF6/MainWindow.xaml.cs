@@ -1,6 +1,6 @@
 ﻿using Filament.WPF6.Helpers;
-using Filament_Db.DataContext;
-using Filament_Db.Models;
+using DataDefinitions.Models;
+using DataContext;
 using Microsoft.Toolkit.Mvvm.Messaging;
 using System;
 using System.Collections.Generic;
@@ -28,7 +28,7 @@ namespace Filament.WPF6
         {
             InitializeComponent();
             var showFlagSetting = FilamentContext.GetSetting(s => s.Name == nameof(SelectShowFlag));
-            
+
             if (showFlagSetting != null)
                 SelectShowFlag.SelectedItem = Enum.Parse<ShowAllFlag>(showFlagSetting.Value);
             else
@@ -42,7 +42,17 @@ namespace Filament.WPF6
                 if (cmb.SelectedItem is ShowAllFlag flag)
                 {
                     WeakReferenceMessenger.Default.Send(new ShowAllFlagChanged(flag));
-                    Setting.UpdateOrAdd(nameof(SelectShowFlag), flag);
+                    if (Singleton<DataLayer>.Instance.GetSingleSetting(s => s.Name == nameof(SelectShowFlag)) is Setting setting)
+                    {
+                        setting.SetValue(flag);
+                        setting.UpdateItem<FilamentContext>();
+                    }
+                    else
+                    {
+                        var createSetting = new Setting(nameof(SelectShowFlag), flag);
+                        createSetting.UpdateItem<FilamentContext>();
+                        Singleton<DataLayer>.Instance.Add(createSetting);
+                    }
                 }
             }
         }

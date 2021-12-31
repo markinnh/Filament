@@ -181,7 +181,7 @@
     <value>Select an item from the list.</value>
     <comment>No selection text for Vendor</comment>
   </data>
-  <data name="Vendor.MasterHeader" xml:space="preserve">
+  <data name="Vendor.ListHeader" xml:space="preserve">
     <value>Vendor</value>
     <comment>Title for VendorPage</comment>
   </data>
@@ -256,5 +256,16 @@
   </data>
   <data name="VendorDetailWebUrl.PlaceholderText" xml:space="preserve">
     <value>Enter a web address for your new company</value>
+  </data>
+  <data name="StopUsing.Content" xml:space="preserve">
+    <value>Stop Using</value>
+  </data>
+  <data name="Filament_NoSelection.Text" xml:space="preserve">
+    <value>Select an item from the list.</value>
+    <comment>No selection text for Filament</comment>
+  </data>
+  <data name="Filament.ListHeader" xml:space="preserve">
+    <value>Filament</value>
+    <comment>Title for FilamentPage</comment>
   </data>
 </root>

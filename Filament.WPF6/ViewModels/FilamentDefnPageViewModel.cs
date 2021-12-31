@@ -7,15 +7,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Filament_Db.Models;
+using DataContext;
+using DataDefinitions.Models;
 using Microsoft.EntityFrameworkCore;
 using MyLibraryStandard.Attributes;
 using Microsoft.Toolkit.Mvvm.Input;
-using Filament_Db;
+using Filament.WPF6.Helpers;
+using DataDefinitions;
 
 namespace Filament.WPF6.ViewModels
 {
-    public class FilamentDefnPageViewModel : Filament_Db.Observable
+    public class FilamentDefnPageViewModel : DataDefinitions.Observable
     {
         public ObservableCollection<FilamentDefn>? Items { get; set; }
         private FilamentDefn? selectedItem;
@@ -73,7 +75,7 @@ namespace Filament.WPF6.ViewModels
 
         private void HandlePrepopulateCommand()
         {
-            if (selectedItem?.DensityAlias?.MeasuredDensity.Count == 0 && selectedItem.MaterialType == Filament_Db.MaterialType.PLA)
+            if (selectedItem?.DensityAlias?.MeasuredDensity.Count == 0 && selectedItem.MaterialType == MaterialType.PLA)
             {
                 Random random = Singleton<Random>.Instance;
                 const int minRandom = 990;
@@ -89,7 +91,7 @@ namespace Filament.WPF6.ViewModels
 
         public FilamentDefnPageViewModel()
         {
-            if (Filament_Db.DataContext.FilamentContext.GetAllFilaments() is IEnumerable<FilamentDefn> filaments)
+            if (Singleton<DataLayer>.Instance.FilamentList is IEnumerable<FilamentDefn> filaments)
             {
                 Items = new(filaments);
                 foreach (var filament in filaments)

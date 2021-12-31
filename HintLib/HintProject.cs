@@ -20,7 +20,10 @@ namespace HintLib
         public int HintProjectId { get; set; }
         [JsonIgnore, NotMapped]
         public override bool InDatabase => HintProjectId != default;
-
+        [JsonIgnore, NotMapped]
+        protected override bool WatchingCrc { get; } = false;
+        [NotMapped,JsonIgnore]
+        public override string DisplayType => "Hint Project";
         private string projectName;
         [MaxLength(100), Required]
         public string ProjectName
@@ -35,8 +38,8 @@ namespace HintLib
         public override bool IsModified
         {
             get => base.IsModified ||
-                    Hints.Count(h => h.IsModified) > 0 ||
-                    projectFilenames.Count(pd => pd.IsModified) > 0;
+                    Hints?.Count(h => h.IsModified) > 0 ||
+                    projectFilenames?.Count(pd => pd.IsModified) > 0;
             set => base.IsModified = value;
         }
 

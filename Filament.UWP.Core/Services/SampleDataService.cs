@@ -495,5 +495,12 @@ namespace Filament.UWP.Core.Services
             await Task.CompletedTask;
             return AllCompanies();
         }
+
+        // Remove this once your ListDetails pages are displaying real data.
+        public static async Task<IEnumerable<SampleOrder>> GetListDetailsDataAsync()
+        {
+            await Task.CompletedTask;
+            return AllOrders();
+        }
     }
 }

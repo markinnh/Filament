@@ -6,7 +6,7 @@
     xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Style="{StaticResource PageStyle}"
-    xmlns:model="using:Filament_Data"
+    xmlns:model="using:DataDefinitions.Models"
     xmlns:views="using:Filament.UWP.Views"
     xmlns:behaviors="using:Filament.UWP.Behaviors"
     behaviors:NavigationViewHeaderBehavior.HeaderMode="Never"
@@ -108,11 +108,15 @@
             </Button>-->
         </StackPanel>
         <Grid x:Name="ContentArea" Grid.Row="1">
-            <VisualStateManager.VisualStateGroups>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <!--<VisualStateManager.VisualStateGroups>
                 <VisualStateGroup>
                     <VisualState>
                         <VisualState.StateTriggers>
-                            <!--641 is the default CompactModeThresholdWidth in NavigationView -->
+                            --><!--641 is the default CompactModeThresholdWidth in NavigationView --><!--
                             <AdaptiveTrigger MinWindowWidth="641" />
                         </VisualState.StateTriggers>
                         <VisualState.Setters>
@@ -120,20 +124,29 @@
                         </VisualState.Setters>
                     </VisualState>
                 </VisualStateGroup>
-            </VisualStateManager.VisualStateGroups>
-            <controls:MasterDetailsView
+            </VisualStateManager.VisualStateGroups>-->
+            <controls:ListDetailsView
             x:Name="MasterDetailsViewControl"
             x:Uid="Vendor"
+                Height="650"
             Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}"
             BorderBrush="Transparent"
             DetailsTemplate="{StaticResource DetailsTemplate}"
             ItemsSource="{x:Bind ViewModel.Vendors}"
             ItemTemplate="{StaticResource ItemTemplate}"
             BackButtonBehavior="Automatic"
-            MasterHeaderTemplate="{StaticResource MinimalMasterHeaderTemplate}"
+            ListHeaderTemplate="{StaticResource MinimalMasterHeaderTemplate}"
+            
             NoSelectionContentTemplate="{StaticResource NoSelectionContentTemplate}"
             SelectedItem="{x:Bind ViewModel.Selected, Mode=TwoWay}"
-            Grid.Row="1"/>
+            />
+            <StackPanel Orientation="Horizontal" Grid.Row="1">
+                <Button >
+                    <Button.Content>
+                        <SymbolIcon Symbol="Save"/>
+                    </Button.Content>
+                </Button>
+            </StackPanel>
         </Grid>
     </Grid>
 </Page>

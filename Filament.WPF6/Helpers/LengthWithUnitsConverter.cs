@@ -6,16 +6,17 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Data;
+using DataDefinitions;
 
 namespace Filament.WPF6.Helpers
 {
 
-    public enum ConvertToLengthEnum
-    {
-        Millimeters,
-        Centimeter,
-        Meters
-    }
+    //public enum ConvertToLengthEnum
+    //{
+    //    Millimeters,
+    //    Centimeter,
+    //    Meters
+    //}
     internal class LengthWithUnitsConverter : IValueConverter
     {
         static string[] shortHandnames = new string[] { "mm", "cm", "m" };
@@ -27,14 +28,14 @@ namespace Filament.WPF6.Helpers
         const string inchesShorthand = "\"";
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            ConvertToLengthEnum convertTo = ConvertToLengthEnum.Millimeters;
+            ConvertToLength convertTo = ConvertToLength.Millimeter;
             if (parameter is string paraString)
             {
                 if (value is double d)
                 {
                     if (!double.IsNaN(d))
                     {
-                        if (Enum.TryParse(paraString, out ConvertToLengthEnum result))
+                        if (Enum.TryParse(paraString, out ConvertToLength result))
                             return $"{value:#.###} {shortHandnames[(int)result]}";
                         else
                             return $"{value:#.###} {shortHandnames[(int)convertTo]}";
@@ -69,11 +70,11 @@ namespace Filament.WPF6.Helpers
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            ConvertToLengthEnum convertTo = ConvertToLengthEnum.Millimeters;
+            ConvertToLength convertTo = ConvertToLength.Millimeter;
             string defaultUnits;
             if (parameter is string paraString)
             {
-                if (Enum.TryParse(paraString, out ConvertToLengthEnum result))
+                if (Enum.TryParse(paraString, out ConvertToLength result))
                 {
                     convertTo = result;
                 }
@@ -84,117 +85,115 @@ namespace Filament.WPF6.Helpers
 
             if (value is string str)
             {
-                if (RegexHelper.IsMatch(str, WeightWithUnitsConverter.regexFindNumberAndUnit,out Match match))
+                if (ValueWithUnits.TryParse(str, out ValueWithUnits valueWithUnits))
                 {
                     //var match = Regex.Match(str, WeightWithUnitsConverter.regexFindNumberAndUnit);
+                    SupportedLength supported = FilamentMath.SupportedLengthAlias(string.IsNullOrEmpty(valueWithUnits.Units) ? defaultUnits : valueWithUnits.Units);
 
-                    if (double.TryParse(match.Groups["number"].Value, out double result))
-                        return result * ConversionFactor(string.IsNullOrEmpty(match.Groups["units"].Value) ? defaultUnits : match.Groups["units"].Value, convertTo);
-                    else
-                        return double.NaN;
+                    return FilamentMath.ConvertLength(valueWithUnits.Value, supported, convertTo);
 
                 }
-                else if (RegexHelper.IsMatch(str, regexFindFraction,out Match fracMatch))
+                else if (CompoundFractionWithUnits.TryParse(str, out CompoundFractionWithUnits compoundFractionWithUnits))
                 {
                     //var fracMatch = Regex.Match(str, regexFindFraction);
-
-                    double number;
-                    double numerator;
-                    double denominator;
-                    if (double.TryParse(fracMatch.Groups["numerator"].Value, out numerator) && double.TryParse(fracMatch.Groups["denominator"].Value, out denominator))
-                    {
-                        if (!string.IsNullOrEmpty(fracMatch.Groups["whole"].Value))
-                        {
-                            if (double.TryParse(fracMatch.Groups["whole"].Value, out number))
-                            {
-                                return (number + (numerator / denominator)) * ConversionFactor(string.IsNullOrEmpty(fracMatch.Groups["units"].Value) ? "in" : fracMatch.Groups["units"].Value.ToLower(), convertTo);
-                            }
-                            else
-                                return double.NaN;
-                        }
-                        else
-                        {
-                            return (numerator / denominator) * ConversionFactor(string.IsNullOrEmpty(fracMatch.Groups["units"].Value) ? "in" : fracMatch.Groups["units"].Value.ToLower(), convertTo);
-                        }
-
-                    }
-                    else
-                        return double.NaN;
+                    SupportedLength supported = FilamentMath.SupportedLengthAlias(!string.IsNullOrEmpty(compoundFractionWithUnits.Units) ? compoundFractionWithUnits.Units : "in");
+                    return FilamentMath.ConvertLength(compoundFractionWithUnits.Value, supported, convertTo);
+                    //double number;
+                    //double numerator;
+                    //double denominator;
+                    //if (double.TryParse(fracMatch.Groups["numerator"].Value, out numerator) && double.TryParse(fracMatch.Groups["denominator"].Value, out denominator))
+                    //{
+                    //    if (!string.IsNullOrEmpty(fracMatch.Groups["whole"].Value))
+                    //    {
+                    //        if (double.TryParse(fracMatch.Groups["whole"].Value, out number))
+                    //        {
+                    //            return (number + (numerator / denominator)) * ConversionFactor(string.IsNullOrEmpty(fracMatch.Groups["units"].Value) ? "in" : fracMatch.Groups["units"].Value.ToLower(), convertTo);
+                    //        }
+                    //        else
+                    //            return double.NaN;
+                    //    }
+                    //    else
+                    //    {
+                    //        return (numerator / denominator) * ConversionFactor(string.IsNullOrEmpty(fracMatch.Groups["units"].Value) ? "in" : fracMatch.Groups["units"].Value.ToLower(), convertTo);
+                    //    }
+                
                 }
                 else
                     return double.NaN;
             }
             else
-                return value;
+                return double.NaN;
         }
-        protected double ConversionFactor(string units, ConvertToLengthEnum convertTo)
-        {
-            double result = 0;
-            switch (units)
-            {
-                case "mm":
-                    switch (convertTo)
-                    {
-                        case ConvertToLengthEnum.Millimeters:
-                            result = 1;
-                            break;
-                        case ConvertToLengthEnum.Centimeter:
-                            result = 0.1;
-                            break;
-                        case ConvertToLengthEnum.Meters:
-                            result = 1.0e-3;
-                            break;
-                    }
-                    break;
-                case "cm":
-                    switch (convertTo)
-                    {
-                        case ConvertToLengthEnum.Millimeters:
-                            result = 10;
-                            break;
-                        case ConvertToLengthEnum.Centimeter:
-                            result = 1;
-                            break;
-                        case ConvertToLengthEnum.Meters:
-                            result = .01;
-                            break;
-                    }
-                    break;
-                case "m":
-                    switch (convertTo)
-                    {
-                        case ConvertToLengthEnum.Millimeters:
-                            result = 1000;
-                            break;
-                        case ConvertToLengthEnum.Centimeter:
-                            result = 100;
-                            break;
-                        case ConvertToLengthEnum.Meters:
-                            result = 1;
-                            break;
-                    }
-                    break;
-                case "\"":
-                case "in":
-                    switch (convertTo)
-                    {
-                        case ConvertToLengthEnum.Millimeters:
-                            result = 25.4;
-                            break;
-                        case ConvertToLengthEnum.Centimeter:
-                            result = 2.54;
-                            break;
-                        case ConvertToLengthEnum.Meters:
-                            result = .0254;
-                            break;
-                    }
-                    break;
-                default:
-                    System.Diagnostics.Debug.WriteLine($"{units} not recognized.");
-                    result = double.NaN;
-                    break;
-            }
-            return result;
-        }
+        //protected double ConversionFactor(string units, ConvertToLengthEnum convertTo)
+        //{
+        //    double result = 0;
+        //    switch (units)
+        //    {
+        //        case "mm":
+        //            switch (convertTo)
+        //            {
+        //                case ConvertToLengthEnum.Millimeters:
+        //                    result = 1;
+        //                    break;
+        //                case ConvertToLengthEnum.Centimeter:
+        //                    result = 0.1;
+        //                    break;
+        //                case ConvertToLengthEnum.Meters:
+        //                    result = 1.0e-3;
+        //                    break;
+        //            }
+        //            break;
+        //        case "cm":
+        //            switch (convertTo)
+        //            {
+        //                case ConvertToLengthEnum.Millimeters:
+        //                    result = 10;
+        //                    break;
+        //                case ConvertToLengthEnum.Centimeter:
+        //                    result = 1;
+        //                    break;
+        //                case ConvertToLengthEnum.Meters:
+        //                    result = .01;
+        //                    break;
+        //            }
+        //            break;
+        //        case "m":
+        //            switch (convertTo)
+        //            {
+        //                case ConvertToLengthEnum.Millimeters:
+        //                    result = 1000;
+        //                    break;
+        //                case ConvertToLengthEnum.Centimeter:
+        //                    result = 100;
+        //                    break;
+        //                case ConvertToLengthEnum.Meters:
+        //                    result = 1;
+        //                    break;
+        //            }
+        //            break;
+        //        case "\"":
+        //        case "in":
+        //            switch (convertTo)
+        //            {
+        //                case ConvertToLengthEnum.Millimeters:
+        //                    result = 25.4;
+        //                    break;
+        //                case ConvertToLengthEnum.Centimeter:
+        //                    result = 2.54;
+        //                    break;
+        //                case ConvertToLengthEnum.Meters:
+        //                    result = .0254;
+        //                    break;
+        //            }
+        //            break;
+        //        default:
+        //            System.Diagnostics.Debug.WriteLine($"{units} not recognized.");
+        //            result = double.NaN;
+        //            break;
+        //    }
+        //    return result;
+        //}
     }
+    
 }
+

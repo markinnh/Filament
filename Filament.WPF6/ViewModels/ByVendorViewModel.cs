@@ -1,6 +1,6 @@
-﻿using Filament_Db;
-using Filament_Db.DataContext;
-using Filament_Db.Models;
+﻿using DataDefinitions;
+using DataDefinitions.Models;
+using DataContext;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,10 +8,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Toolkit.Mvvm.Messaging;
 using System.Windows.Input;
+using Filament.WPF6.Helpers;
 
 namespace Filament.WPF6.ViewModels
 {
-    internal class ByVendorViewModel : BaseBrowserViewModel<Filament_Db.Models.VendorDefn, DatabaseObject>
+    internal class ByVendorViewModel : BaseBrowserViewModel<DataDefinitions.Models.VendorDefn, DatabaseObject>
     {
         //private object? selectedObject;
 
@@ -20,15 +21,25 @@ namespace Filament.WPF6.ViewModels
         //    get => selectedObject;
         //    set => Set<object?>(ref selectedObject, value);
         //}
-        
 
+        public IEnumerable<FilamentDefn> Filaments { get => Singleton<DataLayer>.Instance.FilamentList; }
         protected override void DerivedInitItems()
         {
-            PrepareForDataOperations();
+            //PrepareForDataOperations();
             if (GetAllItems() is IEnumerable<VendorDefn> items)
-                Items = new System.Collections.ObjectModel.ObservableCollection<Filament_Db.Models.VendorDefn>(items);
-            
-            FinishedDataOperations();
+            {
+                if (Items == null)
+                    Items = new System.Collections.ObjectModel.ObservableCollection<VendorDefn>(items);
+                else
+                {
+                    Items.Clear();
+
+                    foreach (VendorDefn item in items)
+                        Items.Add(item);
+                }
+            }
+
+            //FinishedDataOperations();
 
         }
 
@@ -47,23 +58,29 @@ namespace Filament.WPF6.ViewModels
         protected override IEnumerable<VendorDefn>? GetAllItems() => Singleton<DataLayer>.Instance.VendorList;
         protected override IEnumerable<VendorDefn>? GetFilteredItems(Func<VendorDefn, bool> predicate) => Singleton<DataLayer>.Instance.GetFilteredVendors(predicate);
 
-
-
         protected override void FinishedDataOperations()
         {
-            Filament_Db.Models.VendorDefn.InDataOps = false;
-            SpoolDefn.InDataOps = false;
-            InventorySpool.InDataOps = false;
-            DepthMeasurement.InDataOps = false;
+            //throw new NotImplementedException();
         }
-
         protected override void PrepareForDataOperations()
         {
-            Filament_Db.Models.VendorDefn.InDataOps = true;
-            SpoolDefn.InDataOps = true;
-            InventorySpool.InDataOps = true;
-            DepthMeasurement.InDataOps = true;
+            //throw new NotImplementedException();
         }
+        //protected override void FinishedDataOperations()
+        //{
+        //    Filament_Db.Models.VendorDefn.InDataOps = false;
+        //    SpoolDefn.InDataOps = false;
+        //    InventorySpool.InDataOps = false;
+        //    DepthMeasurement.InDataOps = false;
+        //}
+
+        //protected override void PrepareForDataOperations()
+        //{
+        //    Filament_Db.Models.VendorDefn.InDataOps = true;
+        //    SpoolDefn.InDataOps = true;
+        //    InventorySpool.InDataOps = true;
+        //    DepthMeasurement.InDataOps = true;
+        //}
 
         protected override void UpdateSelectedItemHander()
         {
@@ -71,7 +88,7 @@ namespace Filament.WPF6.ViewModels
             if (SelectedItem != null)
                 if (SelectedItem.IsValid)
                 {
-                    SelectedItem.UpdateItem();
+                    SelectedItem.UpdateItem<FilamentContext>();
 
                     SelectedItem.SetContainedModifiedState(false);
                 }

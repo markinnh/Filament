@@ -8,7 +8,7 @@ using Filament.UWP.Core.Services;
 using Filament.UWP.Helpers;
 
 using Microsoft.Toolkit.Uwp.UI.Controls;
-using Filament_Data;
+using DataDefinitions.Models;
 using System.Windows.Input;
 
 namespace Filament.UWP.ViewModels
@@ -25,13 +25,14 @@ namespace Filament.UWP.ViewModels
             set { Set(ref _selected, value); }
         }
 
-        public ObservableCollection<SampleOrder> SampleItems { get; private set; } = new ObservableCollection<SampleOrder>();
-
-        public DefinedVendors Vendors => Core.Helpers.Singleton<DataFile>.Instance.Document.Vendors;
+        public ObservableCollection<VendorDefn> Vendors { get; } = new ObservableCollection<VendorDefn>(Core.Helpers.Singleton<DataContext.DataLayer>.Instance.VendorList);
         private ICommand addVendor;
-        public ICommand AddVendor { get {
+        public ICommand AddVendor
+        {
+            get
+            {
                 if (addVendor == null)
-                    addVendor = new RelayCommand(HandleAddVendor,HandleCanAdd);
+                    addVendor = new RelayCommand(HandleAddVendor, HandleCanAdd);
                 return addVendor;
             }
             set { addVendor = value; }
@@ -46,7 +47,7 @@ namespace Filament.UWP.ViewModels
         private void HandleAddVendor()
         {
             Selected = new VendorDefn();
-            Vendors.Add(Selected,true);
+            //Vendors.Add(Selected, true);
         }
 
         public VendorViewModel()
@@ -54,12 +55,9 @@ namespace Filament.UWP.ViewModels
             AddVendor = new RelayCommand(HandleAddVendor);
         }
 
-        public void LoadDataAsync(MasterDetailsViewState viewState)
+        public void LoadDataAsync()
         {
-            if (viewState == MasterDetailsViewState.Both)
-            {
-                Selected = Vendors.First();
-            }
+            Selected = Vendors.First();
         }
     }
 }

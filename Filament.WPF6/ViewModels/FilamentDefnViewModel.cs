@@ -1,7 +1,8 @@
 ﻿using Filament.WPF6.Helpers;
-using Filament_Db;
-using Filament_Db.DataContext;
-using Filament_Db.Models;
+using DataDefinitions;
+
+using DataDefinitions.Models;
+using DataContext;
 using Microsoft.Toolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,7 @@ namespace Filament.WPF6.ViewModels
         protected override void DerivedInitItems()
         {
             PrepareForDataOperations();
-            if (Filament_Db.DataContext.FilamentContext.GetAllFilaments() is IEnumerable<FilamentDefn> filaments)
+            if (Singleton<DataLayer>.Instance.FilamentList is IEnumerable<FilamentDefn> filaments)
             {
                 InitItems(filaments);
             }
@@ -81,9 +82,9 @@ namespace Filament.WPF6.ViewModels
             if (SelectedItem != null)
             {
                 //PrepareForDataOperations();
-                SelectedItem.UpdateItem();
+                SelectedItem.UpdateItem<FilamentContext>();
                 //FilamentContext.UpdateSpec(SelectedItem);
-                SelectedItem.IsModified = false;
+                SelectedItem.SetContainedModifiedState(false);
                 //FinishedDataOperations();
             }
         }
@@ -98,7 +99,7 @@ namespace Filament.WPF6.ViewModels
 
         private void HandlePrepopulateCommand()
         {
-            if (SelectedItem?.DensityAlias?.MeasuredDensity.Count == 0 && SelectedItem.MaterialType == Filament_Db.MaterialType.PLA)
+            if (SelectedItem?.DensityAlias?.MeasuredDensity.Count == 0 && SelectedItem.MaterialType == MaterialType.PLA)
             {
                 Random random = Singleton<Random>.Instance;
                 const int minRandom = 990;

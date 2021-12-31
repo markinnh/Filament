@@ -4,11 +4,168 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:Filament.WPF6"
+      xmlns:helpers="clr-namespace:Filament.WPF6.Helpers"
       xmlns:vm="clr-namespace:Filament.WPF6.ViewModels"
-      xmlns:model="clr-namespace:Filament_Db.Models;assembly=Filament_Db"
+      xmlns:model="clr-namespace:DataDefinitions.Models;assembly=DataDefinitions"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="ByFilamentPage" Name="ByVendorPage">
+    <Page.Resources>
+        <CollectionViewSource x:Key="DefinedFilaments" Source="{Binding Filaments}"/>
+        <DataTemplate x:Key="EditSpoolDefnItems" DataType="{x:Type model:SpoolDefn}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="400"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Text="{StaticResource EditIconSymbol}"
+                       Style="{StaticResource FontIcon}"
+                       Grid.Column="2"
+                       Grid.RowSpan="2"
+                       FontSize="16"
+                       Visibility="{Binding IsModified,Mode=OneWay,Converter={StaticResource VisibilityConverter}}"
+                       ToolTip="Item is modified"/>
+                <TextBlock Text="Width"/>
+                <TextBlock Grid.Column="1">
+                <Run Text="{Binding SpoolWidth}"/>
+                <Run Text="mm"/>
+                </TextBlock>
+                <TextBlock Text="Spool Diameter"
+                       Grid.Row="1"/>
+                <TextBlock 
+                       Grid.Row="1"
+                       Grid.Column="1">
+                <Run Text="{Binding SpoolDiameter}"/>
+                <Run Text="mm"/>
+                </TextBlock>
+                <TextBlock Text="Drum Diameter"
+                       Grid.Row="2"/>
+                <TextBlock 
+                       Grid.Row="2"
+                       Grid.Column="1">
+                <Run Text="{Binding DrumDiameter}"/>
+                <Run Text="mm"/>
+                </TextBlock>
+                <CheckBox Content="Show In Use" IsChecked="{Binding ShowInUse,Mode=TwoWay}"
+                          Grid.Row="3"
+                          />
+
+
+                <DataGrid ItemsSource="{Binding FilteredInventory}"
+                      AutoGenerateColumns="False"
+                      Grid.Row="4"
+                      Grid.ColumnSpan="2"
+                      CanUserDeleteRows="False"
+                      FontSize="{StaticResource StdFontSize}"
+                      
+                      >
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="DEI"
+                                            ToolTipService.ToolTip="Data editing indicators.">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{StaticResource CheckSymbol}"
+                                           Style="{StaticResource FontIcon}"
+                                           FontSize="12"
+                                           Visibility="{Binding IsValid,Converter={StaticResource VisibilityConverter}}"/>
+                                        <TextBlock Text="{StaticResource EditIconSymbol}"
+                                               Style="{StaticResource FontIcon}"
+                                               FontSize="12"
+                                               Visibility="{Binding IsModified,Converter={StaticResource VisibilityConverter}}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Width="100"
+                                            Header="Color"
+                                            >
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Rectangle Fill="{Binding ColorName,Converter={StaticResource ColorFromNameConverter}}"
+                                           Width="50"
+                                           Height="20"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate>
+                                    <ComboBox ItemsSource="{StaticResource SupportedColors}"
+                                          SelectedValue="{Binding ColorName,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                          Height="26">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Rectangle Width="25" Height="25"
+                                                           Fill="{Binding .,Converter={StaticResource ColorFromNameConverter}}"/>
+                                                    <TextBlock Text="{Binding }"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Width="100"
+                        Header="Date Opened">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding DateOpened,StringFormat={}{0:d}}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate>
+                                    <DatePicker SelectedDate="{Binding DateOpened,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Filament"
+                                            Width="100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding FilamentDefn.MaterialType}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate>
+                                    <ComboBox ItemsSource="{Binding Source={StaticResource DefinedFilaments}}"
+                                          SelectedItem="{Binding FilamentDefn,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate DataType="{x:Type model:FilamentDefn}">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding MaterialType}"/>
+                                                    <TextBlock Text="{Binding FilamentDefnId}"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridCheckBoxColumn Header="Stop Using"
+                                            Width="100"
+                                            Binding="{Binding StopUsing}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </DataTemplate>
+
+        <helpers:EditTemplateSelector x:Key="EditTemplateSelector" 
+                                  EditFilamentTemplate="{StaticResource EditFilamentDefn}" 
+                                  EditVendorTemplate="{StaticResource EditVendorDefn}" 
+                                  EditSpoolDefnTemplate="{StaticResource EditSpoolDefnItems}"
+                                  EditInventorySpoolTemplate="{StaticResource EditInventorySpoolItems}"
+                                  NoEditorTemplate="{StaticResource NoEditorTemplate}" />
+
+    </Page.Resources>
     <Page.DataContext>
         <vm:ByVendorViewModel/>
     </Page.DataContext>

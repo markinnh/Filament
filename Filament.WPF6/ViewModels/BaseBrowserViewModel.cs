@@ -1,7 +1,7 @@
 ﻿using Filament.WPF6.Helpers;
-using Filament_Db;
-using Filament_Db.DataContext;
-using Filament_Db.Models;
+using DataDefinitions;
+using DataDefinitions.Models;
+
 using Microsoft.Toolkit.Mvvm.Input;
 using Microsoft.Toolkit.Mvvm.Messaging;
 using System;
@@ -33,7 +33,7 @@ namespace Filament.WPF6.ViewModels
         public bool CanAdd => !InAddNew;
         protected BaseBrowserViewModel()
         {
-            if (Setting.GetSetting(nameof(MainWindow.SelectShowFlag)) is Setting setting)
+            if (Singleton<DataContext.DataLayer>.Instance.GetSingleSetting(s => s.Name == nameof(MainWindow.SelectShowFlag)) is Setting setting)
             {
                 if (Enum.Parse<ShowAllFlag>(setting.Value) is ShowAllFlag flag)
                 {
@@ -188,7 +188,7 @@ namespace Filament.WPF6.ViewModels
                 if (Items?.Where(it => it.IsModified).ToList() is IEnumerable<TBrowse> tbrowse)
                 {
                     foreach (TBrowse tb in tbrowse)
-                        tb.UpdateItem();
+                        tb.UpdateItem<DataContext.FilamentContext>();
 
                     OnPropertyChanged(nameof(HasModifiedItems));
                 }
@@ -245,8 +245,8 @@ namespace Filament.WPF6.ViewModels
         {
             if (SelectedItem != null)
             {
-                if (SelectedItem.InDatabase)
-                    FilamentContext.DeleteItems(SelectedItem);
+                //if (SelectedItem.InDatabase)
+                //    FilamentContext.DeleteItems(SelectedItem);
             }
             // TODO: This needs a lot of work and consideration whether to support deleting items.
             //try

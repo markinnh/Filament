@@ -4,9 +4,15 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:tk="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:helper="using:Filament.UWP.Helpers"
     mc:Ignorable="d"
     d:DesignHeight="900"
     d:DesignWidth="400">
+    <UserControl.Resources>
+        <helper:LengthWithUnitsConverter x:Key="LengthWithUnits"/>
+        <helper:WeightWithUnitsConverter x:Key="WeightWithUnits"/>
+    </UserControl.Resources>
     <ScrollViewer
         Name="ForegroundElement"
         Padding="{StaticResource DetailPageMargin}"
@@ -16,63 +22,40 @@
         <StackPanel HorizontalAlignment="Left">
             <TextBox x:Uid="VendorDetailName"
                      Text="{x:Bind MasterMenuItem.Name, Mode=TwoWay}"
-                     Width="250"/>
+                     Width="250" HorizontalAlignment="Left"/>
             <CheckBox x:Uid="VendorDetailFoundOnAmazon"
                       IsChecked="{x:Bind MasterMenuItem.FoundOnAmazon, Mode=TwoWay}"/>
+            <CheckBox x:Uid="StopUsing"
+                      IsChecked="{x:Bind MasterMenuItem.StopUsing,Mode=TwoWay}"/>
             <TextBox x:Uid="VendorDetailWebUrl"
                      Text="{x:Bind MasterMenuItem.WebUrl, Mode=TwoWay}"
-                     Width="250"/>
-            <!--<StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
-                <FontIcon
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    FontSize="48"
-                    Glyph="{x:Bind MasterMenuItem.Symbol, Mode=OneWay}" />
-                <TextBlock
-                    Margin="{StaticResource SmallLeftMargin}"
-                    VerticalAlignment="Center"
-                    Text="{x:Bind MasterMenuItem.Company, Mode=OneWay}"
-                    Style="{ThemeResource TitleTextBlockStyle}" />
+                     Width="250" HorizontalAlignment="Left"/>
+            
+            <tk:DataGrid Name="dgEdit" ItemsSource="{x:Bind MasterMenuItem.SpoolDefns,Mode=TwoWay}"
+                         AutoGenerateColumns="False"
+                         IsReadOnly="False"
+                         VerticalScrollBarVisibility="Auto"
+                         Height="300" IsEnabled="True">
+                <tk:DataGrid.Columns>
+                    <tk:DataGridCheckBoxColumn Header="Stop Using" Binding="{Binding StopUsing,Mode=TwoWay}"/>
+                    <tk:DataGridTextColumn Header="Description" Binding="{Binding Description,Mode=TwoWay}"/>
+                    <tk:DataGridTextColumn Header="Spool Diameter" Binding="{Binding SpoolDiameter,Converter={StaticResource LengthWithUnits},ConverterParameter='Millimeter',Mode=TwoWay}"/>
+                    <tk:DataGridTextColumn Header="Spool Width" Binding="{Binding SpoolWidth,Converter={StaticResource LengthWithUnits},ConverterParameter='Millimeter',Mode=TwoWay}"/>
+                    <tk:DataGridTextColumn Header="Drum Diameter" Binding="{Binding DrumDiameter,Converter={StaticResource LengthWithUnits},ConverterParameter='Millimeter',Mode=TwoWay}"/>
+                    <tk:DataGridTextColumn Header="Weight" Binding="{Binding Weight,Converter={StaticResource WeightWithUnits},Mode=TwoWay}"/>
+                    <tk:DataGridCheckBoxColumn Header="Verified" ToolTipService.ToolTip="Measurements verified" Binding="{Binding Verified}"/>
+                </tk:DataGrid.Columns>
+            </tk:DataGrid>
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="AddSpoolDefn" Click="AddSpoolDefn_Click">
+                    <SymbolIcon Symbol="Add"/>
+                </Button>
+                <Button x:Name="Save"
+                        Click="Save_Click"
+                        Visibility="{x:Bind MasterMenuItem.IsModified,Mode=OneWay}">
+                    <SymbolIcon Symbol="Save"/>
+                </Button>
             </StackPanel>
-            <StackPanel Name="block" Padding="0,15,0,0">
-                <TextBlock Style="{StaticResource DetailSubTitleStyle}" Text="Status" />
-                <TextBlock Style="{StaticResource DetailBodyBaseMediumStyle}" Text="{x:Bind MasterMenuItem.Status, Mode=OneWay}" />
-                <TextBlock
-                    Margin="{StaticResource SmallTopMargin}"
-                    Style="{StaticResource DetailSubTitleStyle}"
-                    Text="Order date" />
-                <TextBlock Style="{StaticResource DetailBodyBaseMediumStyle}" Text="{x:Bind MasterMenuItem.OrderDate, Mode=OneWay}" />
-                <TextBlock
-                    Margin="{StaticResource SmallTopMargin}"
-                    Style="{StaticResource DetailSubTitleStyle}"
-                    Text="Company" />
-                <TextBlock Style="{StaticResource DetailBodyBaseMediumStyle}" Text="{x:Bind MasterMenuItem.Company, Mode=OneWay}" />
-                <TextBlock
-                    Margin="{StaticResource SmallTopMargin}"
-                    Style="{StaticResource DetailSubTitleStyle}"
-                    Text="Ship to" />
-                <TextBlock Style="{StaticResource DetailBodyBaseMediumStyle}" Text="{x:Bind MasterMenuItem.ShipTo, Mode=OneWay}" />
-                <TextBlock
-                    Margin="{StaticResource SmallTopMargin}"
-                    Style="{StaticResource DetailSubTitleStyle}"
-                    Text="Order total" />
-                <TextBlock Style="{StaticResource DetailBodyBaseMediumStyle}" Text="{x:Bind MasterMenuItem.OrderTotal, Mode=OneWay}" />
-
-                <TextBlock
-                    Margin="{StaticResource MediumTopMargin}"
-                    Style="{StaticResource DetailSubTitleStyle}"
-                    Text="Note 1" />
-                <TextBlock Style="{StaticResource DetailBodyStyle}" Text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis quis hendrerit nulla, vel molestie libero. In nec ultricies magna, ultricies molestie ipsum. Mauris non dignissim velit. Etiam malesuada blandit mauris eu maximus. Quisque ornare, felis nec scelerisque mollis, risus dolor posuere magna, in gravida quam mi id nisi. Nullam mattis consequat ex. Cras nulla neque, dictum ac urna et, vestibulum feugiat ex. Pellentesque malesuada accumsan ligula, vel fringilla lacus facilisis sit amet. Proin convallis tempor arcu, ac placerat libero pretium ut. Praesent hendrerit nisl at lobortis viverra. Fusce vitae velit odio. Nam ut tortor sed purus finibus sollicitudin quis at ante. Ut sodales dolor vel eros mollis suscipit. Donec eu nulla id urna ultricies consequat. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;" />
-
-                <TextBlock
-                    Margin="{StaticResource SmallTopMargin}"
-                    Style="{StaticResource DetailSubTitleStyle}"
-                    Text="Note 2" />
-                <TextBlock
-                    Margin="{StaticResource MediumBottomMargin}"
-                    Style="{StaticResource DetailBodyStyle}"
-                    Text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis quis hendrerit nulla, vel molestie libero. In nec ultricies magna, ultricies molestie ipsum. Mauris non dignissim velit. Etiam malesuada blandit mauris eu maximus. Quisque ornare, felis nec scelerisque mollis, risus dolor posuere magna, in gravida quam mi id nisi. Nullam mattis consequat ex. Cras nulla neque, dictum ac urna et, vestibulum feugiat ex. Pellentesque malesuada accumsan ligula, vel fringilla lacus facilisis sit amet. Proin convallis tempor arcu, ac placerat libero pretium ut. Praesent hendrerit nisl at lobortis viverra. Fusce vitae velit odio. Nam ut tortor sed purus finibus sollicitudin quis at ante. Ut sodales dolor vel eros mollis suscipit. Donec eu nulla id urna ultricies consequat. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;" />
-            </StackPanel>-->
         </StackPanel>
     </ScrollViewer>
 </UserControl>

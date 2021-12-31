@@ -1,8 +1,8 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:core="clr-namespace:System;assembly=mscorlib"
-                    xmlns:fila="clr-namespace:Filament_Db;assembly=Filament_Db"
-                    xmlns:model="clr-namespace:Filament_Db.Models;assembly=Filament_Db"
+                    xmlns:fila="clr-namespace:DataDefinitions;assembly=DataDefinitions"
+                    xmlns:model="clr-namespace:DataDefinitions.Models;assembly=DataDefinitions"
                     xmlns:helpers="clr-namespace:Filament.WPF6.Helpers">
     <SolidColorBrush x:Key="StandardBackground" Color="WhiteSmoke"/>
     <core:Double x:Key="StdFontSize">14</core:Double>

@@ -4,15 +4,15 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Filament_Db.Models;
-using Filament_Db.DataContext;
+using DataDefinitions.Models;
+using DataContext;
 using System.Windows.Input;
 using Microsoft.Toolkit.Mvvm.Input;
 using System.Diagnostics;
 
 namespace Filament.WPF6.ViewModels
 {
-    internal class VendorDefnPageViewModel : Filament_Db.Observable
+    internal class VendorDefnPageViewModel : DataDefinitions.Observable
     {
         public ObservableCollection<VendorDefn>? VendorDefns { get; set; }
         private VendorDefn selectedVendorDefn;

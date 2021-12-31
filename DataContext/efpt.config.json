@@ -1,0 +1,66 @@
+﻿{
+   "CodeGenerationMode": 1,
+   "ContextClassName": "FilamentContext",
+   "ContextNamespace": null,
+   "DefaultDacpacSchema": null,
+   "FilterSchemas": false,
+   "IncludeConnectionString": false,
+   "ModelNamespace": null,
+   "OutputContextPath": "",
+   "OutputPath": "",
+   "ProjectRootNamespace": "DataContext",
+   "Schemas": null,
+   "SelectedHandlebarsLanguage": 0,
+   "SelectedToBeGenerated": 1,
+   "Tables": [
+      {
+         "Name": "FilamentDefn",
+         "ObjectType": 0
+      },
+      {
+         "Name": "Settings",
+         "ObjectType": 0
+      },
+      {
+         "Name": "DensityAliases",
+         "ObjectType": 0
+      },
+      {
+         "Name": "MeasuredDensity",
+         "ObjectType": 0
+      },
+      {
+         "Name": "InventorySpools",
+         "ObjectType": 0
+      },
+      {
+         "Name": "VendorDefns",
+         "ObjectType": 0
+      },
+      {
+         "Name": "SpoolDefn",
+         "ObjectType": 0
+      },
+      {
+         "Name": "DepthMeasurement",
+         "ObjectType": 0
+      }
+   ],
+   "UiHint": "FilamentData",
+   "UseBoolPropertiesWithoutDefaultSql": false,
+   "UseDatabaseNames": false,
+   "UseDbContextSplitting": false,
+   "UseFluentApiOnly": true,
+   "UseHandleBars": false,
+   "UseInflector": false,
+   "UseLegacyPluralizer": false,
+   "UseManyToManyEntity": false,
+   "UseNoConstructor": false,
+   "UseNoDefaultConstructor": false,
+   "UseNoNavigations": false,
+   "UseNoObjectFilter": false,
+   "UseNodaTime": false,
+   "UseNullableReferences": false,
+   "UseSchemaFolders": false,
+   "UseSpatial": false
+}
