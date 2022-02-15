@@ -10,10 +10,12 @@ using System.Collections.ObjectModel;
 using MyLibraryStandard.Attributes;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
+using System.Reflection;
 
 namespace DataDefinitions.Models
 {
-    public class InventorySpool : DatabaseObject
+    [UIHints(AddType = "Inventory")]
+    public class InventorySpool : DatabaseObject, IEditableObject
     {
         public static event InDataOpsChangedHandler InDataOpsChanged;
 
@@ -34,7 +36,7 @@ namespace DataDefinitions.Models
         [JsonIgnore]
         public override bool IsModified { get => base.IsModified || DepthMeasurements.Count(dm => dm.IsModified) > 0; set => base.IsModified = value; }
         [JsonIgnore]
-        public override bool IsValid => FilamentDefn != null && !string.IsNullOrEmpty(ColorName) && SpoolDefn != null;
+        public override bool IsValid => FilamentDefn != null && !string.IsNullOrEmpty(ColorName) && SpoolDefn != null && SpoolDefnId!=default;
         [JsonIgnore]
         public override bool SupportsDelete => true;
         [JsonIgnore]
@@ -44,7 +46,7 @@ namespace DataDefinitions.Models
         public int FilamentDefnId { get; set; }
 
         private FilamentDefn filamentDefn;
-        [Affected(Names = new string[] { nameof(IsValid) }),JsonIgnore]
+        [Affected(Names = new string[] { nameof(IsValid) }), JsonIgnore]
         public FilamentDefn FilamentDefn
         {
             get => filamentDefn;
@@ -95,11 +97,49 @@ namespace DataDefinitions.Models
             set => Set<bool>(ref stopUsing, value);
         }
 
-        [NotMapped,JsonIgnore]
+        [NotMapped, JsonIgnore]
         public int AgeInDays => (DateTime.Today - DateOpened).Days;
-        [NotMapped,JsonIgnore]
+        [NotMapped, JsonIgnore]
         public string Name => $"{ColorName} - {InventorySpoolId}";
 
+        public double CalcInitialDepth()
+        {
+            const double utilizationFactor = 0.95;
+            const double layerOverlap = .95;
+            bool initialLayer = true;
+            if (SpoolDefn != null && FilamentDefn != null)
+            {
+                var initialLength = InitialLength();
+                if (!double.IsNaN(initialLength))
+                {
+                    double depth = (SpoolDefn.SpoolDiameter - SpoolDefn.DrumDiameter) / 2 + (FilamentDefn.Diameter / 2);
+                    double length = 0;
+                    do
+                    {
+                        var turns = SpoolDefn.SpoolWidth / FilamentDefn.Diameter * utilizationFactor;
+                        var windLength = (SpoolDefn.SpoolDiameter - depth * 2) * Math.PI / 1000;
+                        var amountAdded = turns * windLength;
+                        length += amountAdded;
+                        depth -= FilamentDefn.Diameter * (initialLayer ? 1.0 : layerOverlap);
+                        initialLayer = false;
+                    } while (depth > 0 && length < initialLength);
+                    return depth;
+                }
+                return double.NaN;
+            }
+            else
+                return double.NaN;
+        }
+        public double InitialLength()
+        {
+            if (SpoolDefn != null && FilamentDefn != null)
+            {
+                return FilamentMath.LengthFromWeightBasedOnDensity(FilamentDefn.DensityAlias, SpoolDefn.Weight * 1000, FilamentDefn.Diameter) / 1000;
+
+            }
+            else
+                return double.NaN;
+        }
         //private string? ignoreThis="Ignore This";
         //[NotMapped]
         //public string IgnoreThis
@@ -135,22 +175,17 @@ namespace DataDefinitions.Models
             InDataOpsChanged += InventorySpool_InDataOpsChanged;
         }
 
-        internal override void WatchContained()
+        public override void WatchContained()
         {
             foreach (var dm in DepthMeasurements)
                 dm.Subscribe(WatchContainedHandler);
         }
-        internal override void UnWatchContained()
+        public override void UnWatchContained()
         {
             foreach (var dm in DepthMeasurements)
                 dm.Unsubscribe(WatchContainedHandler);
         }
-        protected override void WatchContainedHandler(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(IsModified))
-                OnPropertyChanged(nameof(IsModified));
-
-        }
+        public override string UIHintAddType() => typeof(DepthMeasurement).GetCustomAttribute<UIHintsAttribute>()?.AddType ?? string.Empty;
         private void Measurement_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add && e.NewItems != null)
@@ -159,6 +194,7 @@ namespace DataDefinitions.Models
                     if (item is DepthMeasurement measurement)
                     {
                         measurement.InventorySpool = this;
+                        measurement.InventorySpoolId = InventorySpoolId;
                         measurement.Subscribe(WatchContainedHandler);
                     }
                 OnPropertyChanged(nameof(IsModified));
@@ -210,7 +246,7 @@ namespace DataDefinitions.Models
         //        SetContainedModifiedState(false);
         //    }
         //}
-        protected override void UpdateContainedItemEntryState<TContext>(TContext context)
+        internal override void UpdateContainedItemEntryState<TContext>(TContext context)
         {
             context.SetDataItemsState(DepthMeasurements.Where(dm => Added(dm)), Microsoft.EntityFrameworkCore.EntityState.Added);
             context.SetDataItemsState(DepthMeasurements.Where(dm => Modified(dm)), Microsoft.EntityFrameworkCore.EntityState.Modified);
@@ -229,5 +265,56 @@ namespace DataDefinitions.Models
                 FilamentDefn = filaments.Single(fil => fil.FilamentDefnId == FilamentDefnId);
             }
         }
+        #region IEditableObject Implementation
+        struct BackupData
+        {
+            public string ColorName { get; set; }
+            public DateTime DateOpened { get; set; }
+            public int FilamentDefnId { get; set; }
+            public FilamentDefn FilamentDefn { get; set; }
+            internal BackupData(InventorySpool inventorySpool)
+            {
+                ColorName = inventorySpool.ColorName;
+                DateOpened = inventorySpool.DateOpened;
+                FilamentDefnId = inventorySpool.FilamentDefnId;
+                FilamentDefn = inventorySpool.FilamentDefn;
+            }
+        }
+        BackupData backupData;
+        void IEditableObject.BeginEdit()
+        {
+            if (!InEdit)
+            {
+                backupData = new BackupData(this);
+                InEdit = true;
+            }
+            //throw new NotImplementedException();
+        }
+
+        void IEditableObject.CancelEdit()
+        {
+            if (InEdit)
+            {
+                ColorName = backupData.ColorName;
+                DateOpened = backupData.DateOpened;
+                FilamentDefnId = backupData.FilamentDefnId;
+                FilamentDefn = backupData.FilamentDefn;
+                SetContainedModifiedState(false);
+                backupData = default(BackupData);
+                InEdit = false;
+            }
+            //throw new NotImplementedException();
+        }
+
+        void IEditableObject.EndEdit()
+        {
+            if (InEdit)
+            {
+                backupData = default(BackupData);
+                InEdit = false;
+            }
+            //throw new NotImplementedException();
+        }
+        #endregion
     }
 }

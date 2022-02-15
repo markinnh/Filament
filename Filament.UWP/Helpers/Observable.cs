@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace Filament.UWP.Helpers
 {
-    public class Observable : INotifyPropertyChanged
+    public class OldObservable : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 

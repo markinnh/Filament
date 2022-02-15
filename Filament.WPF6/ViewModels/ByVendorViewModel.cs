@@ -23,6 +23,7 @@ namespace Filament.WPF6.ViewModels
         //}
 
         public IEnumerable<FilamentDefn> Filaments { get => Singleton<DataLayer>.Instance.FilamentList; }
+        public IEnumerable<string> SupportedColorsCode { get => Properties.Settings.Default.SupportedColors.Split(','); }
         protected override void DerivedInitItems()
         {
             //PrepareForDataOperations();

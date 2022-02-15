@@ -12,6 +12,7 @@
       Title="ByFilamentPage" Name="ByVendorPage">
     <Page.Resources>
         <CollectionViewSource x:Key="DefinedFilaments" Source="{Binding Filaments}"/>
+        <CollectionViewSource x:Key="SupportedColorsInCode" Source="{Binding SupportedColorsCode}"/>
         <DataTemplate x:Key="EditSpoolDefnItems" DataType="{x:Type model:SpoolDefn}">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -91,14 +92,16 @@
                                             >
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
+                                    <Border BorderBrush="Black" BorderThickness="1">
                                     <Rectangle Fill="{Binding ColorName,Converter={StaticResource ColorFromNameConverter}}"
                                            Width="50"
                                            Height="20"/>
+                                    </Border>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                             <DataGridTemplateColumn.CellEditingTemplate>
                                 <DataTemplate>
-                                    <ComboBox ItemsSource="{StaticResource SupportedColors}"
+                                    <ComboBox ItemsSource="{Binding DataContext.SupportedColorsCode, ElementName=ByVendorPage}"
                                           SelectedValue="{Binding ColorName,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                                           Height="26">
                                         <ComboBox.ItemTemplate>
@@ -136,14 +139,15 @@
                             </DataGridTemplateColumn.CellTemplate>
                             <DataGridTemplateColumn.CellEditingTemplate>
                                 <DataTemplate>
-                                    <ComboBox ItemsSource="{Binding Source={StaticResource DefinedFilaments}}"
+                                    <ComboBox ItemsSource="{Binding DataContext.Filaments, ElementName=ByVendorPage}"
                                           SelectedItem="{Binding FilamentDefn,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
                                         <ComboBox.ItemTemplate>
                                             <DataTemplate DataType="{x:Type model:FilamentDefn}">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <TextBlock Text="{Binding MaterialType}"/>
-                                                    <TextBlock Text="{Binding FilamentDefnId}"/>
-                                                </StackPanel>
+                                                <TextBlock >
+                                                    <Run Text="{Binding MaterialType}"/>
+                                                    <Run Text=" - "/>
+                                                    <Run Text="{Binding FilamentDefnId}"/>
+                                                </TextBlock>
                                             </DataTemplate>
                                         </ComboBox.ItemTemplate>
                                     </ComboBox>
@@ -189,7 +193,7 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{StaticResource EditIconSymbol}"
                                    Style="{StaticResource FontIcon}"
-                                   Visibility="{Binding IsModified,Converter={StaticResource VisibilityConverter}}"/>
+                                   Visibility="{Binding IsModified,Mode=OneWay,Converter={StaticResource VisibilityConverter}}"/>
                         <TextBlock Text="{Binding Name}">
                             <TextBlock.ToolTip>
                                 <StackPanel>
@@ -230,9 +234,11 @@
                         <TextBlock Text="{StaticResource EditIconSymbol}"
                                    Style="{StaticResource FontIcon}"
                                    Visibility="{Binding IsModified,Converter={StaticResource VisibilityConverter}}"/>
+                        <Border BorderBrush="Black" BorderThickness="1" CornerRadius="3">
                         <Rectangle Fill="{Binding ColorName,Converter={StaticResource ColorFromNameConverter}}"
                                    Width="30"
                                    Height="16"/>
+                        </Border>
                         <TextBlock Text="{Binding FilamentDefn.MaterialType}"/>
                         
                         <StackPanel.ToolTip>
@@ -252,16 +258,16 @@
         <StackPanel Orientation="Horizontal"
                     Grid.Column="1"
                     Grid.Row="1">
-            <Button Content="Add Vendor"
-                    Style="{StaticResource CommandButton}"
-                    />
-            <Button Content="Update"
-                    Style="{StaticResource CommandButton}"
+            <Button Content="&#xE109;"
+                    Style="{StaticResource FontSymbolCommandButton}"
+                    Visibility="Collapsed"/>
+            <Button Content="&#xE105;"
+                    Style="{StaticResource FontSymbolCommandButton}"
                     ToolTip="Update selected item"
                     Command="{Binding UpdateCommand}"
                     IsEnabled="{Binding SelectedItem.IsModified,Mode=OneWay}"/>
-            <Button Content="Delete"
-                    Style="{StaticResource CommandButton}"
+            <Button Content="&#xE107;"
+                    Style="{StaticResource FontSymbolCommandButton}"
                     ToolTip="Delete the selected item"
                     Command="{Binding DeleteSelectedCommand}"
                     IsEnabled="{Binding SelectedItem.SupportsDelete,Mode=OneWay}"

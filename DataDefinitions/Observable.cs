@@ -90,24 +90,26 @@ namespace DataDefinitions
         //    if(PropertyChanged?.GetInvocationList().Cast<PropertyChangedEventHandler>().Contains(handler)??false)
         //        PropertyChanged-=handler;
         //}
-        internal virtual void WatchContained()
+        public virtual void WatchContained()
         {
             System.Diagnostics.Debug.WriteLine($"Watch contained not implemented in {GetType().Name}");
         }
-        internal virtual void UnWatchContained()
+        public virtual void UnWatchContained()
         {
             System.Diagnostics.Debug.WriteLine($"Unwatch contained not implemented in {GetType().Name}");
         }
         protected virtual void WatchContainedHandler(object sender,PropertyChangedEventArgs e)
         {
             
-            System.Diagnostics.Debug.WriteLine($"Contained Property watch not set up in {GetType().Name}");
+            System.Diagnostics.Debug.WriteLine($"Contained property in {GetType().Name} is changed for {e.PropertyName}");
         }
         public void Subscribe(PropertyChangedEventHandler handler)
         {
             if(handler!=null)
-                if(!PropertyChanged?.GetInvocationList().Contains(handler)??true)
+                if (!PropertyChanged?.GetInvocationList().Contains(handler) ?? true) { 
                     PropertyChanged+= handler;
+                    System.Diagnostics.Debug.WriteLine($"Initializing PropertyChangedHandler for {GetType().Name}");
+                }
         }
         public void Unsubscribe(PropertyChangedEventHandler handler)
         {
@@ -119,7 +121,7 @@ namespace DataDefinitions
         {
             if (PropertyChanged != null)
             {
-                if (PropertyChanged.GetInvocationList().Where(x => x is PropertyChangedEventHandler).Cast<PropertyChangedEventHandler>() is IEnumerable<PropertyChangedEventHandler> handlers)
+                if (PropertyChanged?.GetInvocationList().Where(x => x is PropertyChangedEventHandler).Cast<PropertyChangedEventHandler>() is IEnumerable<PropertyChangedEventHandler> handlers)
                 {
                     foreach (PropertyChangedEventHandler handler in handlers)
                         PropertyChanged -= handler;

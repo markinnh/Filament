@@ -14,11 +14,11 @@ namespace DataDefinitions.JsonSupport
     /// </summary>
     public interface ILinked : ITrackModified
     {
-        IJsonDocument Document { get; }
+        IDocument Document { get; }
         /// <summary>
         /// Relink the 'objects' with the document, which is necessary to restore external references, whether it should hold a reference is yet to be determined.
         /// </summary>
         /// <param name="document">IJsonDocument</param>
-        void EstablishLink(IJsonDocument document);
+        void EstablishLink(IDocument document);
     }
 }

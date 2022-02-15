@@ -10,18 +10,35 @@
     xmlns:behaviors="using:Filament.UWP.Behaviors"
     xmlns:templateSelectors="using:Filament.UWP.TemplateSelectors"
     xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:ui="using:Microsoft.Toolkit.Uwp.UI"
+    xmlns:media="using:Microsoft.Toolkit.Uwp.UI.Media"
     xmlns:helpers="using:Filament.UWP.Helpers"
     xmlns:views="using:Filament.UWP.Views"
     xmlns:ic="using:Microsoft.Xaml.Interactions.Core"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
+    xmlns:ani="using:Microsoft.Toolkit.Uwp.UI.Animations"
+    xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
+  xmlns:interactions="using:Microsoft.Xaml.Interactions.Core"
+    xmlns:behave="using:Microsoft.Toolkit.Uwp.UI.Behaviors"
     Style="{StaticResource PageStyle}"
     behaviors:NavigationViewHeaderBehavior.HeaderMode="Never"
     mc:Ignorable="d" x:Name="InvPage">
 
     <Page.Resources>
-        <CollectionViewSource x:Key="SupportedColors" Source="{x:Bind ViewModel.SupportedColors}"/>
+        <!--<CollectionViewSource x:Key="SupportedColors" Source="{x:Bind ViewModel.SupportedColors}"/>-->
         <CollectionViewSource x:Key="DefinedFilaments" Source="{x:Bind ViewModel.Filaments}"/>
-
+        <media:AttachedCardShadow x:Key="TestShadow" Offset="3" />
+        <ani:AnimationSet x:Key="ShadowPopAnimation" IsSequential="True">
+            <ani:TranslationAnimation To="4" Duration="0:0:1"/>
+            <!--<ani:OffsetDropShadowAnimation To="16" Duration="0:0:2" Target="{StaticResource TestShadow}"/>-->
+            <ani:OffsetDropShadowAnimation To="1" Delay="0:0:0.5" Duration="0:0:0.2" Target="{StaticResource TestShadow}"/>
+            <ani:TranslationAnimation To="0" Duration="0:0:1"/>
+        </ani:AnimationSet>
+        <Style TargetType="Button" >
+            <Setter Property="ui:Effects.Shadow" Value="{StaticResource TestShadow}"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="8"/>
+        </Style>
         <!--<DataTemplate x:Key="CompanyTemplate" x:DataType="model:SampleCompany">
             <winui:TreeViewItem
                 AutomationProperties.Name="{x:Bind CompanyName}"
@@ -33,6 +50,7 @@
         <helpers:WeightWithUnitsConverter x:Key="WeightWithUnits"/>
         <helpers:StringFormatConverter x:Key="StringFormatConverter"/>
         <helpers:DateTimeOffsetConverter x:Key="DateTimeOffsetConverter"/>
+        <helpers:ColorToStringConverter x:Key="ColorToStringConverter"/>
         <DataTemplate x:Key="VendorDisplayTemplate" x:DataType="mdl:VendorDefn">
             <winui:TreeViewItem
                 ItemsSource="{x:Bind SpoolDefns}">
@@ -46,8 +64,26 @@
                 <CheckBox IsChecked="{x:Bind FoundOnAmazon}"
                           Content="Found On Amazon"
                           IsEnabled="False"/>
-                <controls:DataGrid ItemsSource="{x:Bind SpoolDefns}" AutoGenerateColumns="False" Height="400">
+                <controls:DataGrid Name="dgEditor" ItemsSource="{x:Bind SpoolDefns}" AutoGenerateColumns="False" Height="400" BeginningEdit="dgEditor_BeginningEdit">
                     <controls:DataGrid.Columns>
+                        <controls:DataGridTemplateColumn Width="Auto">
+                            <controls:DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Visibility="{Binding InEdit,Mode=OneWay}">
+                                        <Button x:Name="AcceptChanges" Click="AcceptChanges_Click">
+                                            <Button.Content>
+                                                <SymbolIcon Symbol="Accept"/>
+                                            </Button.Content>
+                                        </Button>
+                                        <Button x:Name="CancelChanges" Click="CancelChanges_Click">
+                                            <Button.Content>
+                                                <SymbolIcon Symbol="Cancel"/>
+                                            </Button.Content>
+                                        </Button>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </controls:DataGridTemplateColumn.CellTemplate>
+                        </controls:DataGridTemplateColumn>
                         <controls:DataGridCheckBoxColumn Header="Stop Using" Binding="{Binding StopUsing,Mode=TwoWay}"/>
                         <controls:DataGridTextColumn Header="Description" Binding="{Binding Description,Mode=TwoWay}"/>
                         <controls:DataGridTextColumn Header="Spool Diameter" Binding="{Binding SpoolDiameter,Converter={StaticResource LengthWithUnits},ConverterParameter='Millimeter',Mode=TwoWay}"/>
@@ -77,28 +113,48 @@
                     <Run Text="Kg"/>
                 </TextBlock>
                 <controls:DataGrid ItemsSource="{x:Bind Inventory}"
-                     Width="400"
-                     Height="250"
-                     AutoGenerateColumns="False">
+                     Width="Auto"
+                     Height="250" GridLinesVisibility="Horizontal"
+                     AutoGenerateColumns="False" BeginningEdit="dgEditor_BeginningEdit" SelectionMode="Single">
                     <controls:DataGrid.Columns>
+                        <controls:DataGridTemplateColumn Width="Auto">
+                            <controls:DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Visibility="{Binding InEdit,Mode=OneWay}">
+                                        <Button x:Name="AcceptChanges" Click="AcceptChanges_Click">
+                                            <Button.Content>
+                                                <SymbolIcon Symbol="Accept"/>
+                                            </Button.Content>
+                                        </Button>
+                                        <Button x:Name="CancelChanges" Click="CancelChanges_Click">
+                                            <Button.Content>
+                                                <SymbolIcon Symbol="Cancel"/>
+                                            </Button.Content>
+                                        </Button>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </controls:DataGridTemplateColumn.CellTemplate>
+                        </controls:DataGridTemplateColumn>
                         <controls:DataGridTemplateColumn Header="Color" Width="100">
                             <controls:DataGridTemplateColumn.CellEditingTemplate>
                                 <DataTemplate>
-                                    <ComboBox ItemsSource="{Binding Source={StaticResource SupportedColors}}" SelectedItem="{Binding ColorName,Mode=TwoWay,UpdateSourceTrigger=LostFocus}">
-                                        <ComboBox.ItemTemplate>
-                                            <DataTemplate>
-                                                <StackPanel Orientation="Horizontal">
-                                                    <Rectangle Width="30" Height="24" Fill="{Binding}"/>
-                                                    <TextBlock Text="{Binding}"/>
-                                                </StackPanel>
-                                            </DataTemplate>
-                                        </ComboBox.ItemTemplate>
-                                    </ComboBox>
+                                    <controls:ColorPickerButton SelectedColor="{Binding ColorName,Converter={StaticResource ColorToStringConverter},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                                        <controls:ColorPickerButton.ColorPickerStyle>
+                                            <Style TargetType="controls:ColorPicker">
+                                                <Setter Property="ColorSpectrumShape" Value="Ring"/>
+                                                <Setter Property="IsAlphaEnabled" Value="True"/>
+                                                <Setter Property="IsHexInputVisible" Value="True"/>
+                                                <Setter Property="IsColorSpectrumVisible" Value="False"/>
+                                                <Setter Property="IsColorPaletteVisible" Value="True"/>
+                                                <Setter Property="IsColorChannelTextInputVisible" Value="False"/>
+                                            </Style>
+                                        </controls:ColorPickerButton.ColorPickerStyle>
+                                    </controls:ColorPickerButton>
                                 </DataTemplate>
                             </controls:DataGridTemplateColumn.CellEditingTemplate>
                             <controls:DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <Rectangle Width="40" Height="24" Fill="{Binding ColorName}"/>
+                                    <Border Width="40" Height="24" CornerRadius="5" Background="{Binding ColorName}"/>
                                 </DataTemplate>
                             </controls:DataGridTemplateColumn.CellTemplate>
                         </controls:DataGridTemplateColumn>
@@ -124,10 +180,10 @@
                                                HorizontalAlignment="Center"/>
                                 </DataTemplate>
                             </controls:DataGridTemplateColumn.CellTemplate>
-                            <controls:DataGridTemplateColumn.CellEditingTemplate>
+                            <!--<controls:DataGridTemplateColumn.CellEditingTemplate>
                                 <DataTemplate>
                                     <ComboBox ItemsSource="{Binding Source={StaticResource DefinedFilaments}}"
-                                              SelectedItem="{Binding FilamentDefn,Mode=TwoWay,UpdateSourceTrigger=LostFocus}">
+                                              SelectedItem="{Binding FilamentDefn, Mode=TwoWay}">
                                         <ComboBox.ItemTemplate>
                                             <DataTemplate x:DataType="mdl:FilamentDefn">
                                                 <TextBlock >
@@ -139,8 +195,11 @@
                                         </ComboBox.ItemTemplate>
                                     </ComboBox>
                                 </DataTemplate>
-                            </controls:DataGridTemplateColumn.CellEditingTemplate>
+                            </controls:DataGridTemplateColumn.CellEditingTemplate>-->
                         </controls:DataGridTemplateColumn>
+                        <!--<controls:DataGridComboBoxColumn Header="Filament" Width="75" ItemsSource="{Binding Source={StaticResource DefinedFilaments},Mode=OneWay}"
+                                                         DisplayMemberPath="MaterialType"
+                                                         Binding="{Binding FilamentDefnId,Mode=TwoWay}"/>-->
                         <controls:DataGridTextColumn Header="Days In Use" Binding="{Binding AgeInDays,Mode=OneWay}" IsReadOnly="True"/>
                         <controls:DataGridTemplateColumn Header="Remove" Width="75">
                             <controls:DataGridTemplateColumn.CellTemplate>
@@ -161,22 +220,56 @@
         <DataTemplate x:Key="InventoryDisplayTemplate" x:DataType="mdl:InventorySpool">
             <winui:TreeViewItem>
                 <StackPanel Orientation="Horizontal">
-                    <Rectangle Width="30"
+                    <Border Width="30"
                                Height="24"
-                               Fill="{x:Bind ColorName}"/>
-                    <TextBlock Text="{x:Bind ColorName}"/>
+                            CornerRadius="5"
+                               Background="{x:Bind ColorName}"/>
+                    <!--<TextBlock Text="{x:Bind ColorName}"/>-->
                 </StackPanel>
             </winui:TreeViewItem>
         </DataTemplate>
         <DataTemplate x:Key="InventoryContentTemplate" x:DataType="mdl:InventorySpool">
-            <StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <Rectangle Width="40" Height="24" Fill="{x:Bind ColorName}"/>
-                    <TextBlock Text="{x:Bind ColorName}"/>
-                </StackPanel>
+            <StackPanel >
+                <Border Background="WhiteSmoke" CornerRadius="5">
+                    <StackPanel Orientation="Horizontal" Padding="5" Width="Auto" >
+                        <Border Width="40" Height="40" CornerRadius="5" Background="{x:Bind ColorName}"/>
+                    </StackPanel>
+                </Border>
+                <ComboBox ItemsSource="{Binding Source={StaticResource DefinedFilaments}}"
+                          Width="150" Header="Select a material type" SelectedItem="{x:Bind FilamentDefn,Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="mdl:FilamentDefn">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock>
+                                    <Run Text="{x:Bind MaterialType}"/>
+                                    <Run Text=" : "/>
+                                    <Run Text="{x:Bind FilamentDefnId}"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
                 <TextBlock Text="{x:Bind DateOpened,Converter={StaticResource StringFormatConverter},ConverterParameter='{}{0:d}'}"/>
-                <controls:DataGrid ItemsSource="{x:Bind DepthMeasurements}" AutoGenerateColumns="False">
+                <controls:DataGrid ItemsSource="{x:Bind DepthMeasurements}" AutoGenerateColumns="False" BeginningEdit="dgEditor_BeginningEdit">
                     <controls:DataGrid.Columns>
+                        <controls:DataGridTemplateColumn Width="Auto">
+                            <controls:DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Visibility="{Binding InEdit,Mode=OneWay}">
+                                        <Button x:Name="AcceptChanges" Click="AcceptChanges_Click">
+                                            <Button.Content>
+                                                <SymbolIcon Symbol="Accept"/>
+                                            </Button.Content>
+                                        </Button>
+                                        <Button x:Name="CancelChanges" Click="CancelChanges_Click">
+                                            <Button.Content>
+                                                <SymbolIcon Symbol="Cancel"/>
+                                            </Button.Content>
+                                        </Button>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </controls:DataGridTemplateColumn.CellTemplate>
+                        </controls:DataGridTemplateColumn>
                         <controls:DataGridTemplateColumn Header="Measured On?" Width="100">
                             <controls:DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -192,7 +285,8 @@
                         </controls:DataGridTemplateColumn>
                         <controls:DataGridTextColumn Header="Depth 1" Width="100" Binding="{Binding Depth1,Mode=TwoWay}"/>
                         <controls:DataGridTextColumn Header="Depth 2" Width="100" Binding="{Binding Depth2,Mode=TwoWay}"/>
-                        <controls:DataGridTextColumn Header="Remaining" Width="100" Binding="{Binding FilamentRemainingInGrams}"/>
+                        <controls:DataGridTextColumn Header="Remaining (g)" Width="100" Binding="{Binding FilamentRemainingInGrams,Mode=OneWay}"/>
+                        <controls:DataGridTextColumn Header="Remaining (m)" Width="100" Binding="{Binding FilamentRemainingInMeters,Mode=OneWay}"/>
                     </controls:DataGrid.Columns>
                 </controls:DataGrid>
             </StackPanel>
@@ -203,9 +297,9 @@
             </winui:TreeViewItem>
         </DataTemplate>
         <DataTemplate x:Key="NotSupportedContentTemplate">
-            <DataTemplate>
-                <TextBlock Text="Not Supported" FontSize="24"/>
-            </DataTemplate>
+
+            <TextBlock x:Uid="NoNodeSelected" FontSize="24"/>
+
         </DataTemplate>
         <!--  <DataTemplate x:Key="CompanyContentTemplate" x:DataType="model:SampleCompany">
             <StackPanel>
@@ -456,20 +550,21 @@
                                              VendorDefnTemplate="{StaticResource VendorDisplayTemplate}"
                                              SpoolDefnTemplate="{StaticResource SpoolDisplayTemplate}"
                                              InventoryDefnTemplate="{StaticResource InventoryDisplayTemplate}"
-                                             NotSupportedTemplate="{StaticResource NotSupportedTreeView}"/>
+                                             NotSupportedTemplate="{StaticResource NotSupportedTreeView}" />
         <templateSelectors:InventoryTemplateSelector x:Key="InventoryContentTemplateSelector"
                                              VendorDefnTemplate="{StaticResource VendorContentTemplate}"
                                              SpoolDefnTemplate="{StaticResource SpoolContentTemplate}"
                                              InventoryDefnTemplate="{StaticResource InventoryContentTemplate}"
-                                             NotSupportedTemplate="{StaticResource NotSupportedContentTemplate}"/>
+                                             NotSupportedTemplate="{StaticResource NotSupportedContentTemplate}" />
 
 
     </Page.Resources>
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition x:Name="treeViewColumn" MinWidth="150" MaxWidth="350" />
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition x:Name="treeViewColumn" MinWidth="150" MaxWidth="350" Width="175*" />
+            <ColumnDefinition Width="779*" />
+            <ColumnDefinition Width="6*"/>
         </Grid.ColumnDefinitions>
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup>
@@ -521,7 +616,8 @@
                 Grid.Row="1"
                 SelectionMode="Single"
                 ItemsSource="{x:Bind ViewModel.Vendors}"
-                ItemTemplateSelector="{StaticResource InventoryTreeViewTemplateSelector}">
+                ItemTemplateSelector="{StaticResource InventoryTreeViewTemplateSelector}"
+                >
                 <i:Interaction.Behaviors>
                     <behaviors:TreeViewCollapseBehavior x:Name="collapseBehavior" />
                     <ic:EventTriggerBehavior EventName="ItemInvoked">
@@ -533,23 +629,42 @@
 
         <ScrollViewer
             Grid.Column="1"
-            Padding="{StaticResource DetailPageMargin}">
+            Padding="{StaticResource DetailPageMargin}" Grid.ColumnSpan="2">
             <StackPanel>
-                <ContentControl
+                <controls:HeaderedContentControl
                 Content="{x:Bind ViewModel.SelectedItem, Mode=OneWay}"
                 ContentTemplateSelector="{StaticResource InventoryContentTemplateSelector}" />
                 <StackPanel Orientation="Horizontal">
-                    <Button ToolTipService.ToolTip="Add Child"
+                    <Button
                             Command="{x:Bind ViewModel.AddChildCommand}">
                         <Button.Content>
-                            <SymbolIcon Symbol="Add"/>
+                            <StackPanel>
+                                <SymbolIcon Symbol="Add"/>
+                                <!--<TextBlock Text="{x:Bind ViewModel.AddHintDescription,Mode=OneWay}"/>-->
+                            </StackPanel>
                         </Button.Content>
+                        <ToolTipService.ToolTip>
+                            <TextBlock>
+                                <Run Text="Add"/>
+                                <Run Text="{x:Bind ViewModel.AddHintDescription,Mode=OneWay}"/>
+                            </TextBlock>
+                        </ToolTipService.ToolTip>
+                        <interactivity:Interaction.Behaviors>
+                            <interactions:EventTriggerBehavior EventName="Click">
+                                <behave:StartAnimationAction Animation="{StaticResource ShadowPopAnimation}"/>
+                            </interactions:EventTriggerBehavior>
+                        </interactivity:Interaction.Behaviors>
                     </Button>
                     <Button Command="{x:Bind ViewModel.SaveSelectedCommand}"
                             Visibility="{x:Bind ViewModel.SelectedItem.IsModified,Mode=OneWay}">
                         <Button.Content>
                             <SymbolIcon Symbol="Save"/>
                         </Button.Content>
+                        <interactivity:Interaction.Behaviors>
+                            <interactions:EventTriggerBehavior EventName="Click">
+                                <behave:StartAnimationAction Animation="{StaticResource ShadowPopAnimation}"/>
+                            </interactions:EventTriggerBehavior>
+                        </interactivity:Interaction.Behaviors>
                     </Button>
                 </StackPanel>
             </StackPanel>

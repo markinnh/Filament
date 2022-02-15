@@ -12,11 +12,11 @@ namespace DataDefinitions.JsonSupport
     /// <remarks>
     /// Most of the 'objects' are contained within other items.  So the number of 'collections' is minimal.  Settings, Vendors, and Filaments
     /// </remarks>
-    public interface IJsonDocument
+    public interface IDocument
     {
-        DocumentLinkedCollection<VendorDefn> Vendors { get; }
-        DocumentLinkedCollection<FilamentDefn> Filaments { get; }
-        DocumentLinkedCollection<Setting> Settings { get; }
+        ICollection<VendorDefn> Vendors { get; }
+        ICollection<FilamentDefn> Filaments { get; }
+        ICollection<Setting> Settings { get; }
         CounterProvider Counters { get; }
     }
 }

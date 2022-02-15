@@ -295,4 +295,7 @@
   <data name="FilamentDefineMeasured.Header" xml:space="preserve">
     <value>Defined Density</value>
   </data>
+  <data name="NoNodeSelected.Text" xml:space="preserve">
+    <value>Select an item on the TreeView to start</value>
+  </data>
 </root>

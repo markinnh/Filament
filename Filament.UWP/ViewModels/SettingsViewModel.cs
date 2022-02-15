@@ -7,6 +7,7 @@ using Filament.UWP.Services;
 
 using Windows.ApplicationModel;
 using Windows.UI.Xaml;
+using DataDefinitions;
 
 namespace Filament.UWP.ViewModels
 {

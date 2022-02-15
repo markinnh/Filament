@@ -60,10 +60,12 @@ namespace DataContext
 
             if (Vendors != null && Filaments != null)
             {
-                foreach (var vend in Vendors)
+                foreach (var vend in Vendors) {
+                    vend.WatchContained();
                     foreach (var sp in vend.SpoolDefns)
                         foreach (var inv in sp.Inventory)
                             inv.Link(Filaments);
+                }
 
                 foreach (var filament in Filaments)
                     filament.InitNotificationHandler();

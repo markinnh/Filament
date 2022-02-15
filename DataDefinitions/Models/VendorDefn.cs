@@ -9,12 +9,13 @@ using System.Text;
 using static System.Diagnostics.Debug;
 using System.Linq;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Reflection;
 
 namespace DataDefinitions.Models
 {
     // TODO: Develop a UI for VendorDefn; Add, Delete, Update
     // TODO: Develop a DataObject class the sit between data classes and Observable since the data is going to be disconnected from the DbContext
-    public class VendorDefn : DatabaseObject, IDataErrorInfo
+    public class VendorDefn : DatabaseObject, IDataErrorInfo,IEditableObject
     {
         public static event InDataOpsChangedHandler InDataOpsChanged;
 
@@ -34,6 +35,8 @@ namespace DataDefinitions.Models
         public override bool IsModified { get => base.IsModified || SpoolDefns?.Count(sd => sd.IsModified) > 0; set => base.IsModified = value; }
         protected override bool HasContainedItems => true;
         public override bool InDatabase => vendorID != default;
+
+        public override bool IsValid => !string.IsNullOrEmpty(name);
         //public const string _3DSolutechName = "3D Solutech";
         //public const string HatchBoxName = "HatchBox";
         //public const string SunluName = "Sunlu";
@@ -137,7 +140,8 @@ namespace DataDefinitions.Models
                 foreach (var item in e.NewItems)
                     if (item is Observable spoolDefn)
                     {
-                        spoolDefn.PropertyChanged += SpoolDefn_PropertyChanged;
+                        //spoolDefn.Subscribe(WatchContainedHandler);
+                        spoolDefn.WatchContained();
                         //defn.Vendor = this;
                         //defn.VendorDefnId = VendorDefnId;
                     }
@@ -163,15 +167,17 @@ namespace DataDefinitions.Models
             OnPropertyChanged(nameof(CanEdit));
             //throw new NotImplementedException();
         }
-        internal override void WatchContained()
+        public override void WatchContained()
         {
+            //Subscribe(WatchContainedHandler);
+
             foreach (var spool in SpoolDefns)
             {
                 spool.Subscribe(WatchContainedHandler);
                 spool.WatchContained();
             }
         }
-        internal override void UnWatchContained()
+        public override void UnWatchContained()
         {
             foreach (var spool in SpoolDefns)
             {
@@ -179,11 +185,10 @@ namespace DataDefinitions.Models
                 spool.UnWatchContained();
             }
         }
-        protected override void WatchContainedHandler(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(IsModified))
-                OnPropertyChanged(nameof(IsModified));
-        }
+        public override string UIHintAddType()=>typeof(SpoolDefn).GetCustomAttribute<UIHintsAttribute>()?.AddType ?? String.Empty;      
+        
+
+        
         /// <summary>
         /// Creates the vendor.
         /// </summary>
@@ -202,7 +207,7 @@ namespace DataDefinitions.Models
             };
             return result;
         }
-        protected override void UpdateContainedItemEntryState<TContext>(TContext context)
+        internal override void UpdateContainedItemEntryState<TContext>(TContext context)
         {
             if (InDatabase)
             {
@@ -222,6 +227,7 @@ namespace DataDefinitions.Models
         }
         public override void SetContainedModifiedState(bool state)
         {
+            
             if (SpoolDefns != null)
                 foreach (var spec in SpoolDefns)
                 {
@@ -233,6 +239,60 @@ namespace DataDefinitions.Models
                             dm.IsModified = state;
                     }
                 }
+            IsModified = state;
+            OnPropertyChanged(nameof(IsModified));
         }
+        #region IEditableObject Implementation
+        struct BackupData
+        {
+            public string Name { get; set; }
+            public string WebUrl { get; set; }
+            public bool StopUsing { get; set; }
+            public bool FoundOnAmazon { get; set; }
+
+            internal BackupData(string name, string webUrl, bool stopUsing, bool foundOnAmazon)
+            {
+                Name = name;
+                WebUrl = webUrl;
+                StopUsing = stopUsing;
+                FoundOnAmazon = foundOnAmazon;
+            }
+        }
+        BackupData backupData;
+        void IEditableObject.BeginEdit()
+        {
+            if (!InEdit)
+            {
+                backupData = new BackupData(name,webUrl,stopUsing,foundOnAmazon);
+                InEdit = true;
+            }
+            //throw new NotImplementedException();
+        }
+
+        void IEditableObject.CancelEdit()
+        {
+            if (InEdit)
+            {
+                name = backupData.Name;
+                webUrl = backupData.WebUrl;
+                StopUsing = backupData.StopUsing;
+                foundOnAmazon = backupData.FoundOnAmazon;
+                backupData =default(BackupData);
+                InEdit=false;
+                SetContainedModifiedState(false);
+            }
+            //throw new NotImplementedException();
+        }
+
+        void IEditableObject.EndEdit()
+        {
+            if (InEdit)
+            {
+                backupData=default(BackupData);
+                InEdit = false;
+            }
+            //throw new NotImplementedException();
+        }
+        #endregion
     }
 }

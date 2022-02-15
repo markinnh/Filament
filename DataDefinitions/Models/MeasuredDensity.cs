@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
@@ -10,7 +11,7 @@ namespace DataDefinitions.Models
     /// <summary>
     /// determine the density of filament using empirical measurement
     /// </summary>
-    public class MeasuredDensity : DatabaseObject, IDensity
+    public class MeasuredDensity : DatabaseObject, IDensity,IEditableObject
     {
         public static event InDataOpsChangedHandler InDataOpsChanged;
 
@@ -53,7 +54,7 @@ namespace DataDefinitions.Models
             get => length;
             set => Set<double>(ref length, value);
         }
-
+        // TODO: Consider removing diameter from MeasuredDensity and use the diameter in FilamentDefn
         private double diameter;
 
         /// <summary>
@@ -175,5 +176,59 @@ namespace DataDefinitions.Models
         {
             return length.GetHashCode() ^ weight.GetHashCode() ^ diameter.GetHashCode();
         }
+        #region IEditableObject Implementation
+        struct BackupData
+        {
+            public double Length { get; set; }
+            public double Weight { get; set; }
+            public double Diameter { get; set; }
+
+            internal BackupData(double length, double weight, double diameter)
+            {
+                Length = length;
+                Weight = weight;
+                Diameter = diameter;
+            }
+            internal BackupData(MeasuredDensity measuredDensity)
+            {
+                Length = measuredDensity.Length;
+                Weight = measuredDensity.Weight;
+                Diameter = measuredDensity.Diameter;
+            }
+        }
+        BackupData backupData;
+        void IEditableObject.BeginEdit()
+        {
+            if (!InEdit)
+            {
+                backupData = new BackupData(this);
+                InEdit = true;
+            }
+            //throw new NotImplementedException();
+        }
+
+        void IEditableObject.CancelEdit()
+        {
+            if (InEdit)
+            {
+                Length = backupData.Length;
+                Weight= backupData.Weight;
+                Diameter= backupData.Diameter;
+                backupData=default(BackupData);
+                InEdit = false;
+            }
+            //throw new NotImplementedException();
+        }
+
+        void IEditableObject.EndEdit()
+        {
+            if (InEdit)
+            {
+                backupData = default(BackupData);
+                InEdit= false;
+            }
+            //throw new NotImplementedException();
+        }
+        #endregion
     }
 }

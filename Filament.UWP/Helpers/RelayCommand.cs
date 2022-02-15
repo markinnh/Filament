@@ -50,7 +50,13 @@ namespace Filament.UWP.Helpers
 
         public bool CanExecute(object parameter) => _canExecute == null || _canExecute((T)parameter);
 
-        public void Execute(object parameter) => _execute((T)parameter);
+        public void Execute(object parameter)
+        {
+            if (_execute == null)
+                System.Diagnostics.Debug.WriteLine("Unable to execute through a null value");
+            else
+                _execute((T)parameter);
+        }
 
         public void OnCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
     }

@@ -50,6 +50,7 @@
 
     <CollectionViewSource x:Key="Filaments" Source="{Binding DefinedFilaments}"/>
     <x:Array x:Key="SupportedColors" Type="{x:Type core:String}">
+        <core:String>White</core:String>
         <core:String>Black</core:String>
         <core:String>Cyan</core:String>
         <core:String>Violet</core:String>
@@ -66,6 +67,8 @@
         <core:String>Green</core:String>
         <core:String>Navy</core:String>
         <core:String>Orange</core:String>
+        <core:String>Gold</core:String>
+        <core:String>Silver</core:String>
     </x:Array>
     <core:Double x:Key="StandardListViewHeight">
         350
@@ -94,6 +97,13 @@
         <Setter Property="Width" Value="100"/>
         <Setter Property="Height" Value="30"/>
         <Setter Property="Margin" Value="5"/>
+    </Style>
+    <Style x:Key="FontSymbolCommandButton" TargetType="Button">
+        <Setter Property="Width" Value="32"/>
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="FontFamily" Value="Segoe UI Symbol"/>
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="Margin" Value="5,5,0,5"/>
     </Style>
     <Style TargetType="GroupBox">
         <Setter Property="FontSize" Value="{StaticResource StdFontSize}"/>
@@ -316,7 +326,7 @@
                     <Label Content="Density"
                        />
                     <TextBox Grid.Column="1"
-                         Text="{Binding DensityAlias.DefinedDensity,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                         Text="{Binding DensityAlias.DefinedDensity,Mode=TwoWay,UpdateSourceTrigger=LostFocus}"
                          IsEnabled="{Binding CanEdit}"/>
                 </Grid>
             </GroupBox>
@@ -479,9 +489,12 @@
                        Grid.Row="1"/>
             <TextBlock Text="Material"
                        Grid.Row="2"/>
-            <TextBlock Text="{Binding FilamentDefn.MaterialType}"
-                       Grid.Row="2"
-                       Grid.Column="1"/>
+            <TextBlock Grid.Row="2"
+                       Grid.Column="1">
+                <Run Text="{Binding FilamentDefn.MaterialType}"/>
+                <Run Text=" - "/>
+                <Run Text="{Binding FilamentDefn.FilamentDefnId}"/>
+            </TextBlock>
             <TextBlock Text="Measurements"
                        Grid.Row="3"/>
             <DataGrid ItemsSource="{Binding DepthMeasurements}"
@@ -512,10 +525,15 @@
                                         Header="Depth Right"
                                         Binding="{Binding Depth2,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter',Mode=TwoWay,UpdateSourceTrigger=LostFocus}"/>
                     <DataGridTextColumn Width="100"
-                                        Header="Remaining"
+                                        Header="Remaining (g)"
                                         Binding="{Binding FilamentRemainingInGrams,Mode=OneWay,StringFormat='{}{0:#.#####} g'}"
                                         IsReadOnly="True"
                                         ToolTipService.ToolTip="Amount remaining in grams."/>
+                    <DataGridTextColumn Width="100"
+                                        Header="Remaining (m)"
+                                        Binding="{Binding FilamentRemainingInMeters,Mode=OneWay,StringFormat='{}{0:#.####} m'}"
+                                        IsReadOnly="True"
+                                        ToolTipService.ToolTip="Amount remaining in meters"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

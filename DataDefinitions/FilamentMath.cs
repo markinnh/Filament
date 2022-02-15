@@ -25,7 +25,17 @@ namespace DataDefinitions
         /// <returns>volume in cubic centimeters</returns>
         public static double FilamentVolumeInCubicCentimeters(double radius, double length) =>
             radius * radius * Math.PI * length * ConvertFromCubicMillimetersToCubicCentimeters;
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="density">in gms per cc</param>
+        /// <param name="weight">in grams</param>
+        /// <param name="diameter">in millimeters</param>
+        /// <returns>Length in millimeters</returns>
+        public static double LengthFromWeightBasedOnDensity(IDensity density, double weight, double diameter)
+        {
+            return weight / (density.Density * (Math.Pow(diameter / 2, 2) * Math.PI))/ConvertFromCubicMillimetersToCubicCentimeters;
+        }
         public static double ConvertTo(double measurement, SupportedVolume volume, ConvertToVolume convert)
         {
             double result = double.NaN;
@@ -258,7 +268,7 @@ namespace DataDefinitions
                 case "kg":
                     result = SupportedWeight.Kilogram;
                     break;
-                    default :
+                default:
                     result = SupportedWeight.Kilogram;
                     break;
             }

@@ -8,11 +8,14 @@ using System.Linq;
 using MyLibraryStandard.Attributes;
 using System.Windows.Input;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel;
+using System.Reflection;
 
 namespace DataDefinitions.Models
 {
     // TODO: Develop a UI for SpoolDefinition; Add, Update, Delete
-    public class SpoolDefn : DatabaseObject
+    [UIHints(AddType = "Spool Definition")]
+    public class SpoolDefn : DatabaseObject, IEditableObject
     {
         public static event InDataOpsChangedHandler InDataOpsChanged;
 
@@ -30,14 +33,18 @@ namespace DataDefinitions.Models
         }
         public override bool InDataOperations => InDataOps;
 
-        public override bool IsModified { get => base.IsModified || Inventory?.Count(inv => inv.IsModified) > 0; set => base.IsModified = value; }
+        public override bool IsModified
+        {
+            get => base.IsModified || Inventory?.Count(inv => inv.IsModified) > 0;
+            set => base.IsModified = value;
+        }
 
         public override bool IsValid => spoolDiameter != double.NaN && drumDiameter != double.NaN
             && weight != double.NaN && spoolWidth != double.NaN && Vendor != null;
 
         public override bool InDatabase => SpoolDefnId != default;
 
-        private string description="Black Plastic";
+        private string description = "Black Plastic";
         [MaxLength(128)]
         public string Description
         {
@@ -90,7 +97,7 @@ namespace DataDefinitions.Models
         //}
 
         private int spoolDefnID;
-        
+
         public int SpoolDefnId
         {
             get => spoolDefnID;
@@ -222,7 +229,7 @@ namespace DataDefinitions.Models
             foreach (var inventory in Inventory)
                 inventory.Subscribe(InventorySpool_PropertyChanged);
         }
-        
+
         private void OInventory_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             System.Diagnostics.Debug.WriteLine($"Collection changed {e.Action}, count {e.NewItems?.Count}");
@@ -233,7 +240,7 @@ namespace DataDefinitions.Models
                     {
                         inventorySpool.SpoolDefn = this;
                         inventorySpool.SpoolDefnId = spoolDefnID;
-                        inventorySpool.Subscribe(InventorySpool_PropertyChanged);
+                        inventorySpool.WatchContained();
                     }
                 OnPropertyChanged(nameof(IsModified));
             }
@@ -251,7 +258,23 @@ namespace DataDefinitions.Models
 
             //throw new NotImplementedException();
         }
-
+        public override void WatchContained()
+        {
+            foreach (var inventory in Inventory)
+            {
+                inventory.Subscribe(WatchContainedHandler);
+                inventory.WatchContained();
+            }
+        }
+        public override void UnWatchContained()
+        {
+            foreach (var inventory in Inventory)
+            {
+                inventory.Unsubscribe(WatchContainedHandler);
+                inventory.UnWatchContained();
+            }
+        }
+        public override string UIHintAddType() => typeof(InventorySpool).GetCustomAttribute<UIHintsAttribute>()?.AddType ?? string.Empty;
         private void InventorySpool_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             System.Diagnostics.Debug.WriteLine($"Property Changed in {sender?.GetType().Name} for {e.PropertyName}");
@@ -269,7 +292,7 @@ namespace DataDefinitions.Models
             //FilamentID = filamentID;
             //Filament = DataContext.FilamentContext.GetFilament(fil=>fil.FilamentDefnId == filamentID);
             VendorDefnId = vendorID;
-            
+
             SpoolWidth = spoolWidth;
             Verified = verified;
         }
@@ -282,39 +305,49 @@ namespace DataDefinitions.Models
             return result;
         }
 
-        public override void UpdateItem<TContext>() 
+        //public override void UpdateItem<TContext>() 
+        //{
+        //    if (IsValid)
+        //    {
+        //        using (TContext context = new TContext())
+        //        {
+        //            int expectedUpdate = 0;
+        //            expectedUpdate += context.SetDataItemsState<InventorySpool>(Inventory.Where(inv => Added(inv)), Microsoft.EntityFrameworkCore.EntityState.Added);
+        //            expectedUpdate += context.SetDataItemsState(Inventory.Where(inv => Modified(inv)), Microsoft.EntityFrameworkCore.EntityState.Modified);
+        //            //expectedUpdate += context.SetDataItemsState(Inventory.Where(inv => inv.MarkedForDeletion && inv.InDatabase), Microsoft.EntityFrameworkCore.EntityState.Deleted);
+        //            foreach (var inv in Inventory)
+        //            {
+        //                expectedUpdate += context.SetDataItemsState(inv.DepthMeasurements.Where(dm => Added(dm)), Microsoft.EntityFrameworkCore.EntityState.Added);
+        //                expectedUpdate += context.SetDataItemsState(inv.DepthMeasurements.Where(dm => Modified(dm)), Microsoft.EntityFrameworkCore.EntityState.Modified);
+        //                //expectedUpdate += context.SetDataItemsState(inv.DepthMeasurements.Where(dm => dm.MarkedForDeletion && dm.InDatabase), Microsoft.EntityFrameworkCore.EntityState.Deleted);
+        //            }
+
+        //            try
+        //            {
+        //                if (InDatabase)
+        //                    context.Update(this);
+        //                else
+        //                    context.Add(this);
+
+        //                var updateCount = context.SaveChanges();
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                System.Diagnostics.Debug.WriteLine($"Unable to complete data operation, {ex.Message}");
+        //            }
+        //        }
+        //    }
+        //    //throw new NotImplementedException();
+        //}
+        internal override void UpdateContainedItemEntryState<TContext>(TContext context)
         {
-            if (IsValid)
+            context.SetDataItemsState(Inventory.Where(inv => Modified(inv)), Microsoft.EntityFrameworkCore.EntityState.Modified);
+            context.SetDataItemsState(Inventory.Where(inv => Added(inv)), Microsoft.EntityFrameworkCore.EntityState.Added);
+            foreach (var item in Inventory)
             {
-                using (TContext context = new TContext())
-                {
-                    int expectedUpdate = 0;
-                    expectedUpdate += context.SetDataItemsState<InventorySpool>(Inventory.Where(inv => Added(inv)), Microsoft.EntityFrameworkCore.EntityState.Added);
-                    expectedUpdate += context.SetDataItemsState(Inventory.Where(inv => Modified(inv)), Microsoft.EntityFrameworkCore.EntityState.Modified);
-                    //expectedUpdate += context.SetDataItemsState(Inventory.Where(inv => inv.MarkedForDeletion && inv.InDatabase), Microsoft.EntityFrameworkCore.EntityState.Deleted);
-                    foreach (var inv in Inventory)
-                    {
-                        expectedUpdate += context.SetDataItemsState(inv.DepthMeasurements.Where(dm => Added(dm)), Microsoft.EntityFrameworkCore.EntityState.Added);
-                        expectedUpdate += context.SetDataItemsState(inv.DepthMeasurements.Where(dm => Modified(dm)), Microsoft.EntityFrameworkCore.EntityState.Modified);
-                        //expectedUpdate += context.SetDataItemsState(inv.DepthMeasurements.Where(dm => dm.MarkedForDeletion && dm.InDatabase), Microsoft.EntityFrameworkCore.EntityState.Deleted);
-                    }
-
-                    try
-                    {
-                        if (InDatabase)
-                            context.Update(this);
-                        else
-                            context.Add(this);
-
-                        var updateCount = context.SaveChanges();
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Unable to complete data operation, {ex.Message}");
-                    }
-                }
+                foreach (DepthMeasurement depthMeasurement in item.DepthMeasurements)
+                    depthMeasurement.UpdateContainedItemEntryState<TContext>(context);
             }
-            //throw new NotImplementedException();
         }
         public override void SetContainedModifiedState(bool state)
         {
@@ -328,5 +361,66 @@ namespace DataDefinitions.Models
                 }
             }
         }
+        #region IEditableObject Implementation
+        struct BackupData
+        {
+            public string Description { get; set; }
+            public double Weight { get; set; }
+            public bool StopUsing { get; set; }
+            public double SpoolWidth { get; set; }
+            public double SpoolDiameter { get; set; }
+            public double DrumDiameter { get; set; }
+            public bool Verified { get; set; }
+
+            internal BackupData(string description, double weight, bool stopUsing, double spoolWidth, double spoolDiameter, double drumDiameter, bool verified)
+            {
+                Description = description;
+                Weight = weight;
+                StopUsing = stopUsing;
+                SpoolWidth = spoolWidth;
+                SpoolDiameter = spoolDiameter;
+                DrumDiameter = drumDiameter;
+                Verified = verified;
+            }
+        }
+        BackupData backupData;
+        void IEditableObject.BeginEdit()
+        {
+            if (!InEdit)
+            {
+                backupData = new BackupData(Description, Weight, StopUsing, SpoolWidth, SpoolDiameter, DrumDiameter, Verified);
+                InEdit = true;
+            }
+            //throw new NotImplementedException();
+        }
+
+        void IEditableObject.CancelEdit()
+        {
+            if (InEdit)
+            {
+                Description = backupData.Description;
+                Weight = backupData.Weight;
+                StopUsing = backupData.StopUsing;
+                SpoolDiameter = backupData.SpoolDiameter;
+                SpoolWidth = backupData.SpoolWidth;
+                DrumDiameter = backupData.DrumDiameter;
+                Verified = backupData.Verified;
+                backupData = default(BackupData);
+                InEdit = false;
+                SetContainedModifiedState(false);
+            }
+            //throw new NotImplementedException();
+        }
+
+        void IEditableObject.EndEdit()
+        {
+            if (InEdit)
+            {
+                backupData = default(BackupData);
+                InEdit = false;
+            }
+            //throw new NotImplementedException();
+        }
+        #endregion
     }
 }

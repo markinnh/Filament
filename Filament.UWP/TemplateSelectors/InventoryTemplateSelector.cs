@@ -27,14 +27,20 @@ namespace Filament.UWP.TemplateSelectors
         {
             System.Diagnostics.Debug.WriteLine($"Selecting a template for {item?.GetType().Name ?? "Null Object"}");
 
-            if (item is VendorDefn)
-                return VendorDefnTemplate;
-            else if (item is SpoolDefn)
-                return SpoolDefnTemplate;
-            else if (item is InventorySpool)
-                return InventoryDefnTemplate;
-            else
-                return NotSupportedTemplate;
+            switch(item)
+            {
+                case VendorDefn vendorDefn:
+                    return VendorDefnTemplate;
+                    break;
+                    case SpoolDefn poolDefn:
+                    return SpoolDefnTemplate;
+                    break;
+                case InventorySpool inventorySpool:
+                    return InventoryDefnTemplate;
+                    default:
+                    return NotSupportedTemplate;
+
+            }    
         }
     }
 }

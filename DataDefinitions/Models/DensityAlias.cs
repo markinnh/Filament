@@ -12,7 +12,13 @@ using System.Text.Json.Serialization;
 
 namespace DataDefinitions.Models
 {
+    /// <summary>
+    /// Type of density measurement to be stored
+    /// </summary>
     public enum DensityType { Defined = 0x8000, Measured }
+    /// <summary>
+    /// Allows storing either 'Defined' or 'Measured' densities
+    /// </summary>
     public class DensityAlias : DatabaseObject, IDensity, INotifyContainer
     {
         const int MinimumDensityMeasurementsRequired = 3;
@@ -42,6 +48,9 @@ namespace DataDefinitions.Models
         public bool IsLinkedToNotifyContainer => NotifyContainer != null;
         private int densityAliasId;
 
+        /// <summary>
+        /// Database identifier
+        /// </summary>
         public int DensityAliasId
         {
             get => densityAliasId;
@@ -49,13 +58,18 @@ namespace DataDefinitions.Models
         }
 
         private DensityType densityType;
+        /// <summary>
+        /// Type of density definition used
+        /// </summary>
+        /// <remarks>either defined or measured, normally, a defined density is preferred to a measured density.</remarks>
+        /// <value>DensityType is either <b>Defined</b> or <b>Measured</b></value>
         [Affected(Names = new[] { nameof(Density) }),
-            ContainerPropertiesAffected(new[]
-            {
+                    ContainerPropertiesAffected(new[]
+                    {
                 nameof(Models.FilamentDefn.MgPerMM),
                 nameof(Models.FilamentDefn.MeasuredDensityVisible),
                 nameof(Models.FilamentDefn.DefinedDensityVisible)
-            })]
+                    })]
         public DensityType DensityType
         {
             get => densityType;
@@ -66,15 +80,31 @@ namespace DataDefinitions.Models
 
         public event NotifyContainerHandler NotifyContainer;
 
+        /// <summary>
+        /// A defined density for a 'FilamentDefn'
+        /// </summary>
         public double DefinedDensity
         {
             get => definedDensity;
             set => Set<double>(ref definedDensity, value);
         }
+        /// <summary>
+        /// Id of assigned filament
+        /// </summary>
+        /// <remarks>value must be set to store the object in the database.</remarks>
+        /// <value>Valid FilamentDefnId</value>
         public int FilamentDefnId { get; set; }
+        /// <summary>
+        /// reference to the applicable FilamentDefn
+        /// </summary>
+        /// <remarks>Stored in a separate table and relinked after retrieving from the database.</remarks>
+        /// <value>FilamentDefn or null</value>
         [JsonIgnore]
         public FilamentDefn FilamentDefn { get; set; }
 
+        /// <summary>
+        /// An alias for either the 'DefinedDensity' or the 'MeasuredDensity'
+        /// </summary>
         [NotMapped, JsonIgnore, ContainerPropertiesAffected(new[] { nameof(Models.FilamentDefn.MgPerMM) })]
         public double Density
         {
@@ -83,6 +113,9 @@ namespace DataDefinitions.Models
                 double.NaN;
         }
 
+        /// <summary>
+        /// creates a default density alias, normally, just sets the DensityType member
+        /// </summary>
         public DensityAlias()
         {
             if (MeasuredDensity is ObservableCollection<MeasuredDensity> col && !LinkedToCollectionChangedEH)
@@ -91,6 +124,10 @@ namespace DataDefinitions.Models
                 LinkedToCollectionChangedEH = true;
             }
         }
+        /// <summary>
+        /// releases eventhandlers for strong references
+        /// </summary>
+        /// <remarks>pertains mainly to original event type, although most event handlers are 'unwound' on object release</remarks>
         ~DensityAlias()
         {
             if (MeasuredDensity is ObservableCollection<MeasuredDensity> col && LinkedToCollectionChangedEH)
@@ -99,10 +136,14 @@ namespace DataDefinitions.Models
             {
                 System.Diagnostics.Debug.WriteLine($"Removing event handlers in {nameof(DensityAlias)}");
                 foreach (var handler in handlers)
-                    NotifyContainer -= handler;
+                    if (handler != null)
+                        NotifyContainer -= handler;
             }
             UnWatchContained();
         }
+        /// <summary>
+        /// A debug only routine to allow testing the UI
+        /// </summary>
         public void Prepopulate()
         {
 #if DEBUG
@@ -120,16 +161,26 @@ namespace DataDefinitions.Models
 #else
 #endif
         }
-        internal override void WatchContained()
+        /// <summary>
+        /// Add handler for the WatchContainedHandler
+        /// </summary>
+        public override void WatchContained()
         {
             foreach (var item in MeasuredDensity)
                 item.Subscribe(WatchContainedHandler);
         }
-        internal override void UnWatchContained()
+        /// <summary>
+        /// Remove handlers for the WatchContainedHandler
+        /// </summary>
+        public override void UnWatchContained()
         {
             foreach (var item in MeasuredDensity)
                 item.Unsubscribe(WatchContainedHandler);
         }
+        /// <summary>
+        /// allows monitoring contained object properties
+        /// </summary>
+        /// <remarks>Probably will replace INotifyContainer events</remarks>
         protected override void WatchContainedHandler(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(IsModified))
@@ -148,8 +199,16 @@ namespace DataDefinitions.Models
             //DoNotify(new NotifyContainerEventArgs(new string[] { nameof(Models.FilamentDefn.MgPerMM) }));
         }
 
+        /// <summary>
+        /// routine to notify the container on a property change
+        /// </summary>
+        /// <remarks>can be called from base objects through the INotifyContainer interface</remarks>
         public void DoNotify(NotifyContainerEventArgs args) => NotifyContainer?.Invoke(this, args);
 
+        /// <summary>
+        /// Subscribe for the NotifyContainer events
+        /// </summary>
+        /// <remarks>Probably can be rolled into the WatchContainedHandler method where necessary</remarks>
         internal void Subscribe(NotifyContainerHandler handler)
         {
             if (handler != null)
@@ -158,6 +217,9 @@ namespace DataDefinitions.Models
                     NotifyContainer += handler;
             }
         }
+        /// <summary>
+        /// Unsubscribe from the NotifyContainer event
+        /// </summary>
         internal void UnSubscribe(NotifyContainerHandler handler)
         {
             if (handler != null)
@@ -166,6 +228,10 @@ namespace DataDefinitions.Models
                     NotifyContainer -= handler;
             }
         }
+        /// <summary>
+        /// Collection of measurements
+        /// </summary>
+        /// <remarks>Applies when the DensityType is 'Measured'</remarks>
         public ICollection<MeasuredDensity> MeasuredDensity { get; set; } = new ObservableCollection<MeasuredDensity>();
     }
 }

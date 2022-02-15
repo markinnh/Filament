@@ -11,26 +11,34 @@ using Filament.UWP.Core.Helpers;
 using Filament.UWP.Core.Models;
 using Filament.UWP.Core.Services;
 using Filament.UWP.Helpers;
-
+using MyLibraryStandard.Attributes;
 using WinUI = Microsoft.UI.Xaml.Controls;
+using DataDefinitions;
 
 namespace Filament.UWP.ViewModels
 {
     public class InventoryViewModel : Observable
     {
-        public List<string> SupportedColors { get; set; } = new List<string>(new string[] { "Black", "White", "Red", "Green", "Blue", "Silver", "Grey", "Orange" });
-        public ObservableCollection<FilamentDefn> Filaments { get; set; }=new ObservableCollection<FilamentDefn>();
+        public List<string> SupportedColors { get; set; } = new List<string>(new string[] { "Black", "White", "Red", "Green", "Blue", "Silver", "Grey", "Orange", "Pink", "Purple" });
+        public ObservableCollection<FilamentDefn> Filaments { get; set; } = new ObservableCollection<FilamentDefn>();
         private DataDefinitions.DatabaseObject _selectedItem;
-
+        [Affected(Names = new string[] {nameof(AddHintDescription) ,nameof(DatabaseObject)  })]
         public DataDefinitions.DatabaseObject SelectedItem
         {
             get => _selectedItem;
             set => Set(ref _selectedItem, value);
         }
-
+        public string AddHintDescription
+        {
+            get
+            {
+                return SelectedItem?.UIHintAddType() ?? "Not selected";
+            }
+        }
+        public DataDefinitions.DatabaseObject DatabaseObject => _selectedItem is DataDefinitions.DatabaseObject ? (DataDefinitions.DatabaseObject)_selectedItem : null;
         //public ObservableCollection<SampleCompany> SampleItems { get; } = new ObservableCollection<SampleCompany>();
 
-        public ObservableCollection<VendorDefn> Vendors { get; } = new ObservableCollection<VendorDefn>();
+        public ObservableCollection<VendorDefn> Vendors { get; protected set; } = new ObservableCollection<VendorDefn>();
         private ICommand _itemInvokedCommand;
         public ICommand ItemInvokedCommand => _itemInvokedCommand ?? (_itemInvokedCommand = new RelayCommand<WinUI.TreeViewItemInvokedEventArgs>(OnItemInvoked));
 
@@ -44,8 +52,11 @@ namespace Filament.UWP.ViewModels
 
         internal void HandleDeleteChildCommand(object obj)
         {
-            System.Diagnostics.Debug.WriteLine($"Made it the delete child command, item passed is a {obj?.GetType().Name??"null object"}");
+            System.Diagnostics.Debug.WriteLine($"Made it the delete child command, item passed is a {obj?.GetType().Name ?? "null object"}");
             //throw new NotImplementedException();
+            if (obj is InventorySpool inventory && inventory.SupportsDelete && inventory.InDatabase)
+                //TODO: Write code to delete the spool from inventory
+                inventory.Delete<FilamentContext>();
         }
 
         private void HandleSaveSelectedCommand()
@@ -65,33 +76,48 @@ namespace Filament.UWP.ViewModels
                 if (_selectedItem is VendorDefn vendor)
                     vendor.SpoolDefns.Add(new SpoolDefn() { Vendor = vendor, VendorDefnId = vendor.VendorDefnId });
                 else if (_selectedItem is SpoolDefn spool)
-                    spool.Inventory.Add(new InventorySpool() { SpoolDefn = spool, SpoolDefnId = spool.SpoolDefnId });
+                {
+                    var tFila = Filaments.First(fil => fil.MaterialType == DataDefinitions.MaterialType.PLA && fil.IsIntrinsic);
+                    spool.Inventory.Add(new InventorySpool() { SpoolDefn = spool, SpoolDefnId = spool.SpoolDefnId, FilamentDefn = tFila, FilamentDefnId = tFila.FilamentDefnId, ColorName = "Black" });
+                }
                 else if (_selectedItem is InventorySpool inventory)
-                    inventory.DepthMeasurements.Add(new DepthMeasurement() { InventorySpool = inventory, InventorySpoolId = inventory.InventorySpoolId });
+                {
+                    var initialDepth = inventory.CalcInitialDepth();
+                    inventory.DepthMeasurements.Add(new DepthMeasurement() { InventorySpool = inventory, InventorySpoolId = inventory.InventorySpoolId, Depth1 = initialDepth, Depth2 = initialDepth });
+                }
             }
             //throw new NotImplementedException();
         }
 
         public InventoryViewModel()
         {
+            LoadVendorsAsync();
         }
         public void LoadVendorsAsync()
         {
-            //var data = Singleton<DataLayer>.Instance.VendorList;
-            if (Singleton<DataLayer>.Instance.VendorList is IEnumerable<VendorDefn> data)
+            var data = Singleton<DataLayer>.Instance.VendorList;
+            if (Singleton<DataLayer>.Instance.VendorList is ObservableCollection<VendorDefn> odata)
             {
                 System.Diagnostics.Debug.WriteLine($"Adding {data.Count()} items to the database.");
+                Vendors = odata;
+            }
+            else
                 foreach (var item in data)
                 {
-                    Vendors.Add(item);
+                    if (item is VendorDefn vendor)
+                        Vendors.Add(vendor);
+                    else
+                        System.Diagnostics.Debug.WriteLine($"Item state is{(item == null ? string.Empty : " not")} null");
                 }
-                SelectedItem = Vendors.First();
-            }
-            if(Singleton<DataLayer>.Instance.FilamentList is IEnumerable<FilamentDefn> filaments)
+            //SelectedItem = Vendors.First();
+            var tfila = Singleton<DataLayer>.Instance.FilamentList;
+            if (tfila is ObservableCollection<FilamentDefn> filaments)
             {
-                foreach (var item in filaments)
-                    Filaments.Add(item);
+                Filaments = filaments;
             }
+            else
+                foreach (var item in tfila)
+                    Filaments.Add(item);
         }
         //public async Task LoadDataAsync()
         //{
@@ -104,6 +130,9 @@ namespace Filament.UWP.ViewModels
         //}
 
         private void OnItemInvoked(WinUI.TreeViewItemInvokedEventArgs args)
-            => SelectedItem = (DataDefinitions.DatabaseObject)args.InvokedItem;
+        {
+            if (args.InvokedItem is DataDefinitions.DatabaseObject dbobj)
+                SelectedItem = dbobj;
+        }
     }
 }

@@ -17,8 +17,9 @@ namespace DataDefinitions.Models
     /// <summary>
     /// Allows for definition of 3d print filament. Default FilamentDefn is Generic PLA
     /// </summary>
-    public class FilamentDefn : DatabaseObject
+    public class FilamentDefn : DatabaseObject//,IEditableObject
     {
+
 
         public static event InDataOpsChangedHandler InDataOpsChanged;
 
@@ -42,6 +43,10 @@ namespace DataDefinitions.Models
         public override bool InDatabase => FilamentDefnId != default;
         [JsonIgnore]
         public override bool SupportsDelete => true && !IsIntrinsic;
+        public override bool IsModified { get => base.IsModified || (DensityAlias?.IsModified ?? false); set => base.IsModified = value; }
+        /// <summary>
+        /// Database identifier for FilamentDefn
+        /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int FilamentDefnId { get; set; }
         /// <summary>
@@ -65,7 +70,11 @@ namespace DataDefinitions.Models
         /// The diameter.
         /// </value>
         [Affected(Names = new string[] { nameof(MgPerMM) })]
-        public double Diameter { get => diameter; set => Set<double>(ref diameter, value); }
+        public double Diameter
+        {
+            get => diameter;
+            set => Set<double>(ref diameter, value);
+        }
 
         private bool stopUsing;
         /// <summary>
@@ -104,6 +113,9 @@ namespace DataDefinitions.Models
         //[JsonIgnore]
         //public abstract double Density { get; set; }
         private DensityAlias densityAlias;
+        /// <summary>
+        /// Reference to contained DensityAlias
+        /// </summary>
         [Affected(Names = new[] { nameof(MgPerMM) })]
         public DensityAlias DensityAlias
         {
@@ -121,15 +133,22 @@ namespace DataDefinitions.Models
         }
         private bool isIntrinsic;
 
+        /// <summary>
+        /// Determines whether object can be 'edited'
+        /// </summary>
+        /// <remarks>Currently only set in the database</remarks>
         public bool IsIntrinsic
         {
             get => isIntrinsic;
             set => Set<bool>(ref isIntrinsic, value);
         }
         #region UI Assist Items, not mapped
-        [NotMapped,JsonIgnore]
+        /// <summary>
+        /// flag used by the UI to <b>show</b> or <b>hide</b> features
+        /// </summary>
+        [NotMapped, JsonIgnore]
         public bool MeasuredDensityVisible => DensityAlias?.DensityType == DensityType.Measured;
-        [NotMapped,JsonIgnore]
+        [NotMapped, JsonIgnore]
         public bool DefinedDensityVisible => DensityAlias?.DensityType == DensityType.Defined;
         #endregion
         private void DensityAlias_NotifyContainer(object sender, MyLibraryStandard.NotifyContainerEventArgs e)
@@ -144,6 +163,7 @@ namespace DataDefinitions.Models
         {
             if (!InDataOpsChanged?.GetInvocationList().Cast<InDataOpsChangedHandler>().Contains(FilamentDefn_InDataOpsChanged) ?? true)
                 InDataOpsChanged += FilamentDefn_InDataOpsChanged;
+
         }
 
         private void FilamentDefn_InDataOpsChanged(EventArgs args)
@@ -151,30 +171,42 @@ namespace DataDefinitions.Models
             OnPropertyChanged(nameof(CanEdit));
             //throw new NotImplementedException();
         }
-        internal override void WatchContained()
+        public override void WatchContained()
         {
             DensityAlias?.Subscribe(WatchContainedHandler);
             DensityAlias?.WatchContained();
         }
-        internal override void UnWatchContained()
+        public override void UnWatchContained()
         {
             DensityAlias?.Unsubscribe(WatchContainedHandler);
             DensityAlias?.UnWatchContained();
         }
         protected override void WatchContainedHandler(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(IsModified))
-                OnPropertyChanged(nameof(IsModified));
+            base.WatchContainedHandler(sender, e);
+            switch (e.PropertyName)
+            {
+                case nameof(Models.DensityAlias.DensityType):
+                    var names = new string[] { nameof(MgPerMM), nameof(MeasuredDensityVisible), nameof(DefinedDensityVisible) };
+                    foreach (var name in names)
+                        OnPropertyChanged(name);
+                    break;
+                case nameof(Models.DensityAlias.Density):
+                    OnPropertyChanged(nameof(MgPerMM));
+                    break;
+            }
         }
         public void InitNotificationHandler()
         {
             if (densityAlias != null)
                 densityAlias.Subscribe(DensityAlias_NotifyContainer);
+            WatchContained();
         }
         public void ReleaseNotificationHandler()
         {
             if (densityAlias != null)
                 densityAlias.UnSubscribe(DensityAlias_NotifyContainer);
+            UnWatchContained();
         }
         ~FilamentDefn()
         {
@@ -222,7 +254,7 @@ namespace DataDefinitions.Models
             Init();
             Diameter = StandardFilamentDiameter;
             //DensityUnion = new DefinedDensity(DefinedDensity.BasicPLADensity);
-            DensityAlias = new DensityAlias() { DensityType=DensityType.Defined};
+            DensityAlias = new DensityAlias() { DensityType = DensityType.Defined };
             MaterialType = MaterialType.PLA;
         }
         /// <summary>
@@ -247,7 +279,7 @@ namespace DataDefinitions.Models
         /// <param name="diameter">The diameter.</param>
         /// <param name="densityMeasurement">The density measurement.</param>
         /// <param name="materialType">Type of the material.</param>
-        public FilamentDefn(double diameter,double definedDensity, MaterialType materialType = MaterialType.PLA)
+        public FilamentDefn(double diameter, double definedDensity, MaterialType materialType = MaterialType.PLA)
         {
             Init();
             Diameter = diameter;
@@ -275,29 +307,111 @@ namespace DataDefinitions.Models
             {
                 InDataOps = true;
 
-                if (InDatabase) { 
+                if (InDatabase)
+                {
                     context.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                    context.Entry(this.DensityAlias).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                    context.Entry(this.DensityAlias).State = DensityAlias.InDatabase ? Microsoft.EntityFrameworkCore.EntityState.Modified : Microsoft.EntityFrameworkCore.EntityState.Added;
+                    UpdateContainedItemEntryState(context);
                     context.Update(this);
                 }
                 else
-                { 
+                {
                     context.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Added;
-                    context.Entry(this.DensityAlias).State = Microsoft.EntityFrameworkCore.EntityState.Added;
+                    context.Entry(this.DensityAlias).State = DensityAlias.InDatabase ? Microsoft.EntityFrameworkCore.EntityState.Modified : Microsoft.EntityFrameworkCore.EntityState.Added;
+                    UpdateContainedItemEntryState(context);
                     context.Add(this);
                 }
 
                 //context.Update(this);
                 context.SaveChanges();
-
-                IsModified = false;
                 InDataOps = false;
+                SetContainedModifiedState(false);
             }
         }
-
+        internal override void UpdateContainedItemEntryState<TContext>(TContext context)
+        {
+            context.SetDataItemsState<MeasuredDensity>(DensityAlias?.MeasuredDensity?.Where(md => Added(md)), Microsoft.EntityFrameworkCore.EntityState.Added);
+            context.SetDataItemsState<MeasuredDensity>(DensityAlias?.MeasuredDensity?.Where(md => Modified(md)), Microsoft.EntityFrameworkCore.EntityState.Modified);
+        }
         public static void SetDataOperationsState(bool state)
         {
             InDataOps = state;
         }
+        public override void SetContainedModifiedState(bool state)
+        {
+            IsModified = state;
+            if (DensityAlias != null)
+            {
+                DensityAlias.IsModified = state;
+                foreach (var md in DensityAlias.MeasuredDensity)
+                    md.IsModified = state;
+            }
+        }
+        //struct BackupData
+        //{
+        //    public MaterialType MaterialType { get; set; }
+        //    public double Diameter { get; set; }
+        //    public DensityType DensityType { get; set; }
+        //    public double DefinedDensity { get; set; }
+        //    public bool StopUsing { get; set; }
+        //    public bool DensityAliasIsNull { get; set; }
+        //    internal BackupData(FilamentDefn filamentDefn)
+        //    {
+        //        MaterialType = filamentDefn.MaterialType;
+        //        Diameter = filamentDefn.Diameter;
+        //        DensityAliasIsNull = filamentDefn.DensityAlias == null;
+        //        DensityType = filamentDefn.densityAlias?.DensityType ?? DensityType.Defined;
+        //        DefinedDensity = filamentDefn.densityAlias?.DefinedDensity ?? double.NaN;
+        //        StopUsing = filamentDefn.StopUsing;
+        //    }
+        //    internal BackupData(MaterialType materialType = MaterialType.PLA, double diameter = double.NaN, bool stopUsing = true, bool densityAliasNull = true, DensityType densityType = DensityType.Defined, double definedDensity = double.NaN)
+        //    {
+        //        MaterialType = materialType;
+        //        Diameter = diameter;
+        //        StopUsing = stopUsing;
+        //        DensityAliasIsNull = densityAliasNull;
+        //        DensityType = densityType;
+        //        DefinedDensity = definedDensity;
+        //    }
+        //}
+        //private BackupData backupData;
+        //void IEditableObject.BeginEdit()
+        //{
+        //    if (!InEdit)
+        //    {
+        //        backupData = new BackupData(this);
+        //        InEdit = true;
+        //    }
+        //    //throw new NotImplementedException();
+        //}
+
+        //void IEditableObject.CancelEdit()
+        //{
+        //    if (InEdit)
+        //    {
+
+        //        StopUsing = backupData.StopUsing;
+        //        MaterialType = backupData.MaterialType;
+        //        if (!backupData.DensityAliasIsNull)
+        //        {
+        //            DensityAlias.DefinedDensity = backupData.DefinedDensity;
+        //            DensityAlias.DensityType = backupData.DensityType;
+        //        }
+        //        backupData = default;
+        //        InEdit = false;
+        //        SetContainedModifiedState(false);
+        //    }
+        //    //throw new NotImplementedException();
+        //}
+
+        //void IEditableObject.EndEdit()
+        //{
+        //    if (InEdit)
+        //    {
+        //        backupData = default;
+        //        InEdit=false;
+        //    }
+        //    //throw new NotImplementedException();
+        //}
     }
 }

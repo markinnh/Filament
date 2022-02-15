@@ -18,10 +18,10 @@ namespace DataDefinitions.JsonSupport
             }
         }
         [JsonIgnore]
-        public IJsonDocument Document { get; internal set; }
+        public IDocument Document { get; internal set; }
         [JsonIgnore]
         public bool IsModified { get => this.Count(i => i.IsModified) > 0; }
-        public void EstablishLink(IJsonDocument document)
+        public void EstablishLink(IDocument document)
         {
             Document = document ?? throw new ArgumentNullException(nameof(document), $"document is null, a valid reference is expected in {GetType().Name}.");
             foreach (var item in this)

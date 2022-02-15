@@ -168,18 +168,18 @@
                 Orientation="Horizontal"
                 Grid.Row="1"
                 Grid.ColumnSpan="2">
-                <Button Style="{StaticResource CommandButton}"
-                        Content="Save All"
+                <Button Style="{StaticResource FontSymbolCommandButton}"
+                        Content="&#xE105; All"
                         IsEnabled="{Binding HasModifiedItems,Mode=OneWay}"
                         Command="{Binding SaveAllChangesCommand}"/>
                 <Button
-                    Style="{StaticResource CommandButton}"
-                    Content="Update"
+                    Style="{StaticResource FontSymbolCommandButton}"
+                    Content="&#xE105;"
                     Command="{Binding UpdateCommand}"
                     IsEnabled="{Binding SelectedItem.IsModified}"/>
                 <Button 
-                    Style="{StaticResource CommandButton}"
-                    Content="New"
+                    Style="{StaticResource FontSymbolCommandButton}"
+                    Content="&#xE109;"
                     Command="{Binding NewItemCommand}"
                     IsEnabled="{Binding CanAdd}"/>
                 <Button Style="{StaticResource CommandButton}"

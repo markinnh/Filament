@@ -8,6 +8,7 @@
     Style="{StaticResource PageStyle}"
     xmlns:model="using:DataDefinitions.Models"
     xmlns:views="using:Filament.UWP.Views"
+    xmlns:helpers="using:Filament.UWP.Helpers"
     xmlns:behaviors="using:Filament.UWP.Behaviors"
     behaviors:NavigationViewHeaderBehavior.HeaderMode="Never"
     mc:Ignorable="d">
@@ -17,18 +18,29 @@
         </TransitionCollection>
     </Page.Transitions>
     <Page.Resources>
+        <helpers:EnumDescriptionConverter x:Key="EnumDescriptionConverter"/>
         <DataTemplate x:Key="ItemTemplate" x:DataType="model:FilamentDefn">
             <Grid Height="60">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
+                <SymbolIcon Symbol="Edit"
+                            HorizontalAlignment="Left"
+                            Height="20"
+                            Width="20"
+                            VerticalAlignment="Center"
+                            Visibility="{x:Bind IsModified,Mode=OneWay}"/>
                 <StackPanel
                     Grid.Column="1"
                     Margin="{StaticResource SmallLeftMargin}"
                     VerticalAlignment="Center">
-                    <TextBlock Style="{ThemeResource ListTitleStyle}" Text="{x:Bind MaterialType}" />
-                    <TextBlock Style="{StaticResource ListSubTitleStyle}" Text="{x:Bind Diameter}" />
+                    <TextBlock Style="{ThemeResource ListTitleStyle}" >
+                        <Run Text="{x:Bind MaterialType,Mode=OneWay}"/>
+                        <Run Text=" - "/>
+                        <Run Text="{x:Bind MaterialType,Converter={StaticResource EnumDescriptionConverter}}"/>
+                    </TextBlock>
+                    <TextBlock Style="{StaticResource ListSubTitleStyle}" Text="{x:Bind Diameter,Mode=OneWay}" />
                 </StackPanel>
             </Grid>
         </DataTemplate>
@@ -73,19 +85,19 @@
 
     <Grid x:Name="ContentArea">
         <VisualStateManager.VisualStateGroups>
-                <VisualStateGroup>
-                    <VisualState>
-                        <VisualState.StateTriggers>
-                            <!--641 is the default CompactModeThresholdWidth in NavigationView -->
-                            <AdaptiveTrigger MinWindowWidth="641" />
-                        </VisualState.StateTriggers>
-                        <VisualState.Setters>
-                            <Setter Target="ListDetailsViewControl.ListHeaderTemplate" Value="{StaticResource ListHeaderTemplate}" />
-                        </VisualState.Setters>
-                    </VisualState>
-                </VisualStateGroup>
-            </VisualStateManager.VisualStateGroups>
-        
+            <VisualStateGroup>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <!--641 is the default CompactModeThresholdWidth in NavigationView -->
+                        <AdaptiveTrigger MinWindowWidth="641" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="ListDetailsViewControl.ListHeaderTemplate" Value="{StaticResource ListHeaderTemplate}" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
         <controls:ListDetailsView
             x:Name="ListDetailsViewControl"
             x:Uid="FilamentDefn"

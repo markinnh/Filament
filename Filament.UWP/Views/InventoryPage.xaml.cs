@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using DataDefinitions.Models;
 using Filament.UWP.ViewModels;
+using Microsoft.Toolkit.Uwp.UI.Controls;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
@@ -12,7 +14,7 @@ namespace Filament.UWP.Views
     // For other samples, get the XAML Controls Gallery app http://aka.ms/XamlControlsGallery
     public sealed partial class InventoryPage : Page
     {
-
+        DataGrid dataGrid;
 
         public InventoryViewModel ViewModel
         {
@@ -29,15 +31,16 @@ namespace Filament.UWP.Views
 
         public InventoryPage()
         {
-            InitializeComponent();
             ViewModel = new InventoryViewModel();
+
+            InitializeComponent();
+            
             DataContext = ViewModel;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-             ViewModel.LoadVendorsAsync();
         }
 
         private void DeleteChild_Click(object sender, RoutedEventArgs e)
@@ -45,6 +48,30 @@ namespace Filament.UWP.Views
             System.Diagnostics.Debug.WriteLine("Made it to delete child event.");
             if(sender is Button button)
                 ViewModel.HandleDeleteChildCommand(button.Tag);
+        }
+
+        private void AcceptChanges_Click(object sender, RoutedEventArgs e)
+        {
+            if(dataGrid != null)
+            {
+                dataGrid.CommitEdit();
+                dataGrid = null;
+            }
+        }
+
+        private void CancelChanges_Click(object sender, RoutedEventArgs e)
+        {
+            if (dataGrid != null)
+            {
+                dataGrid.CancelEdit();
+                dataGrid=null;
+            }
+        }
+
+        private void dgEditor_BeginningEdit(object sender, Microsoft.Toolkit.Uwp.UI.Controls.DataGridBeginningEditEventArgs e)
+        {
+            if(sender is DataGrid grid)
+                dataGrid=grid;
         }
     }
 }

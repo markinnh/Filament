@@ -109,8 +109,10 @@ namespace DataDefinitions
         public const double KilogramToMillgram = 1000000;
         public const double GramToMilligram = 1000;
         public const string regexFindFraction = @"(?<whole>\d+)?_?(?<numerator>\d+)/(?<denominator>\d+) *(?<units>[a-zA-Z\x22]+)?";
-        public const string regexFindNumberAndUnit = @"(?<number>\d*(\.\d+)?) *(?<units>[a-zA-Z\x22]+)";
+        public const string regexFindNumberAndUnit = @"(?<number>\d*(\.\d+)?) *(?<units>[a-zA-Z\x22]*)";
+        public const string regexARGB = "#(?<alpha>[0-9A-F]{2})(?<red>[0-9A-F]{2})(?<green>[0-9A-F]{2})(?<blue>[0-9A-F]{2})";
 
-        
+
+
     }
 }

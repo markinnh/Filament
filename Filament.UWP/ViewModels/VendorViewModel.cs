@@ -10,6 +10,7 @@ using Filament.UWP.Helpers;
 using Microsoft.Toolkit.Uwp.UI.Controls;
 using DataDefinitions.Models;
 using System.Windows.Input;
+using DataDefinitions;
 
 namespace Filament.UWP.ViewModels
 {

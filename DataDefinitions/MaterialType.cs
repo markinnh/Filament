@@ -46,6 +46,12 @@ namespace DataDefinitions
         ColorChanging,
         ClayCeramic,
         [Description("Polystyrene")]
-        HIPS
+        HIPS,
+        [Description("Pla +")]
+        PLAPLUS,
+        [Description("Pla Silk")]
+        PLASILK,
+        [Description("Pla Enhanced")]
+        PLAENH
     }
 }

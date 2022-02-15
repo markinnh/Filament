@@ -57,11 +57,12 @@ namespace FilamentDataUnitTests
             else
                 Assert.Fail();
         }
-        [TestMethod, DataRow("1.25in", 1.25, unitInch),
+        [TestMethod, DataRow("1.25\"", 1.25, unitInch2),
             DataRow("54 mm", 54, unitMM),
             DataRow("3.875 in", 3.875, unitInch),
             DataRow("300g", 300, unitG),
-            DataRow("1kg", 1, unitKg)]
+            DataRow("1kg", 1, unitKg),
+            DataRow("34.9",34.9,"")]
         public void TestNumberParse(string test, double expected, string expectedUnits)
         {
             if (ValueWithUnits.TryParse(test, out ValueWithUnits valueWithUnits))

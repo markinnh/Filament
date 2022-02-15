@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="DataDefinitions.DatabaseObject" Collapsed="true">
+    <Position X="3.25" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAEUAAAAAEADAABABggAEAAAgEAAAACQECAAAFCAAA=</HashCode>
+      <FileName>DatabaseObject.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DataDefinitions.Models.DensityAlias" Collapsed="true">
+    <Position X="0.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAwIAACEAACCAABAAQAEIAFAkACICAAQCAAAAEgAAg=</HashCode>
+      <FileName>Models\DensityAlias.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DataDefinitions.Models.DepthMeasurement" Collapsed="true">
+    <Position X="4.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ESQjIAEAAgAAAQAAAAiKAAAAAgCAIABgQAACMIEhAgA=</HashCode>
+      <FileName>Models\DepthMeasurement.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DataDefinitions.Models.FilamentDefn" Collapsed="true">
+    <Position X="6.5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AiAoUgKBAAIAiAgAAgAQAAABAwAAIBECCSGjAAECKAg=</HashCode>
+      <FileName>Models\FilamentDefn.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DataDefinitions.Models.InventorySpool" Collapsed="true">
+    <Position X="10.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AiChcAIAABBAAAABAAgAAA4JAgCAIQLAACACQAECgAg=</HashCode>
+      <FileName>Models\InventorySpool.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DataDefinitions.Models.MeasuredDensity" Collapsed="true">
+    <Position X="1.25" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAhIACAEgAAAAAAwEAABGBBAiCAIIEgAAADAAAABiA=</HashCode>
+      <FileName>Models\MeasuredDensity.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DataDefinitions.Models.Setting" Collapsed="true">
+    <Position X="4.25" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAgAAAAAAAAAgQEAAAADAQAAgAAYAAAAABgACEAIAA=</HashCode>
+      <FileName>Models\Setting.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DataDefinitions.Models.SpoolDefn" Collapsed="true">
+    <Position X="6.25" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AiAhYEIAABAgAAABIQgQAgEBImDAKgRwAAICIgESAAg=</HashCode>
+      <FileName>Models\SpoolDefn.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="DataDefinitions.Models.VendorDefn" Collapsed="true">
+    <Position X="9.25" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AiBhYCIAAAEACQABCAgACAYBIkCGIAAAAQACAAESAAg=</HashCode>
+      <FileName>Models\VendorDefn.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Enum Name="DataDefinitions.Models.DensityType" Collapsed="true">
+    <Position X="3" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAACAA=</HashCode>
+      <FileName>Models\DensityAlias.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Delegate Name="DataDefinitions.Models.InDataOpsChangedHandler" Collapsed="true">
+    <Position X="9" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\FilamentDefn.cs</FileName>
+    </TypeIdentifier>
+  </Delegate>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
