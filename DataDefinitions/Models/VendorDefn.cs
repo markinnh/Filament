@@ -138,12 +138,12 @@ namespace DataDefinitions.Models
 
             if (e.NewItems != null)
                 foreach (var item in e.NewItems)
-                    if (item is Observable spoolDefn)
+                    if (item is SpoolDefn spoolDefn)
                     {
-                        //spoolDefn.Subscribe(WatchContainedHandler);
+                        spoolDefn.Subscribe(WatchContainedHandler);
                         spoolDefn.WatchContained();
-                        //defn.Vendor = this;
-                        //defn.VendorDefnId = VendorDefnId;
+                        spoolDefn.Vendor=this;
+                        spoolDefn.VendorDefnId = VendorDefnId;
                     }
             if (!InDataOperations)
                 IsModified = true;

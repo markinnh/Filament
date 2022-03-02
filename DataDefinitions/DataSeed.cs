@@ -2,37 +2,39 @@ using System;
 using System.Linq;
 using DataDefinitions;
 using DataDefinitions.Models;
+using static System.Diagnostics.Debug;
 
 using Microsoft.EntityFrameworkCore;
 
-namespace DataContext
+namespace DataDefinitions
 {
     public class DataSeed
     {
         const double InitialSeed = 0.1;
         const double AddVendorDefn = 0.15;
-        public static void Seed<TContext>() where TContext : BaseFilamentContext, new()
+        public static void Seed<TContext>(ref bool NeedMigration) where TContext : BaseFilamentContext, new()
         {
-            using (TContext context = new TContext())
+            using (BaseFilamentContext context = new TContext())
             {
+                context.PerformMigrations(ref NeedMigration);
                 //context.Database.Migrate();
-                if (context is FilamentContext filamentContext) 
+                if (context is BaseFilamentContext filamentContext)
                 {
-                    filamentContext.Database.Migrate();
-                    var setting = filamentContext.Settings.FirstOrDefault(s => s.Name == "SeedData");
+
+                    var setting = context.Settings.FirstOrDefault(s => s.Name == "SeedData");
                     if (setting is null)
                     {
                         InitialSeeding<TContext>();
                         if (filamentContext.Settings.FirstOrDefault(s => s.Name == "SeedData") is Setting setting1)
                         {
-                            SeedVendorData<TContext>(setting1,filamentContext);
+                            SeedVendorData<TContext>(setting1, context);
                         }
                     }
                     else
                     {
                         System.Diagnostics.Debug.WriteLine(setting);
                         if (setting < AddVendorDefn)
-                            SeedVendorData<TContext>(setting,filamentContext);
+                            SeedVendorData<TContext>(setting, filamentContext);
                     }
                 }
             }
@@ -49,26 +51,28 @@ namespace DataContext
             //    }
             //}
         }
-        public static void VerifySeed<TContext>() where TContext:BaseFilamentContext,new()
+        public static void VerifySeed<TContext>() where TContext : BaseFilamentContext, new()
         {
+
             if (BaseFilamentContext.GetSetting<TContext>(s => s.Name == "SeedData") is Setting setting)
             {
                 if (setting == InitialSeed)
                 {
                     if (BaseFilamentContext.GetAllFilaments<TContext>()?.FirstOrDefault() is FilamentDefn definition)
                     {
-                        System.Diagnostics.Debug.WriteLine($"Filament Type : {definition.MaterialType}, Density : {definition.DensityAlias?.Density}, Density Type : {definition.DensityAlias.DensityType}");
+                        Assert(definition.MaterialType == MaterialType.PLA);
+                        WriteLine($"Filament Type : {definition.MaterialType}, Density : {definition.DensityAlias?.Density}, Density Type : {definition.DensityAlias.DensityType}");
                     }
                 }
             }
         }
-        private static void InitialSeeding<TContext>() where TContext :BaseFilamentContext,new()
+        private static void InitialSeeding<TContext>() where TContext : BaseFilamentContext, new()
         {
             System.Diagnostics.Debug.WriteLine("Performing initial seeding of FilamentDefns");
             var filamentDefns = DataDefinitions.Seed.InitialFilamentDefinitions();
             foreach (var item in filamentDefns)
             {
-                item.UpdateItem<FilamentContext>();
+                item.UpdateItem<TContext>();
             }
             BaseFilamentContext.AddAll<TContext>(new Setting("SeedData", InitialSeed));
             //DataContext.FilamentContext.AddAll(filamentDefns, );
@@ -78,7 +82,7 @@ namespace DataContext
             //ctx.SaveChanges();
 
         }
-        private static void SeedVendorData<TContext>(Setting setting,FilamentContext filamentContext) where TContext : DbContext,new()
+        private static void SeedVendorData<TContext>(Setting setting, BaseFilamentContext filamentContext) where TContext : BaseFilamentContext, new()
         {
             System.Diagnostics.Debug.WriteLine("Seeding VendorDefns");
             var seedVendors = DataDefinitions.Seed.InitialVendorDefinitions();

@@ -42,7 +42,7 @@ namespace Filament.WPF6.ViewModels
         {
             // TODO: Define all the data to seed the database with the vendor definitions
             VendorDefn.InDataOps = true;
-            var defns = FilamentContext.GetAllVendors();
+            var defns = DAL.Abstraction.GetAllVendors();
             if (defns != null)
             {
                 VendorDefns = new ObservableCollection<VendorDefn>(defns);

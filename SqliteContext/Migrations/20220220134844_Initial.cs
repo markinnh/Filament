@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace DataContext.Migrations
+namespace SqliteContext.Migrations
 {
     public partial class Initial : Migration
     {
@@ -12,7 +12,7 @@ namespace DataContext.Migrations
                 columns: table => new
                 {
                     FilamentDefnId = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                        .Annotation("Sqlite:Autoincrement", true),
                     Diameter = table.Column<double>(nullable: false),
                     StopUsing = table.Column<bool>(nullable: false),
                     MaterialType = table.Column<int>(nullable: false),
@@ -29,9 +29,9 @@ namespace DataContext.Migrations
                 columns: table => new
                 {
                     SettingId = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(nullable: false),
-                    Value = table.Column<string>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(nullable: true),
+                    Value = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -43,7 +43,7 @@ namespace DataContext.Migrations
                 columns: table => new
                 {
                     VendorDefnId = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                        .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(nullable: false),
                     FoundOnAmazon = table.Column<bool>(nullable: false),
                     WebUrl = table.Column<string>(nullable: true),
@@ -59,7 +59,7 @@ namespace DataContext.Migrations
                 columns: table => new
                 {
                     DensityAliasId = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                        .Annotation("Sqlite:Autoincrement", true),
                     DensityType = table.Column<int>(nullable: false),
                     DefinedDensity = table.Column<double>(nullable: false),
                     FilamentDefnId = table.Column<int>(nullable: false)
@@ -68,7 +68,7 @@ namespace DataContext.Migrations
                 {
                     table.PrimaryKey("PK_DensityAliases", x => x.DensityAliasId);
                     table.ForeignKey(
-                        name: "FK_DensityAliases_FilamentDefn_FilamentDefnId",
+                        name: "FK_DensityAliases_FilamentDefns_FilamentDefnId",
                         column: x => x.FilamentDefnId,
                         principalTable: "FilamentDefns",
                         principalColumn: "FilamentDefnId",
@@ -79,8 +79,9 @@ namespace DataContext.Migrations
                 name: "SpoolDefns",
                 columns: table => new
                 {
-                    SpoolDefnID = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    SpoolDefnId = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Description = table.Column<string>(maxLength: 128, nullable: true),
                     SpoolDiameter = table.Column<double>(nullable: false),
                     DrumDiameter = table.Column<double>(nullable: false),
                     SpoolWidth = table.Column<double>(nullable: false),
@@ -91,7 +92,7 @@ namespace DataContext.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SpoolDefns", x => x.SpoolDefnID);
+                    table.PrimaryKey("PK_SpoolDefns", x => x.SpoolDefnId);
                     table.ForeignKey(
                         name: "FK_SpoolDefns_VendorDefns_VendorDefnId",
                         column: x => x.VendorDefnId,
@@ -105,7 +106,7 @@ namespace DataContext.Migrations
                 columns: table => new
                 {
                     MeasuredDensityId = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                        .Annotation("Sqlite:Autoincrement", true),
                     DensityAliasId = table.Column<int>(nullable: false),
                     Length = table.Column<double>(nullable: false),
                     Diameter = table.Column<double>(nullable: false),
@@ -127,10 +128,10 @@ namespace DataContext.Migrations
                 columns: table => new
                 {
                     InventorySpoolId = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                        .Annotation("Sqlite:Autoincrement", true),
                     FilamentDefnId = table.Column<int>(nullable: false),
                     SpoolDefnId = table.Column<int>(nullable: false),
-                    ColorName = table.Column<string>(nullable: false),
+                    ColorName = table.Column<string>(nullable: true),
                     DateOpened = table.Column<DateTime>(nullable: false),
                     StopUsing = table.Column<bool>(nullable: false)
                 },
@@ -138,7 +139,7 @@ namespace DataContext.Migrations
                 {
                     table.PrimaryKey("PK_InventorySpools", x => x.InventorySpoolId);
                     table.ForeignKey(
-                        name: "FK_InventorySpools_FilamentDefn_FilamentDefnId",
+                        name: "FK_InventorySpools_FilamentDefns_FilamentDefnId",
                         column: x => x.FilamentDefnId,
                         principalTable: "FilamentDefns",
                         principalColumn: "FilamentDefnId",
@@ -147,7 +148,7 @@ namespace DataContext.Migrations
                         name: "FK_InventorySpools_SpoolDefns_SpoolDefnId",
                         column: x => x.SpoolDefnId,
                         principalTable: "SpoolDefns",
-                        principalColumn: "SpoolDefnID",
+                        principalColumn: "SpoolDefnId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -156,7 +157,7 @@ namespace DataContext.Migrations
                 columns: table => new
                 {
                     DepthMeasurementId = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                        .Annotation("Sqlite:Autoincrement", true),
                     Depth1 = table.Column<double>(nullable: false),
                     Depth2 = table.Column<double>(nullable: false),
                     MeasureDateTime = table.Column<DateTime>(nullable: false),
@@ -166,9 +167,9 @@ namespace DataContext.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DepthMeasurement", x => x.DepthMeasurementId);
+                    table.PrimaryKey("PK_DepthMeasurements", x => x.DepthMeasurementId);
                     table.ForeignKey(
-                        name: "FK_DepthMeasurement_InventorySpools_InventorySpoolId",
+                        name: "FK_DepthMeasurements_InventorySpools_InventorySpoolId",
                         column: x => x.InventorySpoolId,
                         principalTable: "InventorySpools",
                         principalColumn: "InventorySpoolId",
@@ -182,7 +183,7 @@ namespace DataContext.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_DepthMeasurement_InventorySpoolId",
+                name: "IX_DepthMeasurements_InventorySpoolId",
                 table: "DepthMeasurements",
                 column: "InventorySpoolId");
 

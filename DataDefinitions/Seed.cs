@@ -131,7 +131,7 @@ namespace DataDefinitions
             vendor4.SpoolDefns.Add(new SpoolDefn()
             {
                 Description = "Black plastic",
-                DrumDiameter = 69,
+                DrumDiameter = 68,
                 SpoolWidth = 58,
                 SpoolDiameter = 200,
                 Vendor = vendor4,

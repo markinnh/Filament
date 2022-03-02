@@ -53,23 +53,27 @@ namespace DataDefinitions.Models
         }
 
 
-        private double spoolDiameter = double.NaN;
+        private double spoolDiameter = Constants.DefaultSpoolDiameter;
         /// <summary>
         /// Gets or sets the spool diameter.
         /// </summary>
         /// <value>
         /// The spool diameter.
         /// </value>
-        [Affected(Names = new string[] { nameof(IsValid) })]
-        public double SpoolDiameter { get => spoolDiameter; set => Set<double>(ref spoolDiameter, value); }
-        private double drumDiameter = double.NaN;
+        [Affected(Names = new string[] { nameof(IsValid), nameof(MaxDepth) })]
+        public double SpoolDiameter
+        {
+            get => spoolDiameter;
+            set => Set<double>(ref spoolDiameter, value);
+        }
+        private double drumDiameter = Constants.DefaultDrumDiameter;
         /// <summary>
         /// Gets or sets the minimum diameter.
         /// </summary>
         /// <value>
         /// The minimum diameter.
         /// </value>
-        [Affected(Names = new string[] { nameof(IsValid) })]
+        [Affected(Names = new string[] { nameof(IsValid), nameof(MaxDepth) })]
         public double DrumDiameter { get => drumDiameter; set => Set<double>(ref drumDiameter, value); }
 
         private double spoolWidth = double.NaN;
@@ -87,7 +91,8 @@ namespace DataDefinitions.Models
         }
         [NotMapped]
         public bool CanUseDepthMeasurement => !double.IsNaN(spoolDiameter) && !double.IsNaN(drumDiameter) && !double.IsNaN(spoolWidth);
-
+        [NotMapped]
+        public double MaxDepth => !double.IsNaN(spoolDiameter) && !double.IsNaN(drumDiameter) ? (spoolDiameter - drumDiameter) / 2 : double.NaN;
         //private int filamentID;
 
         //public int FilamentID
@@ -250,7 +255,7 @@ namespace DataDefinitions.Models
                 {
                     if (item is InventorySpool spool)
                     {
-                        //FilamentContext.DeleteItems(e.OldItems);
+
                     }
                 }
                 IsModified = true;
@@ -290,7 +295,7 @@ namespace DataDefinitions.Models
             DrumDiameter = minimumDiameter;
             //FilamentDiameter = filamentDiameter;
             //FilamentID = filamentID;
-            //Filament = DataContext.FilamentContext.GetFilament(fil=>fil.FilamentDefnId == filamentID);
+
             VendorDefnId = vendorID;
 
             SpoolWidth = spoolWidth;

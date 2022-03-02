@@ -19,6 +19,14 @@ namespace Filament.WPF6.ViewModels
     public abstract class BaseBrowserViewModel<TBrowse, TSelect> : Observable where TBrowse : DatabaseObject, new()
         where TSelect : DatabaseObject, new()
     {
+        protected static bool ready = true;
+
+        public bool Ready
+        {
+            get { return ready; }
+            set { Set(ref ready, value); }
+        }
+
         private ObservableCollection<TBrowse> _browse;
         public ObservableCollection<TBrowse>? Items { get => _browse; set => Set(ref _browse, value); }
         private TSelect? selectedItem;
@@ -26,14 +34,14 @@ namespace Filament.WPF6.ViewModels
         public TSelect? SelectedItem
         {
             get => selectedItem;
-            set => Set<TSelect?>(ref selectedItem, value);
+            set => Set(ref selectedItem, value);
         }
 
         public bool HasModifiedItems => Items?.Count(it => it.IsModified) > 0 && !InAddNew;
         public bool CanAdd => !InAddNew;
         protected BaseBrowserViewModel()
         {
-            if (Singleton<DataContext.DataLayer>.Instance.GetSingleSetting(s => s.Name == nameof(MainWindow.SelectShowFlag)) is Setting setting)
+            if (Singleton<DAL.DataLayer>.Instance.GetSingleSetting(s => s.Name == nameof(MainWindow.SelectShowFlag)) is Setting setting)
             {
                 if (Enum.Parse<ShowAllFlag>(setting.Value) is ShowAllFlag flag)
                 {
@@ -211,42 +219,30 @@ namespace Filament.WPF6.ViewModels
 
         protected virtual void UpdateSelectedItemHander()
         {
-            //try
-            //{
-            //    if (selectedItem != null)
-            //    {
-            //        PrepareForDataOperations();
-            //        if (!InAddNew)
-            //        {
+            if (SelectedItem != null)
+                if (SelectedItem.IsValid)
+                {
+                    bool needsAdd;
 
-            //            if (FilamentContext.UpdateL(selectedItem) == 1) { 
-            //                selectedItem.IsModified = false;
-            //                //Items?.Add(selectedItem);
-            //            }
-            //        }
-            //        else
-            //        {
-            //            if (FilamentContext.AddAll(1,selectedItem) == 1)
-            //            {
-            //                selectedItem.IsModified = false;
-            //                Items?.Add(selectedItem);
-            //            }
-            //        }
-            //        FinishedDataOperations();
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    System.Diagnostics.Debug.WriteLine($"Unable to complete data operations.  The following error was returned.  {ex.Message}, Inner Exception : {ex.InnerException?.Message}");
-            //}
-            System.Diagnostics.Debug.WriteLine($"Update selected item for {typeof(TBrowse).Name} not implemented.");
+                    needsAdd = !SelectedItem.InDatabase;
+                    DAL.Abstraction.UpdateItem(SelectedItem);
+                    //SelectedItem.UpdateItem<FilamentContext>();
+                    if (needsAdd)
+                    {
+                        Singleton<DAL.DataLayer>.Instance.Add(SelectedItem);
+                        if (SelectedItem is TBrowse select)
+                            Items?.Add(select);
+                    }
+                    SelectedItem.SetContainedModifiedState(false);
+                }
+            //System.Diagnostics.Debug.WriteLine($"Update selected item for {typeof(TBrowse).Name} not implemented.");
         }
         protected virtual void DeleteSelectedHandler()
         {
             if (SelectedItem != null)
             {
-                //if (SelectedItem.InDatabase)
-                //    FilamentContext.DeleteItems(SelectedItem);
+                if (SelectedItem.InDatabase)
+                    DAL.Abstraction.Remove(SelectedItem);
             }
             // TODO: This needs a lot of work and consideration whether to support deleting items.
             //try

@@ -14,6 +14,7 @@ using MyLibraryStandard.Attributes;
 using Microsoft.Toolkit.Mvvm.Input;
 using Filament.WPF6.Helpers;
 using DataDefinitions;
+using DAL;
 
 namespace Filament.WPF6.ViewModels
 {

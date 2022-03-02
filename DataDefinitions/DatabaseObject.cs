@@ -69,6 +69,8 @@ namespace DataDefinitions
         /// <value>whether or not the item is in the database</value>
         [NotMapped]
         public virtual bool InDatabase { get => throw new NotSupportedException(); }
+        [NotMapped]
+        public bool NotInDatabase => !InDatabase;
         /// <summary>
         /// Supports delete, default is false, each definition will need a decision made about supporting a delete.
         /// </summary>
@@ -126,7 +128,7 @@ namespace DataDefinitions
                     context.SaveChanges();
                 }
                 SetDataOpsState(false);
-                //FilamentContext.UpdateSpec(this);
+
                 SetContainedModifiedState(false);
                 //IsModified = false;
 
@@ -165,7 +167,8 @@ namespace DataDefinitions
         /// <remarks>Usually called after saving the item to the database</remarks>
         public virtual void SetContainedModifiedState(bool state)
         {
-            WriteLine($"Unable to set the ContainedModifiedState '{state}' for {GetType().Name}, this is {(HasContainedItems ? string.Empty : "not")} required.");
+            WriteLine($"Unable to set the ContainedModifiedState to '{state}' for {GetType().Name}, this is{(HasContainedItems ? string.Empty : " not")} required.");
+            Assert(!HasContainedItems);  // This should only fire if this is not implemented and the class has contained items.
         }
         public virtual string UIHintAddType() => GetType().GetCustomAttribute<UIHintsAttribute>()?.AddType ?? string.Empty;
 
@@ -183,7 +186,7 @@ namespace DataDefinitions
         /// <summary>
         /// Tests if a DatabaseObject was just created but not currently in the database
         /// </summary>
-        protected Func<DatabaseObject, bool> Added = (databaseObject) => !databaseObject.InDatabase && databaseObject.IsValid ;
+        protected Func<DatabaseObject, bool> Added = (databaseObject) => !databaseObject.InDatabase && databaseObject.IsValid;
         /// <summary>
         /// Tests if a DatabaseObject is in the database, but modified
         /// </summary>
@@ -212,11 +215,14 @@ namespace DataDefinitions
             {
                 case nameof(IsModified):
 
-                    if ((GetType() != typeof(VendorDefn) && GetType() != typeof(FilamentDefn)) || passUpCount == 0)
+                    if (passUpCount == 0 || (GetType() != typeof(VendorDefn) || GetType() != typeof(FilamentDefn)))
                     {
                         OnPropertyChanged(nameof(IsModified));
                         passUpCount++;
                     }
+                    // don't call the event handler again if this is the second time through the method
+                    else if ((GetType() == typeof(VendorDefn) && GetType() == typeof(FilamentDefn) && passUpCount != 0))
+                        passUpCount = 0;
                     else
                         passUpCount = 0;
                     break;

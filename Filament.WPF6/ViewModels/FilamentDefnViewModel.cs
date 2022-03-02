@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using DAL;
 
 namespace Filament.WPF6.ViewModels
 {
@@ -76,7 +77,7 @@ namespace Filament.WPF6.ViewModels
         //    }
 
         //}
-
+        /*
         protected override void UpdateSelectedItemHander()
         {
             if (SelectedItem != null)
@@ -87,7 +88,7 @@ namespace Filament.WPF6.ViewModels
                 SelectedItem.SetContainedModifiedState(false);
                 //FinishedDataOperations();
             }
-        }
+        }*/
 #if DEBUG
         public bool IsDebug => true;
         private ICommand? prepopulate;

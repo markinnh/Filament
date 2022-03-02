@@ -27,7 +27,7 @@ namespace Filament.WPF6
         public MainWindow()
         {
             InitializeComponent();
-            var showFlagSetting = FilamentContext.GetSetting(s => s.Name == nameof(SelectShowFlag));
+            var showFlagSetting = Singleton<DAL.DataLayer>.Instance.GetSingleSetting(s => s.Name == nameof(SelectShowFlag));
 
             if (showFlagSetting != null)
                 SelectShowFlag.SelectedItem = Enum.Parse<ShowAllFlag>(showFlagSetting.Value);
@@ -42,16 +42,17 @@ namespace Filament.WPF6
                 if (cmb.SelectedItem is ShowAllFlag flag)
                 {
                     WeakReferenceMessenger.Default.Send(new ShowAllFlagChanged(flag));
-                    if (Singleton<DataLayer>.Instance.GetSingleSetting(s => s.Name == nameof(SelectShowFlag)) is Setting setting)
+                    if (Singleton<DAL.DataLayer>.Instance.GetSingleSetting(s => s.Name == nameof(SelectShowFlag)) is Setting setting)
                     {
                         setting.SetValue(flag);
-                        setting.UpdateItem<FilamentContext>();
+                        DAL.Abstraction.UpdateItem(setting);
                     }
                     else
                     {
                         var createSetting = new Setting(nameof(SelectShowFlag), flag);
-                        createSetting.UpdateItem<FilamentContext>();
-                        Singleton<DataLayer>.Instance.Add(createSetting);
+                        //createSetting.UpdateItem<FilamentContext>();
+                        DAL.Abstraction.UpdateItem(createSetting);
+                        Singleton<DAL.DataLayer>.Instance.Add(createSetting);
                     }
                 }
             }

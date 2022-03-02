@@ -21,7 +21,7 @@ namespace Filament.WPF6.Helpers
     {
         static string[] shortHandnames = new string[] { "mm", "cm", "m" };
 
-        const string regexFindFraction = @"(?<whole>\d+)? (?<numerator>\d+)/(?<denominator>\d+) *(?<units>[a-z\x22]+)?";
+        //const string regexFindFraction = @"(?<whole>\d+)? (?<numerator>\d+)/(?<denominator>\d+) *(?<units>[a-z\x22]+)?";
         // commented out so only using one pattern to find a number with units
         // do not use this one : const string regexFindNumberAndUnit = @"(?<number>\d*(\.\d+)?) ?(?<units>[a-z\x22]+)";
         const char space = ' ';
@@ -85,15 +85,7 @@ namespace Filament.WPF6.Helpers
 
             if (value is string str)
             {
-                if (ValueWithUnits.TryParse(str, out ValueWithUnits valueWithUnits))
-                {
-                    //var match = Regex.Match(str, WeightWithUnitsConverter.regexFindNumberAndUnit);
-                    SupportedLength supported = FilamentMath.SupportedLengthAlias(string.IsNullOrEmpty(valueWithUnits.Units) ? defaultUnits : valueWithUnits.Units);
-
-                    return FilamentMath.ConvertLength(valueWithUnits.Value, supported, convertTo);
-
-                }
-                else if (CompoundFractionWithUnits.TryParse(str, out CompoundFractionWithUnits compoundFractionWithUnits))
+                if (CompoundFractionWithUnits.TryParse(str, out CompoundFractionWithUnits compoundFractionWithUnits))
                 {
                     //var fracMatch = Regex.Match(str, regexFindFraction);
                     SupportedLength supported = FilamentMath.SupportedLengthAlias(!string.IsNullOrEmpty(compoundFractionWithUnits.Units) ? compoundFractionWithUnits.Units : "in");
@@ -118,6 +110,15 @@ namespace Filament.WPF6.Helpers
                     //    }
                 
                 }
+                else if (ValueWithUnits.TryParse(str, out ValueWithUnits valueWithUnits))
+                {
+                    //var match = Regex.Match(str, WeightWithUnitsConverter.regexFindNumberAndUnit);
+                    SupportedLength supported = FilamentMath.SupportedLengthAlias(string.IsNullOrEmpty(valueWithUnits.Units) ? defaultUnits : valueWithUnits.Units);
+
+                    return FilamentMath.ConvertLength(valueWithUnits.Value, supported, convertTo);
+
+                }
+                
                 else
                     return double.NaN;
             }

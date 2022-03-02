@@ -9,7 +9,7 @@
       xmlns:model="clr-namespace:DataDefinitions.Models;assembly=DataDefinitions"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      Title="ByFilamentPage" Name="ByVendorPage">
+      Title="ByFilamentPage" Name="ByVendorPage" IsEnabled="{Binding Ready,Mode=OneWay}">
     <Page.Resources>
         <CollectionViewSource x:Key="DefinedFilaments" Source="{Binding Filaments}"/>
         <CollectionViewSource x:Key="SupportedColorsInCode" Source="{Binding SupportedColorsCode}"/>
@@ -70,8 +70,26 @@
                       
                       >
                     <DataGrid.Columns>
-                        <DataGridTemplateColumn Header="DEI"
-                                            ToolTipService.ToolTip="Data editing indicators.">
+                        <DataGridTemplateColumn >
+                            <DataGridTemplateColumn.Header>
+                                <TextBlock Text="DEI">
+                                    <TextBlock.ToolTip>
+                                        <ContentControl ContentTemplate="{StaticResource EditingIndicatorsHelp}"/>
+                                        <!--<StackPanel>
+                                            <TextBlock Text="Data Editing Indicators"/>
+                                            <TextBlock Text="Legend:"/>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{StaticResource CheckSymbol}" Style="{StaticResource FontIcon}"/>
+                                                <TextBlock Text="record in database."/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{StaticResource EditIconSymbol}" Style="{StaticResource FontIcon}"/>
+                                                <TextBlock Text="item needs to be saved to database."/>
+                                            </StackPanel>
+                                        </StackPanel>-->
+                                    </TextBlock.ToolTip>
+                                </TextBlock>
+                            </DataGridTemplateColumn.Header>
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
@@ -93,7 +111,7 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Border BorderBrush="Black" BorderThickness="1">
-                                    <Rectangle Fill="{Binding ColorName,Converter={StaticResource ColorFromNameConverter}}"
+                                        <Rectangle Fill="{Binding ColorName,Converter={StaticResource ColorFromNameConverter}}"
                                            Width="50"
                                            Height="20"/>
                                     </Border>
@@ -218,14 +236,14 @@
                         <TextBlock>
                         <Run Text="{Binding Weight,Converter={StaticResource ConvertToMetricWeight},ConverterParameter='Kilograms'}"/>
                         </TextBlock>
-                        
+
                         <CheckBox IsChecked="{Binding ShowInUse,Mode=TwoWay}" ToolTip="Show in use spools only"
                                   VerticalAlignment="Center"/>
                         <StackPanel.ToolTip>
-                           <TextBlock>
+                            <TextBlock>
                             <Run Text="Spool #"/>
-                            <Run Text="{Binding SpoolDefnID}"/>
-                        </TextBlock> 
+                            <Run Text="{Binding SpoolDefnId}"/>
+                            </TextBlock>
                         </StackPanel.ToolTip>
                     </StackPanel>
                 </HierarchicalDataTemplate>
@@ -235,22 +253,29 @@
                                    Style="{StaticResource FontIcon}"
                                    Visibility="{Binding IsModified,Converter={StaticResource VisibilityConverter}}"/>
                         <Border BorderBrush="Black" BorderThickness="1" CornerRadius="3">
-                        <Rectangle Fill="{Binding ColorName,Converter={StaticResource ColorFromNameConverter}}"
+                            <Rectangle Fill="{Binding ColorName,Converter={StaticResource ColorFromNameConverter}}"
                                    Width="30"
                                    Height="16"/>
                         </Border>
                         <TextBlock Text="{Binding FilamentDefn.MaterialType}"/>
-                        
+
                         <StackPanel.ToolTip>
-                            <TextBlock>
+                            <StackPanel>
+                                <TextBlock>
                             <Run Text="Inventory #"/>
                             <Run Text="{Binding InventorySpoolId}"/>
-                        </TextBlock>
+                                </TextBlock>
+                                <TextBlock>
+                                    <Run Text="Date Opened : "/>
+                                    <Run Text="{Binding DateOpened,StringFormat='{}{0:d}'}"/>
+                                </TextBlock>
+                            </StackPanel>
+
                         </StackPanel.ToolTip>
                     </StackPanel>
                 </DataTemplate>
             </TreeView.Resources>
-            
+
         </TreeView>
         <ContentControl Content="{Binding SelectedItem}"
                         ContentTemplateSelector="{StaticResource EditTemplateSelector}"
@@ -263,9 +288,14 @@
                     Visibility="Collapsed"/>
             <Button Content="&#xE105;"
                     Style="{StaticResource FontSymbolCommandButton}"
-                    ToolTip="Update selected item"
                     Command="{Binding UpdateCommand}"
-                    IsEnabled="{Binding SelectedItem.IsModified,Mode=OneWay}"/>
+                    IsEnabled="{Binding SelectedItem.IsModified,Mode=OneWay}">
+                <Button.ToolTip>
+                    <TextBlock>
+                        <Run Text="Save"/>
+                        <Run Text="{Binding ChildTypename,Mode=OneWay}"/>
+                    </TextBlock>
+                </Button.ToolTip></Button>
             <Button Content="&#xE107;"
                     Style="{StaticResource FontSymbolCommandButton}"
                     ToolTip="Delete the selected item"

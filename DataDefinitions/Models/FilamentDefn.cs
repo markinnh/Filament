@@ -44,6 +44,7 @@ namespace DataDefinitions.Models
         [JsonIgnore]
         public override bool SupportsDelete => true && !IsIntrinsic;
         public override bool IsModified { get => base.IsModified || (DensityAlias?.IsModified ?? false); set => base.IsModified = value; }
+        public override bool IsValid => !double.IsNaN(Diameter);
         /// <summary>
         /// Database identifier for FilamentDefn
         /// </summary>

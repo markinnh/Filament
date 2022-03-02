@@ -6,7 +6,7 @@ namespace MigrateUWP
     {
         static void Main(string[] args)
         {
-            DataContext.DataSeed.Seed();
+            DataContext.DataSeed.Seed<DataContext.FilamentContext>();
         }
     }
 }

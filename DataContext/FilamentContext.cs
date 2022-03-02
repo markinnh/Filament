@@ -6,137 +6,137 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace DataContext
 {
-    public partial class FilamentContext : DbContext
+    public partial class FilamentContext : DataDefinitions.BaseFilamentContext
     {
         public FilamentContext()
         {
         }
 
-        public FilamentContext(DbContextOptions<FilamentContext> options)
-            : base(options)
-        {
-        }
+        //public FilamentContext(DbContextOptions<FilamentContext> options)
+        //    : base(options)
+        //{
+        //}
 
-        public virtual DbSet<DensityAlias> DensityAliases { get; set; }
-        public virtual DbSet<DepthMeasurement> DepthMeasurement { get; set; }
-        public virtual DbSet<FilamentDefn> FilamentDefn { get; set; }
-        public virtual DbSet<InventorySpool> InventorySpools { get; set; }
-        public virtual DbSet<MeasuredDensity> MeasuredDensity { get; set; }
-        public virtual DbSet<Setting> Settings { get; set; }
-        public virtual DbSet<SpoolDefn> SpoolDefns { get; set; }
-        public virtual DbSet<VendorDefn> VendorDefns { get; set; }
+        //public virtual DbSet<DensityAlias> DensityAliases { get; set; }
+        //public virtual DbSet<DepthMeasurement> DepthMeasurement { get; set; }
+        //public virtual DbSet<FilamentDefn> FilamentDefn { get; set; }
+        //public virtual DbSet<InventorySpool> InventorySpools { get; set; }
+        //public virtual DbSet<MeasuredDensity> MeasuredDensity { get; set; }
+        //public virtual DbSet<Setting> Settings { get; set; }
+        //public virtual DbSet<SpoolDefn> SpoolDefns { get; set; }
+        //public virtual DbSet<VendorDefn> VendorDefns { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<DensityAlias>(entity =>
-            {
-                entity.HasKey(e => e.DensityAliasId);
+        //protected override void OnModelCreating(ModelBuilder modelBuilder)
+        //{
+        //    modelBuilder.Entity<DensityAlias>(entity =>
+        //    {
+        //        entity.HasKey(e => e.DensityAliasId);
 
-                entity.HasIndex(e => e.FilamentDefnId)
-                    .IsUnique();
+        //        entity.HasIndex(e => e.FilamentDefnId)
+        //            .IsUnique();
 
-                entity.Property(e => e.DensityAliasId).ValueGeneratedOnAdd();
+        //        entity.Property(e => e.DensityAliasId).ValueGeneratedOnAdd();
 
-                entity.HasOne(d => d.FilamentDefn)
-                    .WithOne(p => p.DensityAlias)
-                    .HasForeignKey<DensityAlias>(d => d.FilamentDefnId);
-            });
+        //        entity.HasOne(d => d.FilamentDefn)
+        //            .WithOne(p => p.DensityAlias)
+        //            .HasForeignKey<DensityAlias>(d => d.FilamentDefnId);
+        //    });
 
-            modelBuilder.Entity<DepthMeasurement>(entity =>
-            {
-                entity.HasIndex(e => e.InventorySpoolId);
+        //    modelBuilder.Entity<DepthMeasurement>(entity =>
+        //    {
+        //        entity.HasIndex(e => e.InventorySpoolId);
 
-                entity.Property(e => e.DepthMeasurementId).ValueGeneratedOnAdd();
+        //        entity.Property(e => e.DepthMeasurementId).ValueGeneratedOnAdd();
 
-                entity.Property(e => e.MeasureDateTime).IsRequired();
+        //        entity.Property(e => e.MeasureDateTime).IsRequired();
 
-                entity.HasOne(d => d.InventorySpool)
-                    .WithMany(p => p.DepthMeasurements)
-                    .HasForeignKey(d => d.InventorySpoolId);
-            });
+        //        entity.HasOne(d => d.InventorySpool)
+        //            .WithMany(p => p.DepthMeasurements)
+        //            .HasForeignKey(d => d.InventorySpoolId);
+        //    });
 
-            modelBuilder.Entity<FilamentDefn>(entity =>
-            {
-                entity.Property(e => e.FilamentDefnId).ValueGeneratedOnAdd();
-                entity.HasOne(fd => fd.DensityAlias)
-                .WithOne(da => da.FilamentDefn)
-                .HasForeignKey<DensityAlias>(da => da.FilamentDefnId);
-            });
+        //    modelBuilder.Entity<FilamentDefn>(entity =>
+        //    {
+        //        entity.Property(e => e.FilamentDefnId).ValueGeneratedOnAdd();
+        //        entity.HasOne(fd => fd.DensityAlias)
+        //        .WithOne(da => da.FilamentDefn)
+        //        .HasForeignKey<DensityAlias>(da => da.FilamentDefnId);
+        //    });
             
-            //modelBuilder.Entity<FilamentDefn>()
-            //    .HasOne(fd => fd.DensityAlias)
-            //    .WithOne(da => da.FilamentDefn)
-            //    .HasForeignKey<DensityAlias>(da => da.FilamentDefnId);
+        //    //modelBuilder.Entity<FilamentDefn>()
+        //    //    .HasOne(fd => fd.DensityAlias)
+        //    //    .WithOne(da => da.FilamentDefn)
+        //    //    .HasForeignKey<DensityAlias>(da => da.FilamentDefnId);
 
-            modelBuilder.Entity<InventorySpool>(entity =>
-            {
-                entity.HasKey(e => e.InventorySpoolId);
+        //    modelBuilder.Entity<InventorySpool>(entity =>
+        //    {
+        //        entity.HasKey(e => e.InventorySpoolId);
 
-                entity.HasIndex(e => e.FilamentDefnId);
+        //        entity.HasIndex(e => e.FilamentDefnId);
 
-                entity.HasIndex(e => e.SpoolDefnId);
+        //        entity.HasIndex(e => e.SpoolDefnId);
 
-                entity.Property(e => e.InventorySpoolId).ValueGeneratedOnAdd();
+        //        entity.Property(e => e.InventorySpoolId).ValueGeneratedOnAdd();
 
-                entity.Property(e => e.ColorName).IsRequired();
+        //        entity.Property(e => e.ColorName).IsRequired();
 
-                entity.Property(e => e.DateOpened).IsRequired();
+        //        entity.Property(e => e.DateOpened).IsRequired();
 
-                //entity.HasOne(d => d.FilamentDefn)
-                //    .WithMany(p => p.Inventory)
-                //    .HasForeignKey(d => d.FilamentDefnId);
+        //        //entity.HasOne(d => d.FilamentDefn)
+        //        //    .WithMany(p => p.Inventory)
+        //        //    .HasForeignKey(d => d.FilamentDefnId);
 
-                entity.HasOne(d => d.SpoolDefn)
-                    .WithMany(p => p.Inventory)
-                    .HasForeignKey(d => d.SpoolDefnId);
-            });
+        //        entity.HasOne(d => d.SpoolDefn)
+        //            .WithMany(p => p.Inventory)
+        //            .HasForeignKey(d => d.SpoolDefnId);
+        //    });
 
-            modelBuilder.Entity<MeasuredDensity>(entity =>
-            {
-                entity.HasIndex(e => e.DensityAliasId);
+        //    modelBuilder.Entity<MeasuredDensity>(entity =>
+        //    {
+        //        entity.HasIndex(e => e.DensityAliasId);
 
-                entity.Property(e => e.MeasuredDensityId).ValueGeneratedOnAdd();
+        //        entity.Property(e => e.MeasuredDensityId).ValueGeneratedOnAdd();
 
-                entity.HasOne(d => d.DensityAlias)
-                    .WithMany(p => p.MeasuredDensity)
-                    .HasForeignKey(d => d.DensityAliasId);
-            });
+        //        entity.HasOne(d => d.DensityAlias)
+        //            .WithMany(p => p.MeasuredDensity)
+        //            .HasForeignKey(d => d.DensityAliasId);
+        //    });
 
-            modelBuilder.Entity<Setting>(entity =>
-            {
-                entity.HasKey(e => e.SettingId);
+        //    modelBuilder.Entity<Setting>(entity =>
+        //    {
+        //        entity.HasKey(e => e.SettingId);
 
-                entity.Property(e => e.SettingId).ValueGeneratedOnAdd();
+        //        entity.Property(e => e.SettingId).ValueGeneratedOnAdd();
 
-                entity.Property(e => e.Name).IsRequired();
+        //        entity.Property(e => e.Name).IsRequired();
 
-                entity.Property(e => e.Value).IsRequired();
-            });
+        //        entity.Property(e => e.Value).IsRequired();
+        //    });
 
-            modelBuilder.Entity<SpoolDefn>(entity =>
-            {
-                entity.HasIndex(e => e.VendorDefnId);
+        //    modelBuilder.Entity<SpoolDefn>(entity =>
+        //    {
+        //        entity.HasIndex(e => e.VendorDefnId);
 
-                entity.Property(e => e.SpoolDefnId)
-                    .HasColumnName("SpoolDefnID")
-                    .ValueGeneratedOnAdd();
+        //        entity.Property(e => e.SpoolDefnId)
+        //            .HasColumnName("SpoolDefnID")
+        //            .ValueGeneratedOnAdd();
 
-                entity.HasOne(d => d.Vendor)
-                    .WithMany(p => p.SpoolDefns)
-                    .HasForeignKey(d => d.VendorDefnId);
-            });
+        //        entity.HasOne(d => d.Vendor)
+        //            .WithMany(p => p.SpoolDefns)
+        //            .HasForeignKey(d => d.VendorDefnId);
+        //    });
 
-            modelBuilder.Entity<VendorDefn>(entity =>
-            {
-                entity.HasKey(e => e.VendorDefnId);
+        //    modelBuilder.Entity<VendorDefn>(entity =>
+        //    {
+        //        entity.HasKey(e => e.VendorDefnId);
 
-                entity.Property(e => e.VendorDefnId).ValueGeneratedOnAdd();
+        //        entity.Property(e => e.VendorDefnId).ValueGeneratedOnAdd();
 
-                entity.Property(e => e.Name).IsRequired();
-            });
+        //        entity.Property(e => e.Name).IsRequired();
+        //    });
 
-            OnModelCreatingPartial(modelBuilder);
-        }
+        //    OnModelCreatingPartial(modelBuilder);
+        //}
 
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }

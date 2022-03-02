@@ -72,6 +72,8 @@ namespace DataDefinitions
 
         // spool size definitions, for spools I have personally used.
         public const double StandardSpoolLoad = 1.0;
+        public const double DefaultDrumDiameter = 78;
+        public const double DefaultSpoolDiameter = 200;
         public const short HatchBox1KgSpoolOuterDiameter = 199;
         public const short HatchBox1KgSpoolDrumDiameter = 77;
         public const short HatchBox1KgSpoolWidth = 63;

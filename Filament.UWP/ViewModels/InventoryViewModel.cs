@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using DataContext;
-
 using DataDefinitions.Models;
 using Filament.UWP.Core.Helpers;
 using Filament.UWP.Core.Models;

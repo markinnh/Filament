@@ -15,9 +15,11 @@ namespace Filament.WPF6
     {
         public App()
         {
-            
-            DataContext.DataSeed.Seed<DataContext.FilamentContext>();
-            DataContext.DataSeed.VerifySeed();
+            //var dataAccessSelector = Enum.Parse<DAL.DataAccessSelector>(WPF6.Properties.Settings.Default.DataAccessSelector);
+            //DAL.Abstraction.DataAccessSelector = dataAccessSelector;
+            bool NeedMigration = DAL.Abstraction.DataAccessSelector == DAL.DataAccessSelector.SqlServer ? WPF6.Properties.Settings.Default.SqlServerNeedsMigration : true;
+            DAL.Abstraction.SeedData(ref NeedMigration) ;
+            DAL.Abstraction.VerifySeed();
         }
     }
 }

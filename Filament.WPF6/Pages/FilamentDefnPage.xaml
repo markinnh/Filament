@@ -9,7 +9,7 @@
       xmlns:core="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800" Height="450"
-      Title="FilamentDefnPage">
+      Title="FilamentDefnPage" IsEnabled="{Binding Ready,Mode=OneWay}" >
     <Page.DataContext>
         <vm:FilamentDefnViewModel/>
     </Page.DataContext>
@@ -176,7 +176,7 @@
                     Style="{StaticResource FontSymbolCommandButton}"
                     Content="&#xE105;"
                     Command="{Binding UpdateCommand}"
-                    IsEnabled="{Binding SelectedItem.IsModified}"/>
+                    IsEnabled="{Binding SelectedItem.IsModified,Mode=OneWay}"/>
                 <Button 
                     Style="{StaticResource FontSymbolCommandButton}"
                     Content="&#xE109;"

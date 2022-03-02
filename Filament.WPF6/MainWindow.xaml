@@ -44,6 +44,16 @@
             <TabItem Header="By Vendor">
                 <Frame Source="Pages\ByVendorPage.xaml" NavigationUIVisibility="Hidden"/>
             </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Calculator"/>
+                        <TextBlock Text="{StaticResource CalculatorSymbol}"
+                               Style="{StaticResource FontIcon}"/>
+                    </StackPanel>
+                </TabItem.Header>
+                <Frame Source="Pages\CalculationsPage.xaml" NavigationUIVisibility="Hidden"/>
+            </TabItem>
         </TabControl>
     </Grid>
 </Window>

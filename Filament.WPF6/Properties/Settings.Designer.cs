@@ -26,13 +26,37 @@ namespace Filament.WPF6.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("Black,White,Cyan,Yellow,Silver,Gray,Red,Lime,Blue,Teal,Purple,Olive,Maroon,Green," +
-            "Navy,Orange,Gold ")]
+            "Navy,Orange,Gold,RoyalBlue,MediumBlue")]
         public string SupportedColors {
             get {
                 return ((string)(this["SupportedColors"]));
             }
             set {
                 this["SupportedColors"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("SqlServer")]
+        public string DataAccessSelector {
+            get {
+                return ((string)(this["DataAccessSelector"]));
+            }
+            set {
+                this["DataAccessSelector"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool SqlServerNeedsMigration {
+            get {
+                return ((bool)(this["SqlServerNeedsMigration"]));
+            }
+            set {
+                this["SqlServerNeedsMigration"] = value;
             }
         }
     }

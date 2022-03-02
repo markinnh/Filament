@@ -13,6 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using DAL;
 
 namespace Filament.WPF6.ViewModels
 {
@@ -66,9 +67,15 @@ namespace Filament.WPF6.ViewModels
         {
             if (SelectedItem != null)
             {
-                SelectedItem.UpdateItem<FilamentContext>();
-                if (Items?.Count(i => i.VendorDefnId == SelectedItem.VendorDefnId) == 0)
+                var needAdd = !SelectedItem.InDatabase;
+
+                DAL.Abstraction.UpdateItem(SelectedItem);
+                //SelectedItem.UpdateItem<FilamentContext>();
+                if (Items?.Count(i => i.VendorDefnId == SelectedItem.VendorDefnId) == 0 && needAdd)
                     Items.Add(SelectedItem);
+
+                if (needAdd)
+                    Singleton<DAL.DataLayer>.Instance.Add(SelectedItem);
 
                 SelectedItem.IsModified = false;
                 SelectedItem.SetContainedModifiedState(false);

@@ -3,7 +3,13 @@
   <Profiles />
   <Settings>
     <Setting Name="SupportedColors" Type="System.String" Scope="User">
-      <Value Profile="(Default)">Black,White,Cyan,Yellow,Silver,Gray,Red,Lime,Blue,Teal,Purple,Olive,Maroon,Green,Navy,Orange,Gold </Value>
+      <Value Profile="(Default)">Black,White,Cyan,Yellow,Silver,Gray,Red,Lime,Blue,Teal,Purple,Olive,Maroon,Green,Navy,Orange,Gold,RoyalBlue,MediumBlue</Value>
+    </Setting>
+    <Setting Name="DataAccessSelector" Type="System.String" Scope="User">
+      <Value Profile="(Default)">SqlServer</Value>
+    </Setting>
+    <Setting Name="SqlServerNeedsMigration" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
     </Setting>
   </Settings>
 </SettingsFile>

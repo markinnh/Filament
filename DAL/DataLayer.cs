@@ -7,9 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataContext
+namespace DAL
 {
-    /*
     public class DataLayer : INotifyPropertyChanged
     {
         protected ObservableCollection<VendorDefn> Vendors { get; set; }
@@ -21,12 +20,12 @@ namespace DataContext
         public IEnumerable<VendorDefn> VendorList { get => FilterVendor == null ? Vendors : Vendors.Where(FilterVendor); }
         public IEnumerable<FilamentDefn> FilamentList { get => FilterFilament == null ? Filaments : Filaments.Where(FilterFilament); }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         protected void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
         public IEnumerable<Setting> GetFilteredSettings(Func<Setting, bool> func) => Settings.Where(x => func(x));
-        public Setting GetSingleSetting(Func<Setting, bool> func) => GetFilteredSettings(func).SingleOrDefault();
+        public Setting? GetSingleSetting(Func<Setting, bool> func) => GetFilteredSettings(func).SingleOrDefault();
         public IEnumerable<VendorDefn> GetFilteredVendors(Func<VendorDefn, bool> func) => Vendors.Where(v => func(v));
 
         public IEnumerable<FilamentDefn> GetFilteredFilaments(Func<FilamentDefn, bool> func) => Filaments.Where(f => func(f));
@@ -41,6 +40,15 @@ namespace DataContext
             Filaments.Add(filament);
             OnPropertyChanged(nameof(FilamentList));
         }
+        public void Add(DataDefinitions.DatabaseObject databaseObject)
+        {
+            if(databaseObject is VendorDefn vendor)
+                Add(vendor);
+            else if (databaseObject is FilamentDefn filament)
+                Add(filament);
+            else if (databaseObject is Setting setting)
+                Add(setting);
+        }
         public void Add(Setting setting)
         {
             Settings.Add(setting);
@@ -49,12 +57,12 @@ namespace DataContext
         {
             VendorDefn.SetDataOperationsState(true);
 
-            if (.GetAllVendors() is List<VendorDefn> v)
+            if (Abstraction.GetAllVendors() is List<VendorDefn> v)
                 Vendors = new ObservableCollection<VendorDefn>(v);
 
 
             FilamentDefn.SetDataOperationsState(true);
-            if (FilamentContext.GetAllFilaments() is List<FilamentDefn> fi)
+            if (Abstraction.GetAllFilaments() is List<FilamentDefn> fi)
                 Filaments = new ObservableCollection<FilamentDefn>(fi);
 
 
@@ -76,7 +84,7 @@ namespace DataContext
 
             Setting.InDataOps = true;
 
-            if (FilamentContext.GetAllSettings() is List<Setting> settings)
+            if (Abstraction.GetAllSettings() is List<Setting> settings)
                 Settings = settings;
 
             Setting.InDataOps = false;
@@ -93,5 +101,4 @@ namespace DataContext
             }
         }
     }
-    */
 }

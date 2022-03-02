@@ -54,33 +54,6 @@ namespace DataDefinitions.Models
 #pragma warning restore CS8601 // Possible null reference assignment.
             }
         }
-//        public static void UpdateOrAdd(string settingName, object value)
-//        {
-//            if (value != null)
-//            {
-//                if (Singleton<DataLayer>.Instance.GetSingleSetting(s => s.Name == settingName) is Setting setting)
-//                {
-//#pragma warning disable CS8601 // Possible null reference assignment.
-//                    setting.Value = value.ToString();
-
-
-//#pragma warning restore CS8601 // Possible null reference assignment.
-//                    FilamentContext.UpdateItems(setting);
-//                }
-//                else
-//                {
-//#pragma warning disable CS8604 // Possible null reference argument.
-//                    if (new Setting(settingName, value) is Setting newSetting)
-//                    {
-//                        FilamentContext.AddAll(1, newSetting);
-
-//                        Singleton<DataLayer>.Instance.Add(newSetting);
-//                    }
-//#pragma warning restore CS8604 // Possible null reference argument.
-//                }
-//            }
-//        }
-        //public static Setting GetSetting(string settingName) => Singleton<DataLayer>.Instance.GetFilteredSettings(s => s.Name == settingName).SingleOrDefault();
 
         public static implicit operator int(Setting setting)
         {

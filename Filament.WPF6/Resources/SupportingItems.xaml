@@ -11,6 +11,7 @@
     <core:Double x:Key="TitleSize">32</core:Double>
     <core:String x:Key="EditIconSymbol">&#xE104;</core:String>
     <core:String x:Key="CheckSymbol">&#xE10B;</core:String>
+    <core:String x:Key="CalculatorSymbol">&#xE1D0;</core:String>
     <ObjectDataProvider x:Key="dataFromMaterialType" MethodName="GetValues"
                             ObjectType="{x:Type core:Enum}">
         <ObjectDataProvider.MethodParameters>
@@ -75,6 +76,7 @@
     </core:Double>
     <helpers:EnumDescriptionConverter x:Key="EnumDescriptionConverter"/>
     <BooleanToVisibilityConverter x:Key="VisibilityConverter"/>
+    <helpers:EnhVisibilityConverter x:Key="EnhancedVisibilityConverter"/>
     <helpers:ColorFromNameConverter x:Key="ColorFromNameConverter"/>
     <helpers:BooleanInverterConverter x:Key="BooleanNotConverter"/>
     <helpers:WeightWithUnitsConverter x:Key="ConvertToMetricWeight"/>
@@ -155,7 +157,20 @@
         </StackPanel>
     </DataTemplate>
     -->
-
+    <DataTemplate x:Key="EditingIndicatorsHelp">
+        <StackPanel>
+            <TextBlock Text="Data Editing Indicators"/>
+            <TextBlock Text="Legend:"/>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{StaticResource CheckSymbol}" Style="{StaticResource FontIcon}"/>
+                <TextBlock Text="record in database."/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="{StaticResource EditIconSymbol}" Style="{StaticResource FontIcon}"/>
+                <TextBlock Text="item needs to be saved to database."/>
+            </StackPanel>
+        </StackPanel>
+    </DataTemplate>
     <DataTemplate x:Key="EditVendorDefn" DataType="{x:Type model:VendorDefn}">
         <Grid >
             <Grid.ColumnDefinitions>
@@ -203,24 +218,66 @@
                       CanUserDeleteRows="False"
                       Height="100"
                       FontSize="{StaticResource StdFontSize}"
-                      IsEnabled="{Binding StopUsing,Converter={StaticResource BooleanNotConverter}}">
+                      IsEnabled="{Binding StopUsing,Converter={StaticResource BooleanNotConverter}}" ToolTipService.IsEnabled="True">
                 <DataGrid.Columns>
-                    <DataGridCheckBoxColumn Header="Modified"
-                                            Binding="{Binding IsModified}"
-                                            Width="10"
-                                            IsReadOnly="True"/>
-                    <DataGridTextColumn Binding="{Binding SpoolWidth,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter'}"
-                                        Header="Width"
-                                        Width="75"/>
-                    
+                    <DataGridTemplateColumn>
+                        <DataGridTemplateColumn.Header>
+                            <TextBlock Text="DEI">
+                                <TextBlock.ToolTip>
+                                    <ContentControl ContentTemplate="{StaticResource EditingIndicatorsHelp}"/>
+                                    <!--<StackPanel>
+                                        <TextBlock Text="Data Editing Indicators"/>
+                                        <TextBlock Text="Legend:"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{StaticResource CheckSymbol}" Style="{StaticResource FontIcon}"/>
+                                            <TextBlock Text="record in database."/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{StaticResource EditIconSymbol}" Style="{StaticResource FontIcon}"/>
+                                            <TextBlock Text="item needs to be saved to database."/>
+                                        </StackPanel>
+                                    </StackPanel>-->
+                                </TextBlock.ToolTip>
+                            </TextBlock>
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{StaticResource CheckSymbol}"
+                                           Style="{StaticResource FontIcon}"
+                                           FontSize="12"
+                                           Visibility="{Binding IsValid,Converter={StaticResource EnhancedVisibilityConverter}}"/>
+                                    <TextBlock Text="{StaticResource EditIconSymbol}"
+                                               Style="{StaticResource FontIcon}"
+                                               FontSize="12"
+                                               Visibility="{Binding IsModified,Converter={StaticResource EnhancedVisibilityConverter}}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="Description"
+                                        Binding="{Binding Description}"
+                                        Width="100" >
+                        <DataGridTextColumn.EditingElementStyle>
+                            <Style TargetType="TextBox">
+                                <Setter Property="MaxLength" Value="128"/>
+                            </Style>
+                        </DataGridTextColumn.EditingElementStyle></DataGridTextColumn>
                     <DataGridTextColumn Header="Diameter"
                                         ToolTipService.ToolTip="Spool diameter"
                                         Binding="{Binding SpoolDiameter,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter'}"
                                         Width="75"/>
+                    <DataGridTextColumn Binding="{Binding SpoolWidth,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter'}"
+                                        Header="Width"
+                                        Width="75"/>
+                    
                     <DataGridTextColumn Header="Drum"
                                         ToolTipService.ToolTip="Drum diameter"
                                         Binding="{Binding DrumDiameter,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter'}"
                                         Width="75"/>
+                    <DataGridTextColumn Header="Max Depth"
+                                        Binding="{Binding MaxDepth,Mode=OneWay,StringFormat='{}{0:#} mm'}"
+                                        IsReadOnly="True"/>
                     <DataGridTextColumn Header="Weight"
                                         ToolTipService.ToolTip="Filament weight"
                                         Binding="{Binding Weight,Converter={StaticResource ConvertToMetricWeight},ConverterParameter='Kilograms'}"
@@ -505,6 +562,41 @@
                       FontSize="{StaticResource StdFontSize}"
                       IsEnabled="{Binding StopUsing,Converter={StaticResource BooleanNotConverter}}">
                 <DataGrid.Columns>
+                    <DataGridTemplateColumn >
+                        <DataGridTemplateColumn.Header>
+                            <TextBlock Text="DEI">
+                                <TextBlock.ToolTip>
+                                    <ContentControl ContentTemplate="{StaticResource EditingIndicatorsHelp}"/>
+                                    <!--<StackPanel>
+                                        <TextBlock Text="Data Editing Indicators"/>
+                                        <TextBlock Text="Legend:"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{StaticResource CheckSymbol}" Style="{StaticResource FontIcon}"/>
+                                            <TextBlock Text="record in database."/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{StaticResource EditIconSymbol}" Style="{StaticResource FontIcon}"/>
+                                            <TextBlock Text="item needs to be saved to database."/>
+                                        </StackPanel>
+                                    </StackPanel>-->
+                                </TextBlock.ToolTip>
+                            </TextBlock>
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{StaticResource CheckSymbol}"
+                                           Style="{StaticResource FontIcon}"
+                                           FontSize="12"
+                                           Visibility="{Binding IsValid,Converter={StaticResource VisibilityConverter}}"/>
+                                    <TextBlock Text="{StaticResource EditIconSymbol}"
+                                               Style="{StaticResource FontIcon}"
+                                               FontSize="12"
+                                               Visibility="{Binding IsModified,Converter={StaticResource VisibilityConverter}}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                     <DataGridTemplateColumn Width="100"
                                             Header="Measured On">
                         <DataGridTemplateColumn.CellTemplate>
