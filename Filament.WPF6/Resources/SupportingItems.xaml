@@ -12,6 +12,7 @@
     <core:String x:Key="EditIconSymbol">&#xE104;</core:String>
     <core:String x:Key="CheckSymbol">&#xE10B;</core:String>
     <core:String x:Key="CalculatorSymbol">&#xE1D0;</core:String>
+    <core:String x:Key="SaveSymbol">&#xE105;</core:String>
     <ObjectDataProvider x:Key="dataFromMaterialType" MethodName="GetValues"
                             ObjectType="{x:Type core:Enum}">
         <ObjectDataProvider.MethodParameters>
@@ -49,6 +50,10 @@
         <core:Double>3.0</core:Double>
     </x:Array>
 
+    <Style TargetType="DataGrid">
+        <Setter Property="FontSize" Value="{StaticResource StdFontSize}"/>
+        
+    </Style>
     <CollectionViewSource x:Key="Filaments" Source="{Binding DefinedFilaments}"/>
     <x:Array x:Key="SupportedColors" Type="{x:Type core:String}">
         <core:String>White</core:String>
@@ -107,6 +112,13 @@
         <Setter Property="FontSize" Value="16"/>
         <Setter Property="Margin" Value="5,5,0,5"/>
     </Style>
+    <Style x:Key="FontSymbolToggleButton" TargetType="ToggleButton">
+        <Setter Property="Width" Value="24"/>
+        <Setter Property="Height" Value="24"/>
+        <Setter Property="FontFamily" Value="Segoe UI Symbol"/>
+        <Setter Property="FontSize" Value="8"/>
+        <Setter Property="Margin" Value="5,5,0,5"/>
+    </Style>
     <Style TargetType="GroupBox">
         <Setter Property="FontSize" Value="{StaticResource StdFontSize}"/>
     </Style>
@@ -134,7 +146,7 @@
             </Trigger>
         </Style.Triggers>
     </Style>
-  <!--  <DataTemplate x:Key="EditLengthTemplate" DataType="{x:Type fila:ConvertLength}">
+    <!--  <DataTemplate x:Key="EditLengthTemplate" DataType="{x:Type fila:ConvertLength}">
         <StackPanel>
 
             <TextBox Text="{Binding InputLength,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
@@ -162,7 +174,7 @@
             <TextBlock Text="Data Editing Indicators"/>
             <TextBlock Text="Legend:"/>
             <StackPanel Orientation="Horizontal">
-                <TextBlock Text="{StaticResource CheckSymbol}" Style="{StaticResource FontIcon}"/>
+                <TextBlock Text="{StaticResource CheckSymbol}" Style="{StaticResource FontIcon}" ToolTip="record in database."/>
                 <TextBlock Text="record in database."/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
@@ -208,15 +220,17 @@
                       Grid.Row="3"
                       Grid.Column="1"
                       IsChecked="{Binding StopUsing}"/>
-            <TextBlock Text="Spool Definitions"
+            <!--<TextBlock Text="Spool Definitions"
                        FontSize="16"
-                       Grid.Row="4"/>
+                       Grid.Row="4"/>-->
+            <TabControl Grid.Row="5"
+                      Grid.ColumnSpan="2">
+                <TabItem Header="Spool Definitions">
             <DataGrid ItemsSource="{Binding SpoolDefns}"
                       AutoGenerateColumns="False"
-                      Grid.Row="5"
-                      Grid.ColumnSpan="2"
+                      
                       CanUserDeleteRows="False"
-                      Height="100"
+                      Height="250"
                       FontSize="{StaticResource StdFontSize}"
                       IsEnabled="{Binding StopUsing,Converter={StaticResource BooleanNotConverter}}" ToolTipService.IsEnabled="True">
                 <DataGrid.Columns>
@@ -246,11 +260,11 @@
                                     <TextBlock Text="{StaticResource CheckSymbol}"
                                            Style="{StaticResource FontIcon}"
                                            FontSize="12"
-                                           Visibility="{Binding IsValid,Converter={StaticResource EnhancedVisibilityConverter}}"/>
+                                           Visibility="{Binding IsValid,Converter={StaticResource EnhancedVisibilityConverter}}" ToolTip="record in database."/>
                                     <TextBlock Text="{StaticResource EditIconSymbol}"
                                                Style="{StaticResource FontIcon}"
                                                FontSize="12"
-                                               Visibility="{Binding IsModified,Converter={StaticResource EnhancedVisibilityConverter}}"/>
+                                               Visibility="{Binding IsModified,Converter={StaticResource EnhancedVisibilityConverter}}" ToolTip="item is modified."/>
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
@@ -262,7 +276,8 @@
                             <Style TargetType="TextBox">
                                 <Setter Property="MaxLength" Value="128"/>
                             </Style>
-                        </DataGridTextColumn.EditingElementStyle></DataGridTextColumn>
+                        </DataGridTextColumn.EditingElementStyle>
+                    </DataGridTextColumn>
                     <DataGridTextColumn Header="Diameter"
                                         ToolTipService.ToolTip="Spool diameter"
                                         Binding="{Binding SpoolDiameter,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter'}"
@@ -270,14 +285,35 @@
                     <DataGridTextColumn Binding="{Binding SpoolWidth,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter'}"
                                         Header="Width"
                                         Width="75"/>
-                    
-                    <DataGridTextColumn Header="Drum"
+
+                    <DataGridTemplateColumn Header="Drum"
                                         ToolTipService.ToolTip="Drum diameter"
-                                        Binding="{Binding DrumDiameter,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter'}"
-                                        Width="75"/>
-                    <DataGridTextColumn Header="Max Depth"
+                                        Width="100">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding DrumDiameter,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter'}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <TextBox Text="{Binding DrumDiameter,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter'}"/>
+                                    <ToggleButton x:Name="ShowDepth" Content="{StaticResource CalculatorSymbol}" Style="{StaticResource FontSymbolToggleButton}"/>
+                                    <TextBlock Text="Spool Depth" Visibility="{Binding ElementName=ShowDepth,Path=IsChecked,Mode=OneWay,Converter={StaticResource VisibilityConverter}}"/>
+                                    <TextBox Text="{Binding SpoolDepth,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter'}"
+                                             Visibility="{Binding ElementName=ShowDepth,Path=IsChecked,Mode=OneWay,Converter={StaticResource VisibilityConverter}}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
+                    <!--<DataGridTextColumn Header="Depth"
+                                        Binding="{Binding SpoolDepth,Mode=TwoWay,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter'}"
+                                        Width="75"/>-->
+
+
+                    <!--<DataGridTextColumn Header="Max Depth"
                                         Binding="{Binding MaxDepth,Mode=OneWay,StringFormat='{}{0:#} mm'}"
-                                        IsReadOnly="True"/>
+                                        IsReadOnly="True"/>-->
                     <DataGridTextColumn Header="Weight"
                                         ToolTipService.ToolTip="Filament weight"
                                         Binding="{Binding Weight,Converter={StaticResource ConvertToMetricWeight},ConverterParameter='Kilograms'}"
@@ -291,8 +327,74 @@
                                             Binding="{Binding Verified}"
                                             Width="75"/>
                 </DataGrid.Columns>
-            </DataGrid>
-
+                    </DataGrid>
+                </TabItem>
+                <TabItem Header="Filaments">
+                    <DataGrid ItemsSource="{Binding VendorSettings}" AutoGenerateColumns="False" >
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn>
+                                <DataGridTemplateColumn.Header>
+                                    <TextBlock Text="DEI">
+                                        <TextBlock.ToolTip>
+                                            <ContentControl ContentTemplate="{StaticResource EditingIndicatorsHelp}"/>
+                                            <!--<StackPanel>
+                                        <TextBlock Text="Data Editing Indicators"/>
+                                        <TextBlock Text="Legend:"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{StaticResource CheckSymbol}" Style="{StaticResource FontIcon}"/>
+                                            <TextBlock Text="record in database."/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{StaticResource EditIconSymbol}" Style="{StaticResource FontIcon}"/>
+                                            <TextBlock Text="item needs to be saved to database."/>
+                                        </StackPanel>
+                                    </StackPanel>-->
+                                        </TextBlock.ToolTip>
+                                    </TextBlock>
+                                </DataGridTemplateColumn.Header>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{StaticResource CheckSymbol}"
+                                           Style="{StaticResource FontIcon}"
+                                           FontSize="12"
+                                           Visibility="{Binding IsValid,Converter={StaticResource EnhancedVisibilityConverter}}" ToolTip="record in database."/>
+                                            <TextBlock Text="{StaticResource EditIconSymbol}"
+                                               Style="{StaticResource FontIcon}"
+                                               FontSize="12"
+                                               Visibility="{Binding IsModified,Converter={StaticResource EnhancedVisibilityConverter}}" ToolTip="item is modified."/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Filament"
+                                            Width="100">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding FilamentDefn.MaterialType,Mode=OneWay}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                                <DataGridTemplateColumn.CellEditingTemplate>
+                                    <DataTemplate>
+                                        <ComboBox ItemsSource="{Binding DataContext.Filaments, ElementName=MyPage}"
+                                          SelectedItem="{Binding FilamentDefn,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate DataType="{x:Type model:FilamentDefn}">
+                                                    <TextBlock >
+                                                    <Run Text="{Binding MaterialType}"/>
+                                                    <Run Text=" - "/>
+                                                    <Run Text="{Binding FilamentDefnId}"/>
+                                                    </TextBlock>
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellEditingTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+            </TabControl>
         </Grid>
     </DataTemplate>
     <DataTemplate x:Key="EditFilamentDefn" DataType="{x:Type model:FilamentDefn}">
@@ -483,13 +585,13 @@
                            >
                     <Run Text="Density"
                          FontWeight="Bold"/>
-                    <Run Text="{Binding DensityAlias.Density,Mode=OneWay,StringFormat={}{0:#.#####}}"/>
+                    <Run Text="{Binding DensityAlias.Density,Mode=OneWay,StringFormat={}{0:#.###}}"/>
                 </TextBlock>
                 <TextBlock ToolTip="milligrams per mm"
                            >
                     <Run Text="mg/mm"
                          FontWeight="Bold"/>
-                    <Run Text="{Binding MgPerMM,Mode=OneWay,StringFormat={}{0:#.######}}"/>
+                    <Run Text="{Binding MgPerMM,Mode=OneWay,StringFormat={}{0:#.###}}"/>
                 </TextBlock>
                 <Separator />
             </StackPanel>
@@ -524,13 +626,15 @@
             </StackPanel.ToolTip>
         </StackPanel>
     </HierarchicalDataTemplate>
-        <DataTemplate x:Key="EditInventorySpoolItems" DataType="{x:Type model:InventorySpool}">
+    <DataTemplate x:Key="EditInventorySpoolItems" DataType="{x:Type model:InventorySpool}">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -552,10 +656,24 @@
                 <Run Text=" - "/>
                 <Run Text="{Binding FilamentDefn.FilamentDefnId}"/>
             </TextBlock>
+            <TextBlock Grid.Row="3"
+                       Text="Initial starting length"/>
+            <TextBlock Grid.Row="3"
+                       Grid.Column="1">
+                <Run Text="{Binding InitialLength,Mode=OneWay,StringFormat='{}{0:#}'}"/>
+                <Run Text="m"/>
+            </TextBlock>
+            <TextBlock Grid.Row="4">
+                <Run Text="Maximum Depth"/>
+                <!--<Run Text="{Binding SpoolDefn.MaxDepth,Mode=OneWay}"/>-->
+            </TextBlock>
+            <TextBlock Grid.Row="4"
+                       Grid.Column="1"
+                       Text="{Binding SpoolDefn.MaxDepth,Mode=OneWay,StringFormat='{}{0:#.### mm}'}"/>
             <TextBlock Text="Measurements"
-                       Grid.Row="3"/>
+                       Grid.Row="5"/>
             <DataGrid ItemsSource="{Binding DepthMeasurements}"
-                      Grid.Row="4"
+                      Grid.Row="5"
                       Grid.ColumnSpan="2"
                       AutoGenerateColumns="False"
                       CanUserDeleteRows="False"
@@ -618,12 +736,12 @@
                                         Binding="{Binding Depth2,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter',Mode=TwoWay,UpdateSourceTrigger=LostFocus}"/>
                     <DataGridTextColumn Width="100"
                                         Header="Remaining (g)"
-                                        Binding="{Binding FilamentRemainingInGrams,Mode=OneWay,StringFormat='{}{0:#.#####} g'}"
+                                        Binding="{Binding FilamentRemainingInGrams,Mode=OneWay,StringFormat='{}{0:#} g'}"
                                         IsReadOnly="True"
                                         ToolTipService.ToolTip="Amount remaining in grams."/>
                     <DataGridTextColumn Width="100"
                                         Header="Remaining (m)"
-                                        Binding="{Binding FilamentRemainingInMeters,Mode=OneWay,StringFormat='{}{0:#.####} m'}"
+                                        Binding="{Binding FilamentRemainingInMeters,Mode=OneWay,StringFormat='{}{0:#} m'}"
                                         IsReadOnly="True"
                                         ToolTipService.ToolTip="Amount remaining in meters"/>
                 </DataGrid.Columns>
@@ -634,5 +752,5 @@
         <TextBlock Text="No Editor Defined"
                    FontSize="24"/>
     </DataTemplate>
-    
+
 </ResourceDictionary>

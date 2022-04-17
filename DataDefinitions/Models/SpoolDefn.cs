@@ -60,7 +60,7 @@ namespace DataDefinitions.Models
         /// <value>
         /// The spool diameter.
         /// </value>
-        [Affected(Names = new string[] { nameof(IsValid), nameof(MaxDepth) })]
+        [Affected(Names = new string[] { nameof(IsValid) })]
         public double SpoolDiameter
         {
             get => spoolDiameter;
@@ -73,7 +73,7 @@ namespace DataDefinitions.Models
         /// <value>
         /// The minimum diameter.
         /// </value>
-        [Affected(Names = new string[] { nameof(IsValid), nameof(MaxDepth) })]
+        [Affected(Names = new string[] { nameof(IsValid) })]
         public double DrumDiameter { get => drumDiameter; set => Set<double>(ref drumDiameter, value); }
 
         private double spoolWidth = double.NaN;
@@ -93,6 +93,21 @@ namespace DataDefinitions.Models
         public bool CanUseDepthMeasurement => !double.IsNaN(spoolDiameter) && !double.IsNaN(drumDiameter) && !double.IsNaN(spoolWidth);
         [NotMapped]
         public double MaxDepth => !double.IsNaN(spoolDiameter) && !double.IsNaN(drumDiameter) ? (spoolDiameter - drumDiameter) / 2 : double.NaN;
+
+        private double spoolDepth= double.NaN;
+        [NotMapped]
+        public double SpoolDepth
+        {
+            get => spoolDepth;
+            set
+            {
+                if (Set<double>(ref spoolDepth, value) && !double.IsNaN(spoolDepth) && !double.IsNaN(spoolDiameter))
+                {
+                    DrumDiameter = spoolDiameter - (2 * spoolDepth);
+                }
+            }
+        }
+
         //private int filamentID;
 
         //public int FilamentID
@@ -245,6 +260,7 @@ namespace DataDefinitions.Models
                     {
                         inventorySpool.SpoolDefn = this;
                         inventorySpool.SpoolDefnId = spoolDefnID;
+                        inventorySpool.Subscribe(WatchContainedHandler);
                         inventorySpool.WatchContained();
                     }
                 OnPropertyChanged(nameof(IsModified));

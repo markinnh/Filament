@@ -9,7 +9,7 @@
       xmlns:model="clr-namespace:DataDefinitions.Models;assembly=DataDefinitions"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      Title="ByFilamentPage" Name="ByVendorPage" IsEnabled="{Binding Ready,Mode=OneWay}">
+      Title="ByFilamentPage" Name="MyPage" IsEnabled="{Binding Ready,Mode=OneWay}">
     <Page.Resources>
         <CollectionViewSource x:Key="DefinedFilaments" Source="{Binding Filaments}"/>
         <CollectionViewSource x:Key="SupportedColorsInCode" Source="{Binding SupportedColorsCode}"/>
@@ -119,7 +119,7 @@
                             </DataGridTemplateColumn.CellTemplate>
                             <DataGridTemplateColumn.CellEditingTemplate>
                                 <DataTemplate>
-                                    <ComboBox ItemsSource="{Binding DataContext.SupportedColorsCode, ElementName=ByVendorPage}"
+                                    <ComboBox ItemsSource="{Binding DataContext.SupportedColorsCode, ElementName=MyPage}"
                                           SelectedValue="{Binding ColorName,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                                           Height="26">
                                         <ComboBox.ItemTemplate>
@@ -157,7 +157,7 @@
                             </DataGridTemplateColumn.CellTemplate>
                             <DataGridTemplateColumn.CellEditingTemplate>
                                 <DataTemplate>
-                                    <ComboBox ItemsSource="{Binding DataContext.Filaments, ElementName=ByVendorPage}"
+                                    <ComboBox ItemsSource="{Binding DataContext.Filaments, ElementName=MyPage}"
                                           SelectedItem="{Binding FilamentDefn,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
                                         <ComboBox.ItemTemplate>
                                             <DataTemplate DataType="{x:Type model:FilamentDefn}">
@@ -199,13 +199,25 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
+        <Menu Grid.ColumnSpan="2">
+            <MenuItem Header="Options">
+                <MenuItem Header="Expand Nodes"
+                          IsChecked="{Binding ExpandTreeNodesOnStartup,Mode=TwoWay}"/>
+            </MenuItem>
+        </Menu>
         <TreeView ItemsSource="{Binding Items}"
                   SelectedItemChanged="TreeView_SelectedItemChanged"
                   Height="{StaticResource StandardListViewHeight}"
                   VerticalAlignment="Top"
                   Margin="5"
-                    >
+                  Grid.Row="1"  >
+            <TreeView.ItemContainerStyle>
+                <Style TargetType="TreeViewItem">
+                    <Setter Property="IsExpanded" Value="{Binding DataContext.ExpandTreeNodesOnStartup, ElementName=MyPage}"/>
+                </Style>
+            </TreeView.ItemContainerStyle>
             <TreeView.Resources>
                 <HierarchicalDataTemplate DataType="{x:Type model:VendorDefn}" ItemsSource="{Binding SpoolDefns}">
                     <StackPanel Orientation="Horizontal">
@@ -228,6 +240,8 @@
                     </TextBlock>
                     </StackPanel>
                 </HierarchicalDataTemplate>
+                
+                
                 <HierarchicalDataTemplate DataType="{x:Type model:SpoolDefn}" ItemsSource="{Binding FilteredInventory}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{StaticResource EditIconSymbol}"
@@ -279,10 +293,10 @@
         </TreeView>
         <ContentControl Content="{Binding SelectedItem}"
                         ContentTemplateSelector="{StaticResource EditTemplateSelector}"
-                        Grid.Column="1"/>
+                        Grid.Column="1" Grid.Row="1"/>
         <StackPanel Orientation="Horizontal"
                     Grid.Column="1"
-                    Grid.Row="1">
+                    Grid.Row="2">
             <Button Content="&#xE109;"
                     Style="{StaticResource FontSymbolCommandButton}"
                     Visibility="Collapsed"/>

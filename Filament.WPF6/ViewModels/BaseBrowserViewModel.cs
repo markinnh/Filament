@@ -20,6 +20,7 @@ namespace Filament.WPF6.ViewModels
         where TSelect : DatabaseObject, new()
     {
         protected static bool ready = true;
+        protected virtual bool SupportsFiltering { get; } = true;
 
         public bool Ready
         {
@@ -41,26 +42,31 @@ namespace Filament.WPF6.ViewModels
         public bool CanAdd => !InAddNew;
         protected BaseBrowserViewModel()
         {
-            if (Singleton<DAL.DataLayer>.Instance.GetSingleSetting(s => s.Name == nameof(MainWindow.SelectShowFlag)) is Setting setting)
+            if (SupportsFiltering)
             {
-                if (Enum.Parse<ShowAllFlag>(setting.Value) is ShowAllFlag flag)
+                if (Singleton<DAL.DataLayer>.Instance.GetSingleSetting(s => s.Name == nameof(MainWindow.SelectShowFlag)) is Setting setting)
                 {
-                    if (flag == ShowAllFlag.ShowAll)
-                        ShowAllItems();
-                    else
-                        ShowInUseItems();
+                    if (Enum.Parse<ShowAllFlag>(setting.Value) is ShowAllFlag flag)
+                    {
+                        if (flag == ShowAllFlag.ShowAll)
+                            ShowAllItems();
+                        else
+                            ShowInUseItems();
+                    }
                 }
+                WeakReferenceMessenger.Default.Register<ShowAllFlagChanged>(this, HandleShowAllFlagChanged);
             }
             else
             {
                 DerivedInitItems();
                 UpdateEventLinks();
             }
-            WeakReferenceMessenger.Default.Register<ShowAllFlagChanged>(this, HandleShowAllFlagChanged);
+
         }
         ~BaseBrowserViewModel()
         {
-            WeakReferenceMessenger.Default.Unregister<ShowAllFlagChanged>(this);
+            if (SupportsFiltering)
+                WeakReferenceMessenger.Default.Unregister<ShowAllFlagChanged>(this);
         }
         protected virtual void UpdateEventLinks()
         {
@@ -233,7 +239,7 @@ namespace Filament.WPF6.ViewModels
                         if (SelectedItem is TBrowse select)
                             Items?.Add(select);
                     }
-                    SelectedItem.SetContainedModifiedState(false);
+                    //SelectedItem.SetContainedModifiedState(false);
                 }
             //System.Diagnostics.Debug.WriteLine($"Update selected item for {typeof(TBrowse).Name} not implemented.");
         }

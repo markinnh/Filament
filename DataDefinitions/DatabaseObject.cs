@@ -11,9 +11,12 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using static System.Diagnostics.Debug;
 using System.Reflection;
+using MyLibraryStandard.Attributes;
 
 namespace DataDefinitions
 {
+    public enum DatabaseObjectActions { ItemAdded,ItemRemoved };
+
     [UIHints(AddType = "Not supported")]
     public class DatabaseObject : Observable, JsonSupport.ILinked
     {
@@ -57,7 +60,7 @@ namespace DataDefinitions
         /// flag to tell if the object is modified
         /// </summary>
         /// <value>state of object compared to the database</value>
-        [NotMapped]
+        [NotMapped,Affected(Names =new string[] {nameof(InDatabase)})]
         public virtual bool IsModified
         {
             get => isModified;
@@ -126,6 +129,7 @@ namespace DataDefinitions
                     UpdateContainedItemEntryState(context);
                     context.Add(this);
                     context.SaveChanges();
+                    //OnPropertyChanged(nameof(InDatabase));
                 }
                 SetDataOpsState(false);
 
@@ -215,7 +219,7 @@ namespace DataDefinitions
             {
                 case nameof(IsModified):
 
-                    if (passUpCount == 0 || (GetType() != typeof(VendorDefn) || GetType() != typeof(FilamentDefn)))
+                    if (passUpCount == 0 || (passUpCount>0 && GetType() != typeof(VendorDefn) || GetType() != typeof(FilamentDefn)))
                     {
                         OnPropertyChanged(nameof(IsModified));
                         passUpCount++;

@@ -18,9 +18,12 @@ namespace DataDefinitions
         public DbSet<MeasuredDensity> MeasuredDensity { get; set; }
         public DbSet<Setting> Settings { get; set; }
     
-        public virtual void PerformMigrations(ref bool NeedMigration)
+        public DbSet<PrintSettingDefn> PrintSettingDefns { get; set; }
+        public DbSet<VendorSettingsConfig> VendorSettingsConfigs { get; set; }
+        public DbSet<ConfigItem> ConfigItems { get; set; }
+        public virtual void PerformMigrations()
         {
-            System.Diagnostics.Debug.Assert(false, $"Perform migrations not implemented in {GetType().Name}");
+            throw new NotImplementedException($"PerformMigrations not implemented in {GetType().Name}.");
         }
         //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         //{
@@ -138,6 +141,8 @@ namespace DataDefinitions
                         .Include("SpoolDefns")
                         .Include("SpoolDefns.Inventory")
                         .Include("SpoolDefns.Inventory.DepthMeasurements")
+                        .Include("VendorSettings")
+                        .Include("VendorSettings.ConfigItems")
                         .ToList();
                 }
                 else
@@ -155,6 +160,8 @@ namespace DataDefinitions
                         .Include("SpoolDefns")
                         .Include("SpoolDefns.Inventory")
                         .Include("SpoolDefns.Inventory.DepthMeasurements")
+                        .Include("VendorSettings")
+                        .Include("VendorSettings.ConfigItems")
                         .Where(predicate)
                         .ToList();
                 }
@@ -165,6 +172,20 @@ namespace DataDefinitions
         public static VendorDefn GetVendor<TContext>(Func<VendorDefn, bool> predicate) where TContext : BaseFilamentContext,new()
         {
             return GetSomeVendors<TContext>(predicate)?.FirstOrDefault();
+        }
+        public static IEnumerable<PrintSettingDefn> GetAllPrintSettingDefns<TContext>() where TContext : BaseFilamentContext, new()
+        {
+            using(BaseFilamentContext ctx = new TContext())
+            {
+                if (ctx != null)
+                {
+                    return ctx.PrintSettingDefns
+                        .AsNoTracking()
+                        .ToList();
+                }
+                else
+                    return null;
+            }
         }
     }
 

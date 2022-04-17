@@ -11,23 +11,6 @@ namespace DataContext
     public partial class FilamentContext : DataDefinitions.BaseFilamentContext
     {
         //static string DbNameAndLocation = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "FilamentDataCmb.db");
-        protected override void OnConfiguring(DbContextOptionsBuilder options)
-        {
-            //System.Diagnostics.Debug.WriteLine($"location {DbNameAndLocation}");
-
-            options.UseSqlServer(@"Data Source=localhost\sqlexpress;Initial Catalog=FilamentDataV1;Integrated Security=True");
-        }
-        public override void PerformMigrations(ref bool NeedMigration)
-        {
-            if (NeedMigration)
-            {
-                using (var context = new FilamentContext())
-                {
-                    context.Database.Migrate();
-                }
-                NeedMigration = false;
-            }
-        }
         //protected override void OnModelCreating(ModelBuilder modelBuilder)
         //{
         //    modelBuilder.Entity<FilamentDefn>()

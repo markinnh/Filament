@@ -5,6 +5,7 @@ using DataDefinitions.Models;
 using static System.Diagnostics.Debug;
 
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace DataDefinitions
 {
@@ -12,11 +13,12 @@ namespace DataDefinitions
     {
         const double InitialSeed = 0.1;
         const double AddVendorDefn = 0.15;
-        public static void Seed<TContext>(ref bool NeedMigration) where TContext : BaseFilamentContext, new()
+        const double AddPrinterSettingDefn = 0.151;
+        public static void Seed<TContext>() where TContext : BaseFilamentContext, new()
         {
             using (BaseFilamentContext context = new TContext())
             {
-                context.PerformMigrations(ref NeedMigration);
+                context.PerformMigrations();
                 //context.Database.Migrate();
                 if (context is BaseFilamentContext filamentContext)
                 {
@@ -35,6 +37,8 @@ namespace DataDefinitions
                         System.Diagnostics.Debug.WriteLine(setting);
                         if (setting < AddVendorDefn)
                             SeedVendorData<TContext>(setting, filamentContext);
+                        if (setting < AddPrinterSettingDefn)
+                            SeedData<TContext>(setting,AddPrinterSettingDefn, filamentContext,DataDefinitions.Seed.InitialPrintSettingDefinitions());
                     }
                 }
             }
@@ -50,6 +54,16 @@ namespace DataDefinitions
             //        // if further seeding is required, just check the SeedData value 
             //    }
             //}
+        }
+        protected static void SeedData<TContext>(Setting setting,double UpdatedSeedValue,BaseFilamentContext filamentContext,IEnumerable<DatabaseObject> databaseObjects) where TContext:BaseFilamentContext,new()
+        {
+            foreach (DatabaseObject databaseObject in databaseObjects)
+                databaseObject.UpdateItem<TContext>();
+            
+            setting.SetValue(UpdatedSeedValue);
+            setting.UpdateItem<TContext>();
+
+            setting.SetValue(UpdatedSeedValue);
         }
         public static void VerifySeed<TContext>() where TContext : BaseFilamentContext, new()
         {

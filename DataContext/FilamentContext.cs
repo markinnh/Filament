@@ -62,7 +62,7 @@ namespace DataContext
         //        .WithOne(da => da.FilamentDefn)
         //        .HasForeignKey<DensityAlias>(da => da.FilamentDefnId);
         //    });
-            
+
         //    //modelBuilder.Entity<FilamentDefn>()
         //    //    .HasOne(fd => fd.DensityAlias)
         //    //    .WithOne(da => da.FilamentDefn)
@@ -137,6 +137,27 @@ namespace DataContext
 
         //    OnModelCreatingPartial(modelBuilder);
         //}
+        protected override void OnConfiguring(DbContextOptionsBuilder options)
+        {
+            //System.Diagnostics.Debug.WriteLine($"location {DbNameAndLocation}");
+
+            options.UseSqlServer(@"Data Source=localhost\sqlexpress;Initial Catalog=FilamentDataV1;Integrated Security=True");
+        }
+        public override void PerformMigrations()
+        {
+            try
+            {
+                using (var context = new FilamentContext())
+                {
+                    context.Database.Migrate();
+                }
+                //NeedMigration = false;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
 
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }

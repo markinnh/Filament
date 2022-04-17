@@ -14,8 +14,8 @@ namespace DataDefinitions.Models
     /// <summary>
     /// Stores actually depth measurements to determine remaining amount of filament
     /// </summary>
-    [UIHints(AddType ="Measurement")]
-    public class DepthMeasurement : DatabaseObject,IEditableObject
+    [UIHints(AddType = "Measurement")]
+    public class DepthMeasurement : DatabaseObject, IEditableObject
     {
         const double FilamentDensityInCC = 1.24;
         const double ConvertFromCMMToCCM = 0.001;
@@ -45,9 +45,9 @@ namespace DataDefinitions.Models
         /// Whether or not the DepthMeasurement has all required data
         /// </summary>
         [JsonIgnore]
-        public override bool IsValid => !double.IsNaN(depth1) && !double.IsNaN(depth2) && measureDateTime != default && ((InventorySpoolId != default && InventorySpool.InventorySpoolId!=default)||
+        public override bool IsValid => !double.IsNaN(depth1) && !double.IsNaN(depth2) && measureDateTime != default && ((InventorySpoolId != default && InventorySpool.InventorySpoolId != default) ||
             /* account for an inventory spool and measurements being added at the same time*/
-            (InventorySpoolId ==default && InventorySpool.InventorySpoolId==default));
+            (InventorySpoolId == default && InventorySpool.InventorySpoolId == default));
         /// <summary>
         /// Database identifier
         /// </summary>
@@ -61,7 +61,11 @@ namespace DataDefinitions.Models
         public double Depth1
         {
             get => depth1;
-            set => Set<double>(ref depth1, value);
+            set
+            {
+                if (value <= InventorySpool?.SpoolDefn?.MaxDepth)
+                    Set<double>(ref depth1, value);
+            }
 
         }
         private double depth2 = FilamentStartingDepth;
@@ -72,7 +76,11 @@ namespace DataDefinitions.Models
         public double Depth2
         {
             get => depth2;
-            set => Set<double>(ref depth2, value);
+            set
+            {
+                if (value <= InventorySpool?.SpoolDefn?.MaxDepth)
+                    Set<double>(ref depth2, value);
+            }
 
         }
 
@@ -119,7 +127,7 @@ namespace DataDefinitions.Models
         [JsonIgnore]
         public double FilamentRemainingInMillimeters => CalcRemaining();
         [JsonIgnore]
-        public double FilamentRemainingInMeters =>CalcRemaining() / 1000;
+        public double FilamentRemainingInMeters => CalcRemaining() / 1000;
         [JsonIgnore]
         public double FilamentRemainingInGrams => CalcGramsRemaining();
 
@@ -193,7 +201,7 @@ namespace DataDefinitions.Models
                 double.NaN;
             //throw new NotImplementedException();
         }
-        #region Support For DataGrid Editing
+        #region Support For DataGrid (UWP) Editing
         struct BackupData
         {
             public DateTime MeasureDateTime { get; set; }

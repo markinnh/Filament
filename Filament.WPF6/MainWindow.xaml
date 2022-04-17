@@ -41,8 +41,14 @@
             <TabItem Header="Vendor">
                 <Frame Source="Pages\VendorDefnPage.xaml" NavigationUIVisibility="Hidden"/>
             </TabItem>
-            <TabItem Header="By Vendor">
+            <TabItem Header="Inventory" ToolTip="Inventory by vendor">
                 <Frame Source="Pages\ByVendorPage.xaml" NavigationUIVisibility="Hidden"/>
+            </TabItem>
+            <TabItem Header="Print Settings" ToolTip="Print Settings by vendor">
+                <Frame Source="Pages\PrintSettingsByVendor.xaml" NavigationUIVisibility="Hidden"/>
+            </TabItem>
+            <TabItem Header="Definitions" ToolTip="Print Setting Definitions">
+                <Frame Source="Pages\DefinePrintSettingsPage.xaml" NavigationUIVisibility="Hidden"/>
             </TabItem>
             <TabItem>
                 <TabItem.Header>

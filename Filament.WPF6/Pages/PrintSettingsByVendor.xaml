@@ -1,0 +1,217 @@
+﻿<Page x:Class="Filament.WPF6.Pages.PrintSettingsByVendor"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Filament.WPF6.Pages"
+      xmlns:vm="clr-namespace:Filament.WPF6.ViewModels"
+      xmlns:models="clr-namespace:DataDefinitions.Models;assembly=DataDefinitions"
+      xmlns:helpers="clr-namespace:Filament.WPF6.Helpers"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="PrintSettingsByVendor" Name="MyPage">
+    <Page.DataContext>
+        <vm:PrintSettingsByVendorViewModel/>
+    </Page.DataContext>
+    <Page.Resources>
+        <DataTemplate x:Key="EditSupportedFilaments" DataType="{x:Type models:VendorDefn}">
+            <DataGrid ItemsSource="{Binding VendorSettings}" AutoGenerateColumns="False" Height="500" CanUserDeleteRows="False">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn>
+                        <DataGridTemplateColumn.Header>
+                            <TextBlock Text="DEI">
+                                <TextBlock.ToolTip>
+                                    <ContentControl ContentTemplate="{StaticResource EditingIndicatorsHelp}"/>
+                                    <!--<StackPanel>
+                                        <TextBlock Text="Data Editing Indicators"/>
+                                        <TextBlock Text="Legend:"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{StaticResource CheckSymbol}" Style="{StaticResource FontIcon}"/>
+                                            <TextBlock Text="record in database."/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{StaticResource EditIconSymbol}" Style="{StaticResource FontIcon}"/>
+                                            <TextBlock Text="item needs to be saved to database."/>
+                                        </StackPanel>
+                                    </StackPanel>-->
+                                </TextBlock.ToolTip>
+                            </TextBlock>
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{StaticResource CheckSymbol}"
+                                           Style="{StaticResource FontIcon}"
+                                           FontSize="12"
+                                           Visibility="{Binding InDatabase,Mode=OneWay,Converter={StaticResource EnhancedVisibilityConverter}}" ToolTip="record in database."/>
+                                    <TextBlock Text="{StaticResource EditIconSymbol}"
+                                               Style="{StaticResource FontIcon}"
+                                               FontSize="12"
+                                               Visibility="{Binding IsModified,Converter={StaticResource EnhancedVisibilityConverter}}" ToolTip="item is modified."/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Filament"
+                                            Width="100">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding FilamentDefn.MaterialType,Mode=OneWay}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <ComboBox ItemsSource="{Binding DataContext.Filaments, ElementName=MyPage}"
+                                          SelectedItem="{Binding FilamentDefn,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type models:FilamentDefn}">
+                                            <TextBlock >
+                                                    <Run Text="{Binding MaterialType}"/>
+                                                    <Run Text=" - "/>
+                                                    <Run Text="{Binding FilamentDefnId}"/>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </DataTemplate>
+        <DataTemplate x:Key="EditPrintSettings" DataType="{x:Type models:VendorSettingsConfig}">
+            <DataGrid x:Name="EditConfigItems" ItemsSource="{Binding ConfigItems}" AutoGenerateColumns="False" Height="400" Width="500" VerticalAlignment="Top" CanUserDeleteRows="False" SelectedItem="{Binding DataContext.SelectedRow, ElementName=MyPage,Mode=TwoWay}" >
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Delete Row" Command="{Binding DataContext.DeleteSelectedRow, Source={x:Reference Name=MyPage}}" CommandParameter="{Binding DataContext.SelectedRow, Source={x:Reference Name=MyPage}}"  />
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn>
+                        <DataGridTemplateColumn.Header>
+                            <TextBlock Text="DEI">
+                                <TextBlock.ToolTip>
+                                    <ContentControl ContentTemplate="{StaticResource EditingIndicatorsHelp}"/>
+                                    <!--<StackPanel>
+                                        <TextBlock Text="Data Editing Indicators"/>
+                                        <TextBlock Text="Legend:"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{StaticResource CheckSymbol}" Style="{StaticResource FontIcon}"/>
+                                            <TextBlock Text="record in database."/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{StaticResource EditIconSymbol}" Style="{StaticResource FontIcon}"/>
+                                            <TextBlock Text="item needs to be saved to database."/>
+                                        </StackPanel>
+                                    </StackPanel>-->
+                                </TextBlock.ToolTip>
+                            </TextBlock>
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{StaticResource CheckSymbol}"
+                                           Style="{StaticResource FontIcon}"
+                                           FontSize="12"
+                                           Visibility="{Binding InDatabase,Mode=OneWay,Converter={StaticResource EnhancedVisibilityConverter}}" ToolTip="record in database."/>
+                                    <TextBlock Text="{StaticResource EditIconSymbol}"
+                                               Style="{StaticResource FontIcon}"
+                                               FontSize="12"
+                                               Visibility="{Binding IsModified,Mode=OneWay,Converter={StaticResource EnhancedVisibilityConverter}}" ToolTip="item is modified."/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <!--<DataGridTextColumn Header="Id" Width="20" Binding="{Binding ConfigItemId,Mode=OneWay}"/>-->
+                    <DataGridTemplateColumn Header="Date Entered" Width="100">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding DateEntered,StringFormat='{}{0:MM/dd/yyyy}'}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <DatePicker SelectedDate="{Binding DateEntered,UpdateSourceTrigger=LostFocus}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Setting" Width="100">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding PrintSettingDefn.Definition}"/>
+                            </DataTemplate>
+                            
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <ComboBox ItemsSource="{Binding ElementName=MyPage,Path=DataContext.PrintSettings,Mode=OneWay}" SelectedItem="{Binding PrintSettingDefn,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type models:PrintSettingDefn}">
+                                            <TextBlock Text="{Binding Definition}"/>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="Value" Width="100" Binding="{Binding TextValue}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </DataTemplate>
+        <helpers:PrintSettingsSelector x:Key="PrintSettingsSelect" SupportedFilamentsTemplate="{StaticResource EditSupportedFilaments}" 
+                                       PrintSettingsEditorTemplate="{StaticResource EditPrintSettings}"/>
+    </Page.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TreeView Width="200"
+                  VerticalAlignment="Stretch" ItemsSource="{Binding Items}" SelectedItemChanged="TreeView_SelectedItemChanged" Grid.RowSpan="2">
+            <TreeView.Resources>
+                <HierarchicalDataTemplate DataType="{x:Type models:VendorDefn}" ItemsSource="{Binding VendorSettings}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{StaticResource EditIconSymbol}"
+                                   Style="{StaticResource FontIcon}"
+                                   Visibility="{Binding IsModified,Mode=OneWay,Converter={StaticResource VisibilityConverter}}"/>
+                        <TextBlock Text="{Binding Name}">
+                            <TextBlock.ToolTip>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Name}"/>
+                                    <CheckBox IsChecked="{Binding FoundOnAmazon}" Content="Available on Amazon" IsEnabled="False"/>
+                                </StackPanel>
+                            </TextBlock.ToolTip>
+                            </TextBlock>
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+                <HierarchicalDataTemplate DataType="{x:Type models:VendorSettingsConfig}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{StaticResource EditIconSymbol}"
+                                   Style="{StaticResource FontIcon}"
+                                   Visibility="{Binding IsModified,Mode=OneWay,Converter={StaticResource VisibilityConverter}}"/>
+                        <TextBlock Text="{Binding FilamentDefn.MaterialType}"/>
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+            </TreeView.Resources>
+        </TreeView>
+        <ContentControl Grid.Column="1" Content="{Binding SelectedItem,Mode=OneWay}"
+                        ContentTemplateSelector="{StaticResource PrintSettingsSelect}"/>
+        <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1">
+            <Button Content="&#xE105;"
+                    Style="{StaticResource FontSymbolCommandButton}"
+                    Command="{Binding UpdateCommand}"
+                    IsEnabled="{Binding SelectedItem.IsModified,Mode=OneWay}">
+                <Button.ToolTip>
+                    <TextBlock>
+                        <Run Text="Save"/>
+                        <Run Text="{Binding ChildTypename,Mode=OneWay}"/>
+                    </TextBlock>
+                </Button.ToolTip>
+            </Button>
+        </StackPanel>
+    </Grid>
+</Page>

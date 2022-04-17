@@ -41,21 +41,31 @@ namespace Filament.WPF6.ViewModels
             //PrepareForDataOperations();
             if (GetAllItems() is IEnumerable<VendorDefn> items)
             {
-                if (Items == null)
-                    Items = new System.Collections.ObjectModel.ObservableCollection<VendorDefn>(items);
-                else
-                {
-                    Items.Clear();
+                InitItems(items);
+                //if (Items == null)
+                //    Items = new System.Collections.ObjectModel.ObservableCollection<VendorDefn>(items);
+                //else
+                //{
+                //    Items.Clear();
 
-                    foreach (VendorDefn item in items)
-                        Items.Add(item);
-                }
+                //    foreach (VendorDefn item in items)
+                //        Items.Add(item);
+                //}
             }
 
             //FinishedDataOperations();
 
         }
-
+        public bool ExpandTreeNodesOnStartup
+        {
+            get => Properties.Settings.Default.ExpandNodesOnStartup;
+            set
+            {
+                Properties.Settings.Default.ExpandNodesOnStartup = value;
+                Properties.Settings.Default.Save();
+                OnPropertyChanged(nameof(ExpandTreeNodesOnStartup));
+            }
+        }
         protected override void ShowAllItems()
         {
             base.ShowAllItems();

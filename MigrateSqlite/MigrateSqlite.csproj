@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DataContext\DataContext.csproj" />
     <ProjectReference Include="..\DataDefinitions\DataDefinitions.csproj" />
     <ProjectReference Include="..\SqliteContext\SqliteContext.csproj" />
   </ItemGroup>

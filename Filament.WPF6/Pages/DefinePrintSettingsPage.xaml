@@ -1,0 +1,71 @@
+﻿<Page x:Class="Filament.WPF6.Pages.DefinePrintSettingsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Filament.WPF6.Pages"
+      xmlns:vm="clr-namespace:Filament.WPF6.ViewModels"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="DefinePrintSettingsPage">
+    <Page.DataContext>
+        <vm:DefinePrintSettingsViewModel/>
+    </Page.DataContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <DataGrid ItemsSource="{Binding Items}" AutoGenerateColumns="False" Height="500" SelectedItem="{Binding SelectedItem}" >
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Delete Row" ToolTip="Delete selected row" Command="{Binding DeleteRowCommand}"/>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+            <DataGrid.Columns>
+                <DataGridTemplateColumn>
+                    <DataGridTemplateColumn.Header>
+                        <TextBlock Text="DEI">
+                            <TextBlock.ToolTip>
+                                <ContentControl ContentTemplate="{StaticResource EditingIndicatorsHelp}"/>
+                                <!--<StackPanel>
+                                        <TextBlock Text="Data Editing Indicators"/>
+                                        <TextBlock Text="Legend:"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{StaticResource CheckSymbol}" Style="{StaticResource FontIcon}"/>
+                                            <TextBlock Text="record in database."/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{StaticResource EditIconSymbol}" Style="{StaticResource FontIcon}"/>
+                                            <TextBlock Text="item needs to be saved to database."/>
+                                        </StackPanel>
+                                    </StackPanel>-->
+                            </TextBlock.ToolTip>
+                        </TextBlock>
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{StaticResource CheckSymbol}"
+                                           Style="{StaticResource FontIcon}"
+                                           FontSize="12"
+                                           Visibility="{Binding InDatabase,Mode=OneWay,Converter={StaticResource EnhancedVisibilityConverter}}" ToolTip="record in database."/>
+                                <TextBlock Text="{StaticResource EditIconSymbol}"
+                                               Style="{StaticResource FontIcon}"
+                                               FontSize="12"
+                                               Visibility="{Binding IsModified,Converter={StaticResource EnhancedVisibilityConverter}}" ToolTip="item is modified."/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Definition" Width="200" Binding="{Binding Definition}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
+            <Button Content="{StaticResource SaveSymbol}"
+                    Style="{StaticResource FontSymbolCommandButton}"
+                    IsEnabled="{Binding HasModifiedItems}"
+                    Command="{Binding SaveChanges}"/>
+        </StackPanel>
+    </Grid>
+</Page>

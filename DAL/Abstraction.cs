@@ -83,6 +83,13 @@ namespace DAL
             else
                 return dd.BaseFilamentContext.GetSetting<sqlite.FilamentContext>(func);
         }
+        public static IEnumerable<PrintSettingDefn> GetAllPrintSettingDefns()
+        {
+            if(DataAccessSelector == DataAccessSelector.SqlServer)
+                return dd.BaseFilamentContext.GetAllPrintSettingDefns<sql.FilamentContext>();
+            else
+                return dd.BaseFilamentContext.GetAllPrintSettingDefns<sqlite.FilamentContext>();
+        }
         public static void UpdateItem(dd.DatabaseObject databaseObject)
         {
             if (DataAccessSelector == DataAccessSelector.SqlServer)
@@ -92,17 +99,18 @@ namespace DAL
         }
         public static void Remove(dd.DatabaseObject databaseObject)
         {
+            
             if (DataAccessSelector == DataAccessSelector.SqlServer)
                 databaseObject.Delete<sql.FilamentContext>();
             else
                 databaseObject.Delete<sqlite.FilamentContext>();
         }
-        public static void SeedData(ref bool NeedMigration)
+        public static void SeedData()
         {
             if (DataAccessSelector == DataAccessSelector.SqlServer)
-                dd.DataSeed.Seed<sql.FilamentContext>(ref NeedMigration);
+                dd.DataSeed.Seed<sql.FilamentContext>();
             else
-                dd.DataSeed.Seed<sqlite.FilamentContext>(ref NeedMigration);
+                dd.DataSeed.Seed<sqlite.FilamentContext>();
         }
         public static void VerifySeed()
         {

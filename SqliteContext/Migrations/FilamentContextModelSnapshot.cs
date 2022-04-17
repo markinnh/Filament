@@ -16,6 +16,33 @@ namespace SqliteContext.Migrations
             modelBuilder
                 .HasAnnotation("ProductVersion", "3.1.22");
 
+            modelBuilder.Entity("DataDefinitions.Models.ConfigItem", b =>
+                {
+                    b.Property<int>("ConfigItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("DateEntered")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PrintSettingDefnId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("TextValue")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("VendorSettingsConfigId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ConfigItemId");
+
+                    b.HasIndex("PrintSettingDefnId");
+
+                    b.HasIndex("VendorSettingsConfigId");
+
+                    b.ToTable("ConfigItems");
+                });
+
             modelBuilder.Entity("DataDefinitions.Models.DensityAlias", b =>
                 {
                     b.Property<int>("DensityAliasId")
@@ -151,6 +178,24 @@ namespace SqliteContext.Migrations
                     b.ToTable("MeasuredDensity");
                 });
 
+            modelBuilder.Entity("DataDefinitions.Models.PrintSettingDefn", b =>
+                {
+                    b.Property<int>("PrintSettingDefnId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Definition")
+                        .HasColumnType("TEXT")
+                        .HasMaxLength(128);
+
+                    b.Property<int>("SettingValueType")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("PrintSettingDefnId");
+
+                    b.ToTable("PrintSettingDefns");
+                });
+
             modelBuilder.Entity("DataDefinitions.Models.Setting", b =>
                 {
                     b.Property<int>("SettingId")
@@ -230,6 +275,42 @@ namespace SqliteContext.Migrations
                     b.ToTable("VendorDefns");
                 });
 
+            modelBuilder.Entity("DataDefinitions.Models.VendorSettingsConfig", b =>
+                {
+                    b.Property<int>("VendorSettingsConfigId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("FilamentDefnId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("VendorDefnId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("VendorSettingsConfigId");
+
+                    b.HasIndex("FilamentDefnId");
+
+                    b.HasIndex("VendorDefnId");
+
+                    b.ToTable("VendorSettingsConfigs");
+                });
+
+            modelBuilder.Entity("DataDefinitions.Models.ConfigItem", b =>
+                {
+                    b.HasOne("DataDefinitions.Models.PrintSettingDefn", "PrintSettingDefn")
+                        .WithMany()
+                        .HasForeignKey("PrintSettingDefnId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataDefinitions.Models.VendorSettingsConfig", "VendorSettings")
+                        .WithMany("ConfigItems")
+                        .HasForeignKey("VendorSettingsConfigId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("DataDefinitions.Models.DensityAlias", b =>
                 {
                     b.HasOne("DataDefinitions.Models.FilamentDefn", "FilamentDefn")
@@ -276,6 +357,21 @@ namespace SqliteContext.Migrations
                 {
                     b.HasOne("DataDefinitions.Models.VendorDefn", "Vendor")
                         .WithMany("SpoolDefns")
+                        .HasForeignKey("VendorDefnId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("DataDefinitions.Models.VendorSettingsConfig", b =>
+                {
+                    b.HasOne("DataDefinitions.Models.FilamentDefn", "FilamentDefn")
+                        .WithMany()
+                        .HasForeignKey("FilamentDefnId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataDefinitions.Models.VendorDefn", "VendorDefn")
+                        .WithMany("VendorSettings")
                         .HasForeignKey("VendorDefnId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

@@ -36,7 +36,7 @@ namespace DataDefinitions.Models
         [JsonIgnore]
         public override bool IsModified { get => base.IsModified || DepthMeasurements.Count(dm => dm.IsModified) > 0; set => base.IsModified = value; }
         [JsonIgnore]
-        public override bool IsValid => FilamentDefn != null && !string.IsNullOrEmpty(ColorName) && SpoolDefn != null && SpoolDefnId!=default;
+        public override bool IsValid => FilamentDefn != null && !string.IsNullOrEmpty(ColorName) && SpoolDefn != null && SpoolDefnId != default;
         [JsonIgnore]
         public override bool SupportsDelete => true;
         [JsonIgnore]
@@ -109,7 +109,7 @@ namespace DataDefinitions.Models
             bool initialLayer = true;
             if (SpoolDefn != null && FilamentDefn != null)
             {
-                var initialLength = InitialLength();
+                var initialLength = InitialLength;
                 if (!double.IsNaN(initialLength))
                 {
                     double depth = (SpoolDefn.SpoolDiameter - SpoolDefn.DrumDiameter) / 2 + (FilamentDefn.Diameter / 2);
@@ -130,15 +130,19 @@ namespace DataDefinitions.Models
             else
                 return double.NaN;
         }
-        public double InitialLength()
+        [NotMapped]
+        public double InitialLength
         {
-            if (SpoolDefn != null && FilamentDefn != null)
+            get
             {
-                return FilamentMath.LengthFromWeightBasedOnDensity(FilamentDefn.DensityAlias, SpoolDefn.Weight * 1000, FilamentDefn.Diameter) / 1000;
+                if (SpoolDefn != null && FilamentDefn != null)
+                {
+                    return FilamentMath.LengthFromWeightBasedOnDensity(FilamentDefn.DensityAlias, SpoolDefn.Weight * 1000, FilamentDefn.Diameter) / 1000;
 
+                }
+                else
+                    return double.NaN;
             }
-            else
-                return double.NaN;
         }
         //private string? ignoreThis="Ignore This";
         //[NotMapped]
@@ -194,7 +198,12 @@ namespace DataDefinitions.Models
                     if (item is DepthMeasurement measurement)
                     {
                         measurement.InventorySpool = this;
-                        measurement.InventorySpoolId = InventorySpoolId;
+                        if (!measurement.InDatabase)
+                        {
+                            measurement.InventorySpoolId = InventorySpoolId;
+                            measurement.Depth1 = CalcInitialDepth();
+                            measurement.Depth2 = CalcInitialDepth();
+                        }
                         measurement.Subscribe(WatchContainedHandler);
                     }
                 OnPropertyChanged(nameof(IsModified));
@@ -253,9 +262,10 @@ namespace DataDefinitions.Models
         }
         public override void SetContainedModifiedState(bool state)
         {
-            IsModified = state;
+            
             foreach (var dm in DepthMeasurements)
                 dm.IsModified = state;
+            IsModified = state;
         }
 
         public void Link(IEnumerable<FilamentDefn> filaments)

@@ -62,7 +62,7 @@ namespace Filament.WPF6.ViewModels
         protected override IEnumerable<VendorDefn>? GetInUseItems() => Singleton<DataLayer>.Instance.GetFilteredVendors(v => !v.StopUsing);
 
         protected override IEnumerable<VendorDefn>? GetFilteredItems(Func<VendorDefn, bool> predicate) => Singleton<DataLayer>.Instance.GetFilteredVendors(predicate);
-
+        public IEnumerable<FilamentDefn> Filaments => Singleton<DataLayer>.Instance.FilamentList;
         protected override void UpdateSelectedItemHander()
         {
             if (SelectedItem != null)

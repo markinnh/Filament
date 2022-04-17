@@ -20,7 +20,7 @@ namespace SqliteContext
             //System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Filament");
             optionsBuilder.UseSqlite($"Data Source={System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Filament", "FilamentData.db")};");
         }
-        public override void PerformMigrations(ref bool NeedMigration)
+        public override void PerformMigrations()
         {
             //if (!DbExists)
             //{
@@ -38,7 +38,7 @@ namespace SqliteContext
                 }
                 finally
                 {
-                    NeedMigration = DbExists;
+                    //NeedMigration = DbExists;
                 }
             //}
         }

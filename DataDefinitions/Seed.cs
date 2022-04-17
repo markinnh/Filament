@@ -258,5 +258,33 @@ namespace DataDefinitions
         }
         #endregion
 
+        #region Print Setting Definitions Seed Data
+        public static PrintSettingDefn[] InitialPrintSettingDefinitions()
+        {
+            return new PrintSettingDefn[]
+            {
+                new PrintSettingDefn()
+                {
+                    Definition="Extruder Temperature",
+                    SettingValueType= SupportedSettingValueType.Integer
+                },
+                new PrintSettingDefn()
+                {
+                    Definition="Layer Height",
+                    SettingValueType= SupportedSettingValueType.Float
+                },
+                new PrintSettingDefn()
+                {
+                    Definition= "Nozzle Diameter",
+                    SettingValueType = SupportedSettingValueType.Float
+                },
+                new PrintSettingDefn()
+                {
+                    Definition="Parts Cooling Fan",
+                    SettingValueType=SupportedSettingValueType.Boolean
+                }
+            };
+        }
+        #endregion
     }
 }
