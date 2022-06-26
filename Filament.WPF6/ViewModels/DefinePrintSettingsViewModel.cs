@@ -91,9 +91,9 @@ namespace Filament.WPF6.ViewModels
             WriteLine($"HandleSaveChanges called, items modified : {Items?.Count(it => it.InDatabase && it.IsModified)}, items added : {Items?.Count(it => !it.InDatabase && it.IsValid)}");
             if (Items != null)
                 foreach (var item in Items.Where(it => it.IsModified)) { 
-                    bool needsUpdate=!item.InDatabase;
+                    bool needsAdd=!item.InDatabase;
                     DAL.Abstraction.UpdateItem(item);
-                    if (needsUpdate)
+                    if (needsAdd)
                     {
                         Singleton<DAL.DataLayer>.Instance.Add(item);
                         WeakReferenceMessenger.Default.Send(new ItemAdded<PrintSettingDefn>(item));

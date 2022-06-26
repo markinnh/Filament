@@ -644,10 +644,12 @@
             <TextBlock Text="{Binding DateOpened,StringFormat={}{0:d}}"
                        Grid.Column="1"/>
             <TextBlock Text="Color"
-                       Grid.Row="1"/>
-            <Rectangle Fill="{Binding ColorName,Converter={StaticResource ColorFromNameConverter}}"
-                       Grid.Column="1"
-                       Grid.Row="1"/>
+                       Grid.Row="1" VerticalAlignment="Center"/>
+            <StackPanel Orientation="Horizontal" Grid.Column="1"
+                       Grid.Row="1">
+                <Rectangle Fill="{Binding ColorName,Converter={StaticResource ColorFromNameConverter}}" Width="50"/>
+                <TextBlock Text="{Binding ColorName}" Margin="3,0,0,0"/>
+            </StackPanel>
             <TextBlock Text="Material"
                        Grid.Row="2"/>
             <TextBlock Grid.Row="2"

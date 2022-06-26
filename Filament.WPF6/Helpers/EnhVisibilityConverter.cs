@@ -13,12 +13,20 @@ namespace Filament.WPF6.Helpers
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is bool boolean)
-                return boolean ? Visibility.Visible : Visibility.Hidden;
-            else if (value is null)
-                return Visibility.Hidden;
+            if (value != null)
+            {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+                if (value is bool boolean)
+                    return boolean ? Visibility.Visible : Visibility.Hidden;
+
+                else if (value.ToString().Contains("NewItemPlaceholder"))
+                    return Visibility.Hidden;
+                else
+                    return value;
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+            }
             else
-                return value;
+                return Visibility.Collapsed;
             //throw new NotImplementedException();
         }
 

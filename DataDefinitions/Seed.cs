@@ -76,6 +76,7 @@ namespace DataDefinitions
         #region Vendor Definition Seed Data
         public static VendorDefn[] InitialVendorDefinitions()
         {
+            
             var vendor1 = new VendorDefn()
             {
                 Name = "3d Solutech",
@@ -137,12 +138,43 @@ namespace DataDefinitions
                 Vendor = vendor4,
                 Weight = 1
             });
+            var vendor5 = new VendorDefn()
+            {
+                Name = "Prusament",
+                WebUrl = "https://prusament.com/",
+                FoundOnAmazon = true
+            };
+            vendor5.SpoolDefns.Add(new SpoolDefn()
+            {
+                Description = "Prusament",
+                DrumDiameter = 53,
+                SpoolWidth = 53,
+                SpoolDiameter = 190,
+                Vendor = vendor5
+            });
+            var vendor6 = new VendorDefn()
+            {
+                Name = "3D-Fuel",
+                WebUrl = "https://www.3dfuel.com/collections/pro-pla",
+                FoundOnAmazon = true
+            };
+            // removed to support the training portion of the documentation
+            //vendor6.SpoolDefns.Add(new SpoolDefn()
+            //{
+            //    Description = "Black plastic",
+            //    DrumDiameter = 88.2,
+            //    SpoolWidth = 55,
+            //    SpoolDiameter = 200,
+            //    Vendor = vendor6
+            //});
             return new VendorDefn[]
             {
                 vendor1,
                 vendor2,
                 vendor3,
                 vendor4,
+                vendor5,
+                vendor6,
                 new VendorDefn()
                 {
                     Name="Overture",
@@ -161,12 +193,6 @@ namespace DataDefinitions
                     WebUrl="https://www.geeetech.com/",
                     FoundOnAmazon=true
                 },
-                new VendorDefn()
-                {
-                    Name="eSun",
-                    WebUrl="https://esun3dstore.com/collections/3d-printing-filament",
-                    FoundOnAmazon=true
-                    },
                 new VendorDefn()
                 {
                     Name="iSanMate",
@@ -247,13 +273,8 @@ namespace DataDefinitions
                     Name="Ataraxia",
                     WebUrl="https://ataraxiaart.com/",
                     FoundOnAmazon=true
-                },
-                new VendorDefn()
-                {
-                    Name="Prusament",
-                    WebUrl="https://prusament.com/",
-                    FoundOnAmazon=true
                 }
+                
             };
         }
         #endregion

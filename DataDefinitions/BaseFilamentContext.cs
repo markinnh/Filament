@@ -17,7 +17,7 @@ namespace DataDefinitions
         public DbSet<DepthMeasurement> DepthMeasurements { get; set; }
         public DbSet<MeasuredDensity> MeasuredDensity { get; set; }
         public DbSet<Setting> Settings { get; set; }
-    
+
         public DbSet<PrintSettingDefn> PrintSettingDefns { get; set; }
         public DbSet<VendorSettingsConfig> VendorSettingsConfigs { get; set; }
         public DbSet<ConfigItem> ConfigItems { get; set; }
@@ -30,7 +30,7 @@ namespace DataDefinitions
         //    //System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Filament");
         //    optionsBuilder.UseSqlite($"Data Source={System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),"Filament","FilamentData.db")};");
         //}
-        public static void AddAll<TContext>(params object[] items)where TContext : BaseFilamentContext,new()
+        public static void AddAll<TContext>(params object[] items) where TContext : BaseFilamentContext, new()
         {
             using (BaseFilamentContext context = new TContext())
             {
@@ -51,16 +51,20 @@ namespace DataDefinitions
                 context.SaveChanges();
             }
         }
-        public static List<FilamentDefn> GetAllFilaments<TContext>() where TContext : BaseFilamentContext,new()
+        public static List<FilamentDefn> GetAllFilaments<TContext>() where TContext : BaseFilamentContext, new()
         {
             using (BaseFilamentContext ctx = new TContext())
             {
                 if (ctx != null)
-                    return ctx.FilamentDefns?
+                {
+                    var result = ctx.FilamentDefns?
                         .Include("DensityAlias")
                         .Include("DensityAlias.MeasuredDensity")
                         .AsNoTracking()
                         .ToList();
+                    
+                    return result;
+                }
                 else
                     return null;
             }
@@ -75,32 +79,34 @@ namespace DataDefinitions
                         .AsNoTracking()
                         .Include("DensityAlias")
                         .Include("DensityAlias.MeasuredDensity")
-                        .Where<FilamentDefn>(predicate)
+                        .Where(predicate)
                         .ToList();
                 }
                 else
                     return null;
             }
         }
-        public static FilamentDefn GetFilament<TContext>(Func<FilamentDefn, bool> func) where TContext : BaseFilamentContext,new()
+        public static FilamentDefn GetFilament<TContext>(Func<FilamentDefn, bool> func) where TContext : BaseFilamentContext, new()
         {
             return GetFilaments<TContext>(func)?.FirstOrDefault();
         }
-        public static List<Setting> GetAllSettings<TContext>() where TContext : BaseFilamentContext,new()
+        public static List<Setting> GetAllSettings<TContext>() where TContext : BaseFilamentContext, new()
         {
             using (BaseFilamentContext ctx = new TContext())
             {
                 if (ctx != null)
                 {
-                    return ctx.Settings?
+                    var result = ctx.Settings?
                         .AsNoTracking()
                         .ToList();
+                    
+                    return result;
                 }
                 else
                     return null;
             }
         }
-        public static Setting GetSetting<TContext>(Func<Setting, bool> predicate) where TContext: BaseFilamentContext,new()
+        public static Setting GetSetting<TContext>(Func<Setting, bool> predicate) where TContext : BaseFilamentContext, new()
         {
             using (BaseFilamentContext context = new TContext())
             {
@@ -108,14 +114,14 @@ namespace DataDefinitions
                 {
                     return context.Settings?
                         .AsNoTracking()
-                        .Where<Setting>(predicate)
+                        .Where(predicate)
                         .SingleOrDefault();
                 }
                 else
                     return null;
             }
         }
-        public static List<Setting> GetSettings<TContext>(Func<Setting, bool> predicate) where TContext:BaseFilamentContext, new()
+        public static List<Setting> GetSettings<TContext>(Func<Setting, bool> predicate) where TContext : BaseFilamentContext, new()
         {
             using (BaseFilamentContext context = new TContext())
             {
@@ -130,13 +136,13 @@ namespace DataDefinitions
                     return null;
             }
         }
-        public static List<VendorDefn> GetAllVendors<TContext>() where TContext : BaseFilamentContext,new()
+        public static List<VendorDefn> GetAllVendors<TContext>() where TContext : BaseFilamentContext, new()
         {
             using (BaseFilamentContext ctx = new TContext())
             {
                 if (ctx != null)
                 {
-                    return ctx.VendorDefns?
+                    var result = ctx.VendorDefns?
                         .AsNoTracking()
                         .Include("SpoolDefns")
                         .Include("SpoolDefns.Inventory")
@@ -144,6 +150,8 @@ namespace DataDefinitions
                         .Include("VendorSettings")
                         .Include("VendorSettings.ConfigItems")
                         .ToList();
+                    
+                    return result;
                 }
                 else
                     return null;
@@ -169,19 +177,23 @@ namespace DataDefinitions
                     return null;
             }
         }
-        public static VendorDefn GetVendor<TContext>(Func<VendorDefn, bool> predicate) where TContext : BaseFilamentContext,new()
+        public static VendorDefn GetVendor<TContext>(Func<VendorDefn, bool> predicate) where TContext : BaseFilamentContext, new()
         {
             return GetSomeVendors<TContext>(predicate)?.FirstOrDefault();
         }
         public static IEnumerable<PrintSettingDefn> GetAllPrintSettingDefns<TContext>() where TContext : BaseFilamentContext, new()
         {
-            using(BaseFilamentContext ctx = new TContext())
+            using (BaseFilamentContext ctx = new TContext())
             {
                 if (ctx != null)
                 {
-                    return ctx.PrintSettingDefns
+                    var result= ctx.PrintSettingDefns
                         .AsNoTracking()
                         .ToList();
+
+                    
+                    return result;
+
                 }
                 else
                     return null;

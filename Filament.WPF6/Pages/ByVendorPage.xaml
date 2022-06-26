@@ -11,6 +11,7 @@
       d:DesignHeight="450" d:DesignWidth="800"
       Title="ByFilamentPage" Name="MyPage" IsEnabled="{Binding Ready,Mode=OneWay}">
     <Page.Resources>
+        
         <CollectionViewSource x:Key="DefinedFilaments" Source="{Binding Filaments}"/>
         <CollectionViewSource x:Key="SupportedColorsInCode" Source="{Binding SupportedColorsCode}"/>
         <DataTemplate x:Key="EditSpoolDefnItems" DataType="{x:Type model:SpoolDefn}">
@@ -162,7 +163,7 @@
                                         <ComboBox.ItemTemplate>
                                             <DataTemplate DataType="{x:Type model:FilamentDefn}">
                                                 <TextBlock >
-                                                    <Run Text="{Binding MaterialType}"/>
+                                                    <Run Text="{Binding MaterialType,Converter={StaticResource EnumDescriptionConverter}}"/>
                                                     <Run Text=" - "/>
                                                     <Run Text="{Binding FilamentDefnId}"/>
                                                 </TextBlock>
@@ -266,12 +267,13 @@
                         <TextBlock Text="{StaticResource EditIconSymbol}"
                                    Style="{StaticResource FontIcon}"
                                    Visibility="{Binding IsModified,Converter={StaticResource VisibilityConverter}}"/>
-                        <Border BorderBrush="Black" BorderThickness="1" CornerRadius="3">
-                            <Rectangle Fill="{Binding ColorName,Converter={StaticResource ColorFromNameConverter}}"
+                        <Border  BorderThickness="3" CornerRadius="3" BorderBrush="{Binding ColorName}">
+                            <!--<Rectangle Fill="{Binding ColorName,Converter={StaticResource ColorFromNameConverter}}"
                                    Width="30"
-                                   Height="16"/>
+                                   Height="16"/>-->
+                            <TextBlock Text="{Binding FilamentDefn.MaterialType,StringFormat='{}{0,-15}'}"/>
                         </Border>
-                        <TextBlock Text="{Binding FilamentDefn.MaterialType}"/>
+                        
 
                         <StackPanel.ToolTip>
                             <StackPanel>
