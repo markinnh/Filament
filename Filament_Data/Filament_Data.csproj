@@ -10,15 +10,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="newtonsoft.json" Version="13.0.1" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Folder Include="Alias\" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="Project Notes.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="6.0.5" />
   </ItemGroup>
 
   <ItemGroup>

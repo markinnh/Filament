@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Text.Json;
 
-using Newtonsoft.Json;
 
 namespace Filament.UWP.Core.Helpers
 {
@@ -11,7 +11,7 @@ namespace Filament.UWP.Core.Helpers
         {
             return await Task.Run<T>(() =>
             {
-                return JsonConvert.DeserializeObject<T>(value);
+                return JsonSerializer.Deserialize<T>(value);
             });
         }
 
@@ -19,7 +19,7 @@ namespace Filament.UWP.Core.Helpers
         {
             return await Task.Run<string>(() =>
             {
-                return JsonConvert.SerializeObject(value);
+                return JsonSerializer.Serialize(value);
             });
         }
     }
