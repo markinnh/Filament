@@ -54,6 +54,7 @@ namespace DAL
             PrintSettings.Add(printSetting);
             OnPropertyChanged(nameof(PrintSettingsList));
         }
+        
         public void Add(DataDefinitions.DatabaseObject databaseObject)
         {
             if (databaseObject is VendorDefn vendor)
@@ -62,8 +63,9 @@ namespace DAL
                 Add(filament);
             else if (databaseObject is Setting setting)
                 Add(setting);
-            else if(databaseObject is PrintSettingDefn printSetting)
+            else if (databaseObject is PrintSettingDefn printSetting)
                 Add(printSetting);
+            
         }
         
 

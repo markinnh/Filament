@@ -15,7 +15,7 @@ namespace DataDefinitions.Models
     /// <summary>
     /// Print setting definitions that can affect the print and change based on filament type which the user might want to record
     /// </summary>
-    public class PrintSettingDefn : DatabaseObject
+    public class PrintSettingDefn : DataDefinitions.DatabaseObject
     {
         public static event InDataOpsChangedHandler InDataOpsChanged;
 

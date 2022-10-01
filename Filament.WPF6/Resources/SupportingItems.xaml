@@ -4,7 +4,11 @@
                     xmlns:dd="clr-namespace:DataDefinitions;assembly=DataDefinitions"
                     xmlns:model="clr-namespace:DataDefinitions.Models;assembly=DataDefinitions"
                     xmlns:helpers="clr-namespace:Filament.WPF6.Helpers"
-                    x:Class="SupportingItems.cs">
+                    xmlns:local="clr-namespace:Filament.WPF6"
+                    xmlns:rsrc="clr-namespace:Filament.WPF6.Properties" 
+                    xmlns:vm="clr-namespace:Filament.WPF6.ViewModels"
+                    >
+
     <SolidColorBrush x:Key="StandardBackground" Color="WhiteSmoke"/>
     <core:Double x:Key="StdFontSize">14</core:Double>
     <core:Double x:Key="StdTextBoxHeight">26</core:Double>
@@ -13,6 +17,36 @@
     <core:String x:Key="CheckSymbol">&#xE10B;</core:String>
     <core:String x:Key="CalculatorSymbol">&#xE1D0;</core:String>
     <core:String x:Key="SaveSymbol">&#xE105;</core:String>
+    <core:String x:Key="DiscardSymbol">&#xE107;</core:String>
+    <core:String x:Key="RefreshSymbol">&#xE117;</core:String>
+    <core:String x:Key="AddSymbol">&#xE109;</core:String>
+    <core:String x:Key="NoSymbol">&#xE10A;</core:String>
+    <core:String x:Key="UndoSymbol">&#xE10E;</core:String>
+    <core:String x:Key="SettingsSymbol">&#xE115;</core:String>
+    <core:String x:Key="ListSymbol">&#xE14C;</core:String>
+    <core:String x:Key="StandardBackgroundColor">Goldenrod</core:String>
+    <core:Double x:Key="cls-1">0.75</core:Double>
+    <core:String x:Key="FilamentPathData">M0,0 H16 M3,1.6 H13 M3,3 H13 M3,4.6 H13 M3,6 H13 M3,7.6 H13 M3,9 H11.6 M0,10.5 H10 M12,10.5 H16 M11,9.5 V16</core:String>
+    <Image x:Key="ShelfImage" Source="shelf.png"/>
+    <Style x:Key="StandardControl" TargetType="Control">
+        <Setter Property="Background" Value="GhostWhite"/>
+    </Style>
+    
+
+    <Geometry x:Key="FilamentGeometry" >m 35.743449 41.500156 c -0.132537 -0.05741 -0.27021 -0.183225 -0.341593 -0.312171 -0.04723 -0.08532 -0.05387 -0.351293 -0.06809 -2.725993 l -0.01576 -2.63145 -4.593219 -0.008 -4.593219 -0.008 v -0.472609 -0.472611 h 1.032928 1.032928 l -0.01183 -0.124021 c -0.02484 -0.260513 0.109699 -0.495371 0.353334 -0.616779 l 0.157676 -0.07857 3.200398 4.76e-4 c 3.547214 4.77e-4 3.408453 -0.007 3.81716 0.207734 0.413664 0.217376 0.755075 0.659803 0.863235 1.118653 0.06888 0.292213 0.07248 5.604125 0.0039 5.768239 -0.134186 0.321151 -0.529459 0.488666 -0.837862 0.355083 z m 1.827833 -5.84017 c 0 -0.477022 -0.246081 -1.146744 -0.557226 -1.516519 l -0.07866 -0.09349 h 1.383245 1.383247 l 0.157676 0.07857 c 0.243634 0.121408 0.378177 0.356266 0.353333 0.616779 l -0.01183 0.124021 h 1.032928 1.032929 v 0.472716 0.472715 h -2.34782 -2.34782 z M 28.52588 33.222728 c -0.395611 -0.200094 -0.46074 -0.741033 -0.125667 -1.043751 0.06709 -0.06061 0.17617 -0.125253 0.242395 -0.143644 0.168665 -0.04684 10.944609 -0.04684 11.113274 0 0.06623 0.01839 0.175303 0.08303 0.242396 0.143644 0.335073 0.302718 0.269944 0.843657 -0.125668 1.043751 l -0.140191 0.07091 h -5.533174 -5.533173 z m 0.11828 -1.987827 c -0.557661 -0.173461 -0.627692 -0.925274 -0.110877 -1.190312 0.113624 -0.05827 0.273508 -0.05996 5.665962 -0.05996 5.392455 0 5.552338 0.0017 5.665963 0.05996 0.527164 0.270346 0.43751 1.053117 -0.137193 1.197829 -0.201225 0.05067 -10.920166 0.0434 -11.083855 -0.0075 z m -0.0705 -2.065393 c -0.492879 -0.22391 -0.52243 -0.910534 -0.04992 -1.159987 l 0.138893 -0.07333 h 5.536614 5.536615 l 0.138893 0.07333 c 0.472506 0.249453 0.442956 0.936077 -0.04992 1.159987 -0.120645 0.05481 -0.373709 0.05739 -5.625585 0.05739 -5.251876 0 -5.504939 -0.0026 -5.625584 -0.05739 z m -0.04992 -2.062985 c -0.07639 -0.04033 -0.181437 -0.133703 -0.233436 -0.207496 -0.08127 -0.115336 -0.09454 -0.162537 -0.09454 -0.336277 v -0.202108 l -1.032096 -8.4e-5 -1.032095 -8.2e-5 V 25.88776 25.415045 h 8.067677 8.067678 v 0.472715 0.472716 l -1.032096 8.1e-5 -1.032095 8.2e-5 v 0.202109 c 0 0.173741 -0.01327 0.22094 -0.09454 0.336278 -0.052 0.07379 -0.157045 0.167165 -0.233436 0.207494 l -0.138893 0.07333 h -5.536615 -5.536614 z</Geometry>
+    <Geometry x:Key="ShelfGlyph">M0,0 V16 H1 V0 M2,4 H14 M2,9 H14 M2,14 H14 M15,0 V16 H16 V0 M3,2.5 H7 M3,1.5 H6 M3,7.5 H7 M3,6.5 H6 M9,7.5 H13 M10,6.5 H13 M3,12.5 H7 M3,11.5 H6 M9,12.5 H13 M10,11.5 H13</Geometry>
+ <Path x:Key="TestPath"
+          Data=""/>   
+    <!--<Image x:Key="FilamentGlyph" Width="16" Height="16" >
+        <Image.Source>
+            <DrawingImage>
+                <DrawingImage.Drawing>
+                    <GeometryDrawing Brush="Black" Geometry="m 35.743449 41.500156 c -0.132537 -0.05741 -0.27021 -0.183225 -0.341593 -0.312171 -0.04723 -0.08532 -0.05387 -0.351293 -0.06809 -2.725993 l -0.01576 -2.63145 -4.593219 -0.008 -4.593219 -0.008 v -0.472609 -0.472611 h 1.032928 1.032928 l -0.01183 -0.124021 c -0.02484 -0.260513 0.109699 -0.495371 0.353334 -0.616779 l 0.157676 -0.07857 3.200398 4.76e-4 c 3.547214 4.77e-4 3.408453 -0.007 3.81716 0.207734 0.413664 0.217376 0.755075 0.659803 0.863235 1.118653 0.06888 0.292213 0.07248 5.604125 0.0039 5.768239 -0.134186 0.321151 -0.529459 0.488666 -0.837862 0.355083 z m 1.827833 -5.84017 c 0 -0.477022 -0.246081 -1.146744 -0.557226 -1.516519 l -0.07866 -0.09349 h 1.383245 1.383247 l 0.157676 0.07857 c 0.243634 0.121408 0.378177 0.356266 0.353333 0.616779 l -0.01183 0.124021 h 1.032928 1.032929 v 0.472716 0.472715 h -2.34782 -2.34782 z M 28.52588 33.222728 c -0.395611 -0.200094 -0.46074 -0.741033 -0.125667 -1.043751 0.06709 -0.06061 0.17617 -0.125253 0.242395 -0.143644 0.168665 -0.04684 10.944609 -0.04684 11.113274 0 0.06623 0.01839 0.175303 0.08303 0.242396 0.143644 0.335073 0.302718 0.269944 0.843657 -0.125668 1.043751 l -0.140191 0.07091 h -5.533174 -5.533173 z m 0.11828 -1.987827 c -0.557661 -0.173461 -0.627692 -0.925274 -0.110877 -1.190312 0.113624 -0.05827 0.273508 -0.05996 5.665962 -0.05996 5.392455 0 5.552338 0.0017 5.665963 0.05996 0.527164 0.270346 0.43751 1.053117 -0.137193 1.197829 -0.201225 0.05067 -10.920166 0.0434 -11.083855 -0.0075 z m -0.0705 -2.065393 c -0.492879 -0.22391 -0.52243 -0.910534 -0.04992 -1.159987 l 0.138893 -0.07333 h 5.536614 5.536615 l 0.138893 0.07333 c 0.472506 0.249453 0.442956 0.936077 -0.04992 1.159987 -0.120645 0.05481 -0.373709 0.05739 -5.625585 0.05739 -5.251876 0 -5.504939 -0.0026 -5.625584 -0.05739 z m -0.04992 -2.062985 c -0.07639 -0.04033 -0.181437 -0.133703 -0.233436 -0.207496 -0.08127 -0.115336 -0.09454 -0.162537 -0.09454 -0.336277 v -0.202108 l -1.032096 -8.4e-5 -1.032095 -8.2e-5 V 25.88776 25.415045 h 8.067677 8.067678 v 0.472715 0.472716 l -1.032096 8.1e-5 -1.032095 8.2e-5 v 0.202109 c 0 0.173741 -0.01327 0.22094 -0.09454 0.336278 -0.052 0.07379 -0.157045 0.167165 -0.233436 0.207494 l -0.138893 0.07333 h -5.536615 -5.536614 z"/>
+                </DrawingImage.Drawing>
+            </DrawingImage>
+        </Image.Source>
+    </Image>-->
+
     <ObjectDataProvider x:Key="dataFromMaterialType" MethodName="GetValues"
                             ObjectType="{x:Type core:Enum}">
         <ObjectDataProvider.MethodParameters>
@@ -45,6 +79,12 @@
         </ObjectDataProvider.MethodParameters>
     </ObjectDataProvider>
 
+    <ObjectDataProvider x:Key="DataFromInventoryDisplayStyle" MethodName="GetValues"
+                        ObjectType="{x:Type core:Enum}">
+        <ObjectDataProvider.MethodParameters>
+            <x:Type TypeName="vm:InventoryDisplayStyle"/>
+        </ObjectDataProvider.MethodParameters>
+    </ObjectDataProvider>
     <x:Array x:Key="FilamentDiameters" Type="core:Double">
         <core:Double>1.75</core:Double>
         <core:Double>3.0</core:Double>
@@ -52,7 +92,11 @@
 
     <Style TargetType="DataGrid">
         <Setter Property="FontSize" Value="{StaticResource StdFontSize}"/>
-        
+
+    </Style>
+    <Style x:Key="GlyphStyle" TargetType="Image">
+        <Setter Property="Width" Value="16"/>
+        <Setter Property="Height" Value="16"/>
     </Style>
     <CollectionViewSource x:Key="Filaments" Source="{Binding DefinedFilaments}"/>
     <x:Array x:Key="SupportedColors" Type="{x:Type core:String}">
@@ -86,6 +130,11 @@
     <helpers:BooleanInverterConverter x:Key="BooleanNotConverter"/>
     <helpers:WeightWithUnitsConverter x:Key="ConvertToMetricWeight"/>
     <helpers:LengthWithUnitsConverter x:Key="ConvertToMetricLength"/>
+    <helpers:GridLengthValueConverter x:Key="GrdLengthVConverter"/>
+    <DataGridLengthConverter x:Key="DataGridLenConverter"/>
+    <helpers:LeakProofSettings x:Key="LeakPrfSettings"/>
+    <helpers:HandleNullBoolean x:Key="HandleNullBoolean"/>
+    <helpers:MultiBoolCombiner x:Key="MultiBoolConverter"/>
     <Style TargetType="CheckBox">
         <Setter Property="FontSize" Value="{StaticResource StdFontSize}"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
@@ -105,6 +154,18 @@
         <Setter Property="Height" Value="30"/>
         <Setter Property="Margin" Value="5"/>
     </Style>
+    <Style x:Key="IconCommandButton" TargetType="Button">
+        <Setter Property="Width" Value="32" />
+        <Setter Property="Height" Value="32" />
+        <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value=".5"/>
+                <Setter Property="Background" Value="LightGray"/>
+            </Trigger>
+        </Style.Triggers>
+        
+    </Style>
+    
     <Style x:Key="FontSymbolCommandButton" TargetType="Button">
         <Setter Property="Width" Value="32"/>
         <Setter Property="Height" Value="32"/>
@@ -127,6 +188,10 @@
     </Style>
     <Style TargetType="TextBlock">
         <Setter Property="FontSize" Value="{StaticResource StdFontSize}"/>
+    </Style>
+    <Style x:Key="StdDataGrid" TargetType="DataGrid">
+        <Setter Property="FontSize" Value="{StaticResource StdFontSize}"/>
+        <Setter Property="ToolTipService.IsEnabled" Value="True"/>
     </Style>
     <Style TargetType="TextBlock" x:Key="FontIcon">
         <Setter Property="FontFamily" Value="Segoe UI Symbol"/>
@@ -169,17 +234,24 @@
         </StackPanel>
     </DataTemplate>
     -->
+    
+        
+   
     <DataTemplate x:Key="EditingIndicatorsHelp">
         <StackPanel>
-            <TextBlock Text="Data Editing Indicators"/>
-            <TextBlock Text="Legend:"/>
+            <TextBlock Text="{x:Static rsrc:Resources.DataEditingIndicatorsHeader}"/>
+            <TextBlock >
+                <Run Text="{x:Static rsrc:Resources.LegendHeader}"/>
+                <Run Text="{x:Static rsrc:Resources.ColonHeader}"/>
+            </TextBlock>
             <StackPanel Orientation="Horizontal">
-                <TextBlock Text="{StaticResource CheckSymbol}" Style="{StaticResource FontIcon}" ToolTip="record in database."/>
-                <TextBlock Text="record in database."/>
+                <TextBlock Text="{StaticResource CheckSymbol}" Style="{StaticResource FontIcon}" ToolTip="{x:Static rsrc:Resources.RecordInDbTip}"/>
+                <TextBlock Text="{x:Static rsrc:Resources.RecordInDbTip}"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="{StaticResource EditIconSymbol}" Style="{StaticResource FontIcon}"/>
-                <TextBlock Text="item needs to be saved to database."/>
+                <TextBlock Text="{x:Static rsrc:Resources.NotInDbTip}"/>
+                <!--<TextBlock Text="{x:Static rsrc:Resources.NotInDbTip}"/>-->
             </StackPanel>
         </StackPanel>
     </DataTemplate>
@@ -198,143 +270,66 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <Label Content="Name"      
-                   Target="{Binding ElementName=NameEdit}"/>
+            <Label       
+                   Target="{Binding ElementName=NameEdit}">
+                <Label.Content>
+                    <TextBlock Text="{x:Static rsrc:Resources.NameHeader}"/>
+                    <!--<TextBlock Text="{x:Static local:Constants.NameHeader}"/>-->
+                </Label.Content>
+            </Label>
             <TextBox Name="NameEdit"
                      Grid.Column="1"
                      Width="250"
                      Text="{Binding Name}"/>
             <Label Grid.Row="1"
-                   Content="Web Address"
-                   Target="{Binding ElementName=WebAddressEdit}"/>
+                   
+                   Target="{Binding ElementName=WebAddressEdit}">
+                <Label.Content>
+                    <TextBlock Text="{x:Static rsrc:Resources.WebAddressHeader}"/>
+                    <!--<TextBlock Text="{x:Static local:Constants.WebAddressHeader}"/>-->
+                </Label.Content>
+            </Label>
             <TextBox x:Name="WebAddressEdit"
                      Grid.Row="1"
                      Grid.Column="1"
                      Width="250"
                      Text="{Binding WebUrl}"/>
-            <CheckBox Content="Found On Amazon"
+            <CheckBox 
                       Grid.Row="2"
                       Grid.Column="1"
-                      IsChecked="{Binding FoundOnAmazon}"/>
-            <CheckBox Content="Stop Using"
+                      IsChecked="{Binding FoundOnAmazon}">
+                <CheckBox.Content>
+                    <TextBlock Text="{x:Static rsrc:Resources.FoundOnAmazonHeader}"/>
+                    <!--<TextBlock Text="{x:Static local:Constants.FoundOnAmazonHeader}"/>-->
+                </CheckBox.Content>
+            </CheckBox>
+            <CheckBox
                       Grid.Row="3"
                       Grid.Column="1"
-                      IsChecked="{Binding StopUsing}"/>
+                      IsChecked="{Binding StopUsing}">
+                <CheckBox.Content>
+                    <TextBlock Text="{x:Static rsrc:Resources.StopUsingHeader}"/>
+                    <!--<TextBlock Text="{x:Static local:Constants.StopUsingHeader}"/>-->
+                </CheckBox.Content>
+            </CheckBox>
             <!--<TextBlock Text="Spool Definitions"
                        FontSize="16"
                        Grid.Row="4"/>-->
             <TabControl Grid.Row="5"
                       Grid.ColumnSpan="2">
-                <TabItem Header="Spool Definitions">
-            <DataGrid ItemsSource="{Binding SpoolDefns}"
+                <TabItem Header="{x:Static rsrc:Resources.SpoolDefinitionsHeader}">
+                    <DataGrid ItemsSource="{Binding SpoolDefns}"
                       AutoGenerateColumns="False"
                       
                       CanUserDeleteRows="False"
                       Height="250"
-                      FontSize="{StaticResource StdFontSize}"
-                      IsEnabled="{Binding StopUsing,Converter={StaticResource BooleanNotConverter}}" ToolTipService.IsEnabled="True">
-                <DataGrid.Columns>
-                    <DataGridTemplateColumn>
-                        <DataGridTemplateColumn.Header>
-                            <TextBlock Text="DEI">
-                                <TextBlock.ToolTip>
-                                    <ContentControl ContentTemplate="{StaticResource EditingIndicatorsHelp}"/>
-                                    <!--<StackPanel>
-                                        <TextBlock Text="Data Editing Indicators"/>
-                                        <TextBlock Text="Legend:"/>
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{StaticResource CheckSymbol}" Style="{StaticResource FontIcon}"/>
-                                            <TextBlock Text="record in database."/>
-                                        </StackPanel>
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{StaticResource EditIconSymbol}" Style="{StaticResource FontIcon}"/>
-                                            <TextBlock Text="item needs to be saved to database."/>
-                                        </StackPanel>
-                                    </StackPanel>-->
-                                </TextBlock.ToolTip>
-                            </TextBlock>
-                        </DataGridTemplateColumn.Header>
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{StaticResource CheckSymbol}"
-                                           Style="{StaticResource FontIcon}"
-                                           FontSize="12"
-                                           Visibility="{Binding IsValid,Converter={StaticResource EnhancedVisibilityConverter}}" ToolTip="record in database."/>
-                                    <TextBlock Text="{StaticResource EditIconSymbol}"
-                                               Style="{StaticResource FontIcon}"
-                                               FontSize="12"
-                                               Visibility="{Binding IsModified,Converter={StaticResource EnhancedVisibilityConverter}}" ToolTip="item is modified."/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTextColumn Header="Description"
-                                        Binding="{Binding Description}"
-                                        Width="100" >
-                        <DataGridTextColumn.EditingElementStyle>
-                            <Style TargetType="TextBox">
-                                <Setter Property="MaxLength" Value="128"/>
-                            </Style>
-                        </DataGridTextColumn.EditingElementStyle>
-                    </DataGridTextColumn>
-                    <DataGridTextColumn Header="Diameter"
-                                        ToolTipService.ToolTip="Spool diameter"
-                                        Binding="{Binding SpoolDiameter,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter'}"
-                                        Width="75"/>
-                    <DataGridTextColumn Binding="{Binding SpoolWidth,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter'}"
-                                        Header="Width"
-                                        Width="75"/>
-
-                    <DataGridTemplateColumn Header="Drum"
-                                        ToolTipService.ToolTip="Drum diameter"
-                                        Width="100">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding DrumDiameter,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter'}"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                        <DataGridTemplateColumn.CellEditingTemplate>
-                            <DataTemplate>
-                                <StackPanel>
-                                    <TextBox Text="{Binding DrumDiameter,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter'}"/>
-                                    <ToggleButton x:Name="ShowDepth" Content="{StaticResource CalculatorSymbol}" Style="{StaticResource FontSymbolToggleButton}"/>
-                                    <TextBlock Text="Spool Depth" Visibility="{Binding ElementName=ShowDepth,Path=IsChecked,Mode=OneWay,Converter={StaticResource VisibilityConverter}}"/>
-                                    <TextBox Text="{Binding SpoolDepth,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter'}"
-                                             Visibility="{Binding ElementName=ShowDepth,Path=IsChecked,Mode=OneWay,Converter={StaticResource VisibilityConverter}}"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellEditingTemplate>
-                    </DataGridTemplateColumn>
-                    <!--<DataGridTextColumn Header="Depth"
-                                        Binding="{Binding SpoolDepth,Mode=TwoWay,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter'}"
-                                        Width="75"/>-->
-
-
-                    <!--<DataGridTextColumn Header="Max Depth"
-                                        Binding="{Binding MaxDepth,Mode=OneWay,StringFormat='{}{0:#} mm'}"
-                                        IsReadOnly="True"/>-->
-                    <DataGridTextColumn Header="Weight"
-                                        ToolTipService.ToolTip="Filament weight"
-                                        Binding="{Binding Weight,Converter={StaticResource ConvertToMetricWeight},ConverterParameter='Kilograms'}"
-                                        Width="75"/>
-                    <DataGridCheckBoxColumn Header="Stop Using"
-                                            ToolTipService.ToolTip="Stop using this spool definition"
-                                            Binding="{Binding StopUsing}"
-                                            Width="75"/>
-                    <DataGridCheckBoxColumn Header="Verified"
-                                            ToolTipService.ToolTip="Measurements verified on empty spool"
-                                            Binding="{Binding Verified}"
-                                            Width="75"/>
-                </DataGrid.Columns>
-                    </DataGrid>
-                </TabItem>
-                <TabItem Header="Filaments">
-                    <DataGrid ItemsSource="{Binding VendorSettings}" AutoGenerateColumns="False" >
+                      
+                      IsEnabled="{Binding StopUsing,Converter={StaticResource BooleanNotConverter}}" 
+                      Style="{StaticResource StdDataGrid}">
                         <DataGrid.Columns>
                             <DataGridTemplateColumn>
                                 <DataGridTemplateColumn.Header>
-                                    <TextBlock Text="DEI">
+                                    <TextBlock Text="{x:Static rsrc:Resources.DEIHeader}">
                                         <TextBlock.ToolTip>
                                             <ContentControl ContentTemplate="{StaticResource EditingIndicatorsHelp}"/>
                                             <!--<StackPanel>
@@ -358,17 +353,122 @@
                                             <TextBlock Text="{StaticResource CheckSymbol}"
                                            Style="{StaticResource FontIcon}"
                                            FontSize="12"
-                                           Visibility="{Binding IsValid,Converter={StaticResource EnhancedVisibilityConverter}}" ToolTip="record in database."/>
+                                           Visibility="{Binding IsValid,Converter={StaticResource VisibilityConverter}}" 
+                                               ToolTip="{x:Static rsrc:Resources.RecordInDbTip}"/>
                                             <TextBlock Text="{StaticResource EditIconSymbol}"
                                                Style="{StaticResource FontIcon}"
                                                FontSize="12"
-                                               Visibility="{Binding IsModified,Converter={StaticResource EnhancedVisibilityConverter}}" ToolTip="item is modified."/>
+                                               Visibility="{Binding IsModified,Converter={StaticResource VisibilityConverter}}" 
+                                               ToolTip="{x:Static rsrc:Resources.RecordModifiedToolTip}"/>
                                         </StackPanel>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Filament"
-                                            Width="100">
+                            <DataGridTextColumn Header="{x:Static rsrc:Resources.DescriptionHeader}"
+                                        Binding="{Binding Description}"
+                                        Width="{Binding DescriptionColumnWidth,Source={StaticResource LeakPrfSettings},Mode=TwoWay}" >
+                                <DataGridTextColumn.EditingElementStyle>
+                                    <Style TargetType="TextBox">
+                                        <Setter Property="MaxLength" Value="128"/>
+                                    </Style>
+                                </DataGridTextColumn.EditingElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="{x:Static rsrc:Resources.DiameterHeader}"
+                                        ToolTipService.ToolTip="{x:Static rsrc:Resources.SpoolDiameterToolTip}"
+                                        Binding="{Binding SpoolDiameter,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter'}"
+                                        Width="{Binding DiameterColumnWidth,Source={StaticResource LeakPrfSettings},Mode=TwoWay}"/>
+                            <DataGridTextColumn Binding="{Binding SpoolWidth,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter'}"
+                                        Header="{x:Static rsrc:Resources.WidthHeader}"
+                                                ToolTipService.ToolTip="{x:Static rsrc:Resources.WidthToolTip}"
+                                        Width="{Binding SpoolWidthColumnWidth,Source={StaticResource LeakPrfSettings},Mode=TwoWay}"/>
+
+                            <DataGridTemplateColumn Header="{x:Static rsrc:Resources.DrumHeader}"
+                                        ToolTipService.ToolTip="{x:Static rsrc:Resources.DrumDiameterToolTip}"
+                                        Width="{Binding DrumDiameterColumnWidth,Source={StaticResource LeakPrfSettings},Mode=TwoWay}">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding DrumDiameter,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter'}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                                <DataGridTemplateColumn.CellEditingTemplate>
+                                    <DataTemplate>
+                                        <StackPanel>
+                                            <TextBox Text="{Binding DrumDiameter,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter'}"/>
+                                            <ToggleButton x:Name="ShowDepth" Content="{StaticResource CalculatorSymbol}" Style="{StaticResource FontSymbolToggleButton}"/>
+                                            <TextBlock Text="{x:Static rsrc:Resources.SpoolDepthHeader}" Visibility="{Binding ElementName=ShowDepth,Path=IsChecked,Mode=OneWay,Converter={StaticResource VisibilityConverter}}"/>
+                                            <TextBox Text="{Binding SpoolDepth,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter'}"
+                                             Visibility="{Binding ElementName=ShowDepth,Path=IsChecked,Mode=OneWay,Converter={StaticResource VisibilityConverter}}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellEditingTemplate>
+                            </DataGridTemplateColumn>
+                            <!--<DataGridTextColumn Header="Depth"
+                                        Binding="{Binding SpoolDepth,Mode=TwoWay,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter'}"
+                                        Width="75"/>-->
+
+
+                            <!--<DataGridTextColumn Header="Max Depth"
+                                        Binding="{Binding MaxDepth,Mode=OneWay,StringFormat='{}{0:#} mm'}"
+                                        IsReadOnly="True"/>-->
+                            <DataGridTextColumn Header="{x:Static rsrc:Resources.WeightHeader}"
+                                        ToolTipService.ToolTip="{x:Static rsrc:Resources.WeightToolTip}"
+                                        Binding="{Binding Weight,Converter={StaticResource ConvertToMetricWeight},ConverterParameter='Kilograms'}"
+                                        Width="{Binding WeightColumnWidth,Source={StaticResource LeakPrfSettings},Mode=TwoWay}"/>
+                            <DataGridCheckBoxColumn Header="{x:Static rsrc:Resources.StopUsingHeader}"
+                                            ToolTipService.ToolTip="{x:Static rsrc:Resources.StopUsingToolTip}"
+                                            Binding="{Binding StopUsing}"
+                                            Width="{Binding StopUsingColumnWidth,Source={StaticResource LeakPrfSettings},Mode=TwoWay}"/>
+                            <DataGridCheckBoxColumn Header="{x:Static rsrc:Resources.VerifiedHeader}"
+                                            ToolTipService.ToolTip="{x:Static rsrc:Resources.VerifiedToolTip}"
+                                            Binding="{Binding Verified}"
+                                            Width="{Binding VerifiedColumnWidth,Source={StaticResource LeakPrfSettings},Mode=TwoWay}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+                <TabItem Header="{x:Static rsrc:Resources.FilamentsHeader}">
+                    <DataGrid ItemsSource="{Binding VendorSettings}" 
+                              AutoGenerateColumns="False" 
+                              Style="{StaticResource StdDataGrid}">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn>
+                                <DataGridTemplateColumn.Header>
+                                    <TextBlock Text="{x:Static rsrc:Resources.DEIHeader}">
+                                        <TextBlock.ToolTip>
+                                            <ContentControl ContentTemplate="{StaticResource EditingIndicatorsHelp}"/>
+                                            <!--<StackPanel>
+                                        <TextBlock Text="Data Editing Indicators"/>
+                                        <TextBlock Text="Legend:"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{StaticResource CheckSymbol}" Style="{StaticResource FontIcon}"/>
+                                            <TextBlock Text="record in database."/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{StaticResource EditIconSymbol}" Style="{StaticResource FontIcon}"/>
+                                            <TextBlock Text="item needs to be saved to database."/>
+                                        </StackPanel>
+                                    </StackPanel>-->
+                                        </TextBlock.ToolTip>
+                                    </TextBlock>
+                                </DataGridTemplateColumn.Header>
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{StaticResource CheckSymbol}"
+                                           Style="{StaticResource FontIcon}"
+                                           FontSize="12"
+                                           Visibility="{Binding IsValid,Converter={StaticResource VisibilityConverter}}" 
+                                                        ToolTip="{x:Static rsrc:Resources.RecordInDbTip}"/>
+                                            <TextBlock Text="{StaticResource EditIconSymbol}"
+                                               Style="{StaticResource FontIcon}"
+                                               FontSize="12"
+                                               Visibility="{Binding IsModified,Converter={StaticResource VisibilityConverter}}" 
+                                                       ToolTip="{x:Static rsrc:Resources.RecordModifiedToolTip}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="{x:Static rsrc:Resources.FilamentLabel}"
+                                            Width="{Binding FilamentColumnWidth,Source={StaticResource LeakPrfSettings},Mode=TwoWay}">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding FilamentDefn.MaterialType,Mode=OneWay}"/>
@@ -412,9 +512,12 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <Label Content="Filament Type"
-               Grid.Row="1"
-               />
+            <Label 
+               Grid.Row="1">
+                <Label.Content>
+                    <TextBlock Text="{x:Static rsrc:Resources.FilamentTypeHeader}"/>
+                </Label.Content>
+            </Label>
             <ComboBox Grid.Row="1"
                   Grid.Column="2"
                   Margin="3"
@@ -433,12 +536,15 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-            <Label Content="Diameter"
+            <Label 
                Grid.Row="2"
-               />
-            <Label Content="Density Measurement Type"
-               Grid.Row="3"
-               />
+               >
+                <TextBlock Text="{x:Static rsrc:Resources.DiameterHeader}"/>
+            </Label>
+            <Label Grid.Row="3"
+               >
+                <TextBlock Text="{x:Static rsrc:Resources.DensityMeasurementTypeHeader}"/>
+            </Label>
             <ComboBox 
                 Grid.Row="2" 
                 Grid.Column="1" 
@@ -463,10 +569,15 @@
                   ItemsSource="{Binding Source={StaticResource dataFromDensityEditType}}"
                   SelectedItem="{Binding DensityAlias.DensityType,Mode=TwoWay}"
                   IsEnabled="{Binding CanEdit}"/>
-            <CheckBox Content="Stop Using"
+            <CheckBox
                       Grid.Row="4"
                       Grid.Column="1"
-                      IsChecked="{Binding StopUsing}"/>
+                      IsChecked="{Binding StopUsing}"
+                ToolTip="{x:Static rsrc:Resources.StopUsingToolTip}">
+                <CheckBox.Content>
+                    <TextBlock Text="{x:Static rsrc:Resources.StopUsingHeader}"/>
+                </CheckBox.Content>
+            </CheckBox>
             <GroupBox Header="Defined Density"
             Grid.Row="5"
             
@@ -482,38 +593,53 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <Label Content="Density"
-                       />
+                    <Label >
+                        <Label.Content>
+                            <TextBlock Text="{x:Static rsrc:Resources.DensityHeader}"/>
+                        </Label.Content></Label>
                     <TextBox Grid.Column="1"
                          Text="{Binding DensityAlias.DefinedDensity,Mode=TwoWay,UpdateSourceTrigger=LostFocus}"
-                         IsEnabled="{Binding CanEdit}"/>
+                         IsEnabled="{Binding CanEdit}" ToolTip="{x:Static rsrc:Resources.DefinedDensityToolTip}"/>
                 </Grid>
             </GroupBox>
 
             <DataGrid Grid.Row="6"
                   
                   Grid.ColumnSpan="2"
-                  
+                  Style="{StaticResource StdDataGrid}"
                   ItemsSource="{Binding DensityAlias.MeasuredDensity}"
                   Visibility="{Binding MeasuredDensityVisible,Converter={StaticResource VisibilityConverter}}" AutoGenerateColumns="False"
                   IsEnabled="{Binding CanEdit}"
                   >
                 <DataGrid.Columns>
-                    <DataGridTextColumn Binding="{Binding Diameter,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter',UpdateSourceTrigger=PropertyChanged}" ClipboardContentBinding="{x:Null}" Header="Diameter" Width="100"/>
-                    <DataGridTextColumn Binding="{Binding Length,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter',UpdateSourceTrigger=PropertyChanged}" ClipboardContentBinding="{x:Null}" Header="Length" Width="100"/>
-                    <DataGridTextColumn Binding="{Binding Weight,Converter={StaticResource ConvertToMetricWeight},ConverterParameter='Grams',UpdateSourceTrigger=LostFocus}" ClipboardContentBinding="{x:Null}" Header="Weight" Width="100"/>
-                    <DataGridTextColumn Binding="{Binding DensityInGmPerCC}" ClipboardContentBinding="{x:Null}" Header="Density" IsReadOnly="True" Width="100"/>
+                    <DataGridTextColumn Binding="{Binding Diameter,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter',UpdateSourceTrigger=PropertyChanged}" 
+                                        ClipboardContentBinding="{x:Null}" 
+                                        Header="{x:Static rsrc:Resources.DiameterHeader}" 
+                                        Width="100"/>
+                    <DataGridTextColumn Binding="{Binding Length,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter',UpdateSourceTrigger=PropertyChanged}" 
+                                        ClipboardContentBinding="{x:Null}"
+                                        Header="{x:Static rsrc:Resources.LengthHeader}" 
+                                        Width="100"/>
+                    <DataGridTextColumn Binding="{Binding Weight,Converter={StaticResource ConvertToMetricWeight},ConverterParameter='Grams',UpdateSourceTrigger=LostFocus}" 
+                                        ClipboardContentBinding="{x:Null}" 
+                                        Header="{x:Static rsrc:Resources.WeightHeader}" 
+                                        Width="100"/>
+                    <DataGridTextColumn Binding="{Binding DensityInGmPerCC}" 
+                                        ClipboardContentBinding="{x:Null}" 
+                                        Header="{x:Static rsrc:Resources.DensityInGmPerCCHeader}" 
+                                        IsReadOnly="True" 
+                                        Width="100"/>
                 </DataGrid.Columns>
             </DataGrid>
 
-            <GroupBox Header="Average Density"
+            <GroupBox Header="{x:Static rsrc:Resources.AverageDensityHeader}"
                   Grid.Row="5"
                   Grid.ColumnSpan="2"
                   Visibility="{Binding MeasuredDensityVisible,Converter={StaticResource VisibilityConverter}}"
                   Margin="5" Height="75">
                 <StackPanel>
                     <TextBlock>
-                    <Run Text="Average Measured Density : "/>
+                    <Run Text="{x:Static rsrc:Resources.AverageMeasuredDensityHeader}"/>
                     <Run Text="{Binding DensityAlias.Density, Mode=OneWay,StringFormat={}{0:#.#####}}"/>
                     </TextBlock>
                 </StackPanel>
@@ -537,18 +663,23 @@
                        VerticalAlignment="Center"/>
             <StackPanel Grid.Column="1">
                 <TextBlock>
-                <Run Text="Name : "/>
+                <Run Text="{x:Static rsrc:Resources.NameHeader}"/>
+                    <Run Text="{x:Static rsrc:Resources.ColonHeader}"/>
                 <Run Text="{Binding Name,Mode=OneWay}"/>
                 </TextBlock>
-                <TextBlock ToolTip="Web Page Address">
-                <Run Text="Url : "/>
-                    <Hyperlink Command="{Binding DataContext.WebNavigate, ElementName=Page}" CommandParameter="{Binding WebUri,Mode=OneWay}">
+                <TextBlock ToolTip="{x:Static rsrc:Resources.WebAddressToolTip}">
+                <Run Text="{x:Static rsrc:Resources.DisplayUrlHeader}"/>
+                    <Hyperlink Command="{Binding DataContext.WebNavigate, ElementName=MyPage}" CommandParameter="{Binding WebUri,Mode=OneWay}">
                         <Run Text="{Binding WebUri,Mode=OneWay}"/>
                     </Hyperlink>
                 </TextBlock>
-                <CheckBox Content="Found on amazon" 
+                <CheckBox
                       IsChecked="{Binding FoundOnAmazon,Mode=OneWay}"
-                      IsEnabled="False"/>
+                      IsEnabled="False">
+                    <CheckBox.Content>
+                        <TextBlock Text="{x:Static rsrc:Resources.DisplayFoundOnAmazonHeader}"/>
+                    </CheckBox.Content>
+                </CheckBox>
                 <Separator/>
 
             </StackPanel>
@@ -679,7 +810,7 @@
                       Grid.ColumnSpan="2"
                       AutoGenerateColumns="False"
                       CanUserDeleteRows="False"
-                      FontSize="{StaticResource StdFontSize}"
+                      Style="{StaticResource StdDataGrid}"
                       IsEnabled="{Binding StopUsing,Converter={StaticResource BooleanNotConverter}}">
                 <DataGrid.Columns>
                     <DataGridTemplateColumn >
@@ -708,16 +839,16 @@
                                     <TextBlock Text="{StaticResource CheckSymbol}"
                                            Style="{StaticResource FontIcon}"
                                            FontSize="12"
-                                           Visibility="{Binding IsValid,Converter={StaticResource VisibilityConverter}}"/>
+                                           Visibility="{Binding IsValid,Converter={StaticResource EnhancedVisibilityConverter}}"/>
                                     <TextBlock Text="{StaticResource EditIconSymbol}"
                                                Style="{StaticResource FontIcon}"
                                                FontSize="12"
-                                               Visibility="{Binding IsModified,Converter={StaticResource VisibilityConverter}}"/>
+                                               Visibility="{Binding IsModified,Converter={StaticResource EnhancedVisibilityConverter}}"/>
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridTemplateColumn Width="100"
+                    <DataGridTemplateColumn Width="{Binding MeasuredOnColumnWidth,Source={StaticResource LeakPrfSettings},Mode=TwoWay}"
                                             Header="Measured On">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -730,18 +861,18 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridTextColumn Width="100"
+                    <DataGridTextColumn Width="{Binding DepthLeftColumnWidth,Source={StaticResource LeakPrfSettings},Mode=TwoWay}"
                                         Header="Depth Left"
                                         Binding="{Binding Depth1,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter',Mode=TwoWay,UpdateSourceTrigger=LostFocus}"/>
-                    <DataGridTextColumn Width="100"
+                    <DataGridTextColumn Width="{Binding DepthRightColumnWidth,Source={StaticResource LeakPrfSettings},Mode=TwoWay}"
                                         Header="Depth Right"
                                         Binding="{Binding Depth2,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter',Mode=TwoWay,UpdateSourceTrigger=LostFocus}"/>
-                    <DataGridTextColumn Width="100"
+                    <DataGridTextColumn Width="{Binding RemainingGColumnWidth,Source={StaticResource LeakPrfSettings},Mode=TwoWay}"
                                         Header="Remaining (g)"
                                         Binding="{Binding FilamentRemainingInGrams,Mode=OneWay,StringFormat='{}{0:#} g'}"
                                         IsReadOnly="True"
                                         ToolTipService.ToolTip="Amount remaining in grams."/>
-                    <DataGridTextColumn Width="100"
+                    <DataGridTextColumn Width="{Binding RemainingMColumnWidth,Source={StaticResource LeakPrfSettings},Mode=TwoWay}"
                                         Header="Remaining (m)"
                                         Binding="{Binding FilamentRemainingInMeters,Mode=OneWay,StringFormat='{}{0:#} m'}"
                                         IsReadOnly="True"

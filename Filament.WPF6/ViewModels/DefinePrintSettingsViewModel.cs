@@ -83,7 +83,7 @@ namespace Filament.WPF6.ViewModels
             //throw new NotImplementedException();
         }
 
-        private ICommand saveChanges;
+        private ICommand? saveChanges;
         public ICommand SaveChanges { get => saveChanges ??= new RelayCommand(HandleSaveChanges); }
 
         private void HandleSaveChanges()

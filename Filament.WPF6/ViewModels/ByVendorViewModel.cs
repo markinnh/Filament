@@ -13,7 +13,7 @@ using System.Reflection;
 
 namespace Filament.WPF6.ViewModels
 {
-    internal class ByVendorViewModel : BaseBrowserViewModel<DataDefinitions.Models.VendorDefn, DatabaseObject>
+    internal class ByVendorViewModel : BaseBrowserViewModel<VendorDefn, DataDefinitions.DatabaseObject>
     {
         //private object? selectedObject;
 

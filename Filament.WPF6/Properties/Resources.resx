@@ -117,11 +117,146 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AddInventoryHeader" xml:space="preserve">
+    <value>Add Inventory</value>
+  </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="AppIcon" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\AppIcon.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="AverageDensityHeader" xml:space="preserve">
+    <value>Average Density</value>
+  </data>
+  <data name="AverageMeasuredDensityHeader" xml:space="preserve">
+    <value>Average Measured Density</value>
+  </data>
+  <data name="ColonHeader" xml:space="preserve">
+    <value>:</value>
+  </data>
+  <data name="ColorHeader" xml:space="preserve">
+    <value>Color</value>
+  </data>
+  <data name="DataEditingIndicatorsHeader" xml:space="preserve">
+    <value>Data Editing Indicators</value>
+  </data>
+  <data name="DateOpenedHeader" xml:space="preserve">
+    <value>Date Opened/Dried</value>
+  </data>
+  <data name="DefinedDensityToolTip" xml:space="preserve">
+    <value>Defined density as provided by vendor or website</value>
+  </data>
+  <data name="DefinedHeader" xml:space="preserve">
+    <value>Defined</value>
+  </data>
+  <data name="DEIHeader" xml:space="preserve">
+    <value>DEI</value>
+  </data>
+  <data name="DensityHeader" xml:space="preserve">
+    <value>Density</value>
+  </data>
+  <data name="DensityInGmPerCCHeader" xml:space="preserve">
+    <value>Gm per cc</value>
+  </data>
+  <data name="DensityMeasurementTypeHeader" xml:space="preserve">
+    <value>Density Measurement Type</value>
+  </data>
+  <data name="DescriptionHeader" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="DiameterHeader" xml:space="preserve">
+    <value>Diameter</value>
+  </data>
+  <data name="DisplayFoundOnAmazonHeader" xml:space="preserve">
+    <value>Found on Amazon :</value>
+  </data>
+  <data name="DisplayNameHeader" xml:space="preserve">
+    <value>Name :</value>
+  </data>
+  <data name="DisplayUrlHeader" xml:space="preserve">
+    <value>Url :</value>
+  </data>
+  <data name="DrumDiameterToolTip" xml:space="preserve">
+    <value>Drum Diameter</value>
+  </data>
+  <data name="DrumHeader" xml:space="preserve">
+    <value>Drum</value>
+  </data>
+  <data name="FilamentLabel" xml:space="preserve">
+    <value>Filament</value>
+  </data>
+  <data name="FilamentsHeader" xml:space="preserve">
+    <value>Filaments</value>
+  </data>
+  <data name="FilamentTypeHeader" xml:space="preserve">
+    <value>Filament Type</value>
+  </data>
+  <data name="FoundOnAmazonHeader" xml:space="preserve">
+    <value>Found On Amazon</value>
+  </data>
+  <data name="LegendHeader" xml:space="preserve">
+    <value>Legend</value>
+  </data>
+  <data name="LengthHeader" xml:space="preserve">
+    <value>Length</value>
+  </data>
+  <data name="MeasuredHeader" xml:space="preserve">
+    <value>Measured</value>
+  </data>
+  <data name="NameHeader" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="NotInDbTip" xml:space="preserve">
+    <value>record needs to be saved to database.</value>
+  </data>
+  <data name="RecordInDbTip" xml:space="preserve">
+    <value>record in database.</value>
+  </data>
+  <data name="RecordModifiedToolTip" xml:space="preserve">
+    <value>record is modified</value>
+  </data>
+  <data name="SpoolDefinitionsHeader" xml:space="preserve">
+    <value>Spool Definitions</value>
+  </data>
+  <data name="SpoolDepthHeader" xml:space="preserve">
+    <value>Spool Depth</value>
+  </data>
+  <data name="SpoolDiameterToolTip" xml:space="preserve">
+    <value>Spool Diameter</value>
+  </data>
+  <data name="StopUsingHeader" xml:space="preserve">
+    <value>Stop Using</value>
+  </data>
+  <data name="StopUsingToolTip" xml:space="preserve">
+    <value>Stop using this item</value>
+  </data>
   <data name="Test" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Test.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="VendorSpoolHeader" xml:space="preserve">
+    <value>Vendor Spool</value>
+  </data>
+  <data name="VerifiedHeader" xml:space="preserve">
+    <value>Verified</value>
+  </data>
+  <data name="VerifiedToolTip" xml:space="preserve">
+    <value>Measurements verified on empty spool</value>
+  </data>
+  <data name="WebAddressHeader" xml:space="preserve">
+    <value>Web Address</value>
+  </data>
+  <data name="WebAddressToolTip" xml:space="preserve">
+    <value>Web page address</value>
+  </data>
+  <data name="WeightHeader" xml:space="preserve">
+    <value>Weight</value>
+  </data>
+  <data name="WeightToolTip" xml:space="preserve">
+    <value>Filament weight in Kg</value>
+  </data>
+  <data name="WidthHeader" xml:space="preserve">
+    <value>Width</value>
+  </data>
+  <data name="WidthToolTip" xml:space="preserve">
+    <value>Inner width of spool</value>
   </data>
 </root>

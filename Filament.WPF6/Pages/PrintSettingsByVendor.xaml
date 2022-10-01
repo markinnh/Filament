@@ -15,7 +15,11 @@
     </Page.DataContext>
     <Page.Resources>
         <DataTemplate x:Key="EditSupportedFilaments" DataType="{x:Type models:VendorDefn}">
-            <DataGrid ItemsSource="{Binding VendorSettings}" AutoGenerateColumns="False" Height="500" CanUserDeleteRows="False">
+            <DataGrid ItemsSource="{Binding VendorSettings}" 
+                      AutoGenerateColumns="False" 
+                      Height="500" 
+                      CanUserDeleteRows="False"
+                      Style="{StaticResource StdDataGrid}">
                 <DataGrid.Columns>
                     <DataGridTemplateColumn>
                         <DataGridTemplateColumn.Header>
@@ -43,11 +47,11 @@
                                     <TextBlock Text="{StaticResource CheckSymbol}"
                                            Style="{StaticResource FontIcon}"
                                            FontSize="12"
-                                           Visibility="{Binding InDatabase,Mode=OneWay,Converter={StaticResource EnhancedVisibilityConverter}}" ToolTip="record in database."/>
+                                           Visibility="{Binding InDatabase,Mode=OneWay,Converter={StaticResource VisibilityConverter}}" ToolTip="record in database."/>
                                     <TextBlock Text="{StaticResource EditIconSymbol}"
                                                Style="{StaticResource FontIcon}"
                                                FontSize="12"
-                                               Visibility="{Binding IsModified,Converter={StaticResource EnhancedVisibilityConverter}}" ToolTip="item is modified."/>
+                                               Visibility="{Binding IsModified,Converter={StaticResource VisibilityConverter}}" ToolTip="item is modified."/>
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
@@ -113,7 +117,7 @@
                                     <TextBlock Text="{StaticResource CheckSymbol}"
                                            Style="{StaticResource FontIcon}"
                                            FontSize="12"
-                                           Visibility="{Binding InDatabase,Mode=OneWay,Converter={StaticResource EnhancedVisibilityConverter}}" ToolTip="record in database."/>
+                                           Visibility="{Binding InDatabase,Mode=OneWay,Converter={StaticResource VisibilityConverter}}" ToolTip="record in database."/>
                                     <TextBlock Text="{StaticResource EditIconSymbol}"
                                                Style="{StaticResource FontIcon}"
                                                FontSize="12"

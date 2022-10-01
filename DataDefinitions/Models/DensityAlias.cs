@@ -19,7 +19,7 @@ namespace DataDefinitions.Models
     /// <summary>
     /// Allows storing either 'Defined' or 'Measured' densities
     /// </summary>
-    public class DensityAlias : DatabaseObject, IDensity, INotifyContainer
+    public class DensityAlias : DataDefinitions.DatabaseObject, IDensity, INotifyContainer
     {
         const int MinimumDensityMeasurementsRequired = 3;
 

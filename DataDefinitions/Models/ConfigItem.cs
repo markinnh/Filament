@@ -12,7 +12,7 @@ namespace DataDefinitions.Models
     /// <summary>
     /// Individual settings for the configuration.
     /// </summary>
-    public class ConfigItem : DatabaseObject
+    public class ConfigItem : DataDefinitions.DatabaseObject
     {
         public static event InDataOpsChangedHandler InDataOpsChanged;
 

@@ -4,22 +4,23 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:Filament.WPF6.Pages"
-      
+      xmlns:properties="clr-namespace:Filament.WPF6.Helpers"
       xmlns:vm="clr-namespace:Filament.WPF6.ViewModels"
       xmlns:core="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800" Height="450"
+      d:DesignHeight="450" d:DesignWidth="800" 
       Title="FilamentDefnPage" IsEnabled="{Binding Ready,Mode=OneWay}" >
     <Page.DataContext>
         <vm:FilamentDefnViewModel/>
     </Page.DataContext>
     <Page.Resources>
         
-        
+
     </Page.Resources>
     <Grid VerticalAlignment="Top" >
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="{Binding FilamentDefnColumn1,Source={StaticResource LeakPrfSettings},Mode=TwoWay}"/>
+            <ColumnDefinition Width="5"/>
             <ColumnDefinition Width="150"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
@@ -42,13 +43,18 @@
             Grid.Row="2"
             Margin="3"
             VerticalAlignment="Top"
-            Height="{StaticResource StandardListViewHeight}"
+            
+            MaxHeight="400"
             ItemsSource="{Binding Items}" 
             ItemTemplate="{StaticResource DisplayFilaDefnInList}"
             SelectedItem="{Binding SelectedItem}">
 
         </ListView>
-        <Grid Grid.Column="1" Grid.ColumnSpan="2" Grid.RowSpan="8">
+        <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch"
+                      VerticalAlignment="Stretch" Background="AliceBlue"
+                      Grid.RowSpan="10" ResizeBehavior="PreviousAndNext"
+                      ResizeDirection="Columns"/>
+        <Grid Grid.Column="2" Grid.ColumnSpan="2" Grid.RowSpan="8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200"/>
                 <ColumnDefinition Width="Auto"/>

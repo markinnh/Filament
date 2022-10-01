@@ -14,11 +14,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using DAL;
+using System.Windows.Controls;
 
 namespace Filament.WPF6.ViewModels
 {
-    public class TVendorDefnViewModel : BaseBrowserViewModel<VendorDefn,VendorDefn>
+    public class TVendorDefnViewModel : BaseBrowserViewModel<VendorDefn, VendorDefn>
     {
+        DataGridLengthConverter dglConvert = new DataGridLengthConverter();
         private ICommand? webNavigate;
         public ICommand WebNavigate { get => webNavigate ??= new RelayCommand<object>(HandleWebNavigate); }
 
@@ -63,6 +65,12 @@ namespace Filament.WPF6.ViewModels
 
         protected override IEnumerable<VendorDefn>? GetFilteredItems(Func<VendorDefn, bool> predicate) => Singleton<DataLayer>.Instance.GetFilteredVendors(predicate);
         public IEnumerable<FilamentDefn> Filaments => Singleton<DataLayer>.Instance.FilamentList;
+
+        public string DescriptionColumnWidth
+        {
+            get => Properties.Settings.Default.DescriptionColumnWidth;
+            set => Properties.Settings.Default.DescriptionColumnWidth = dglConvert.ConvertToString(value);
+        }
         protected override void UpdateSelectedItemHander()
         {
             if (SelectedItem != null)
@@ -88,7 +96,7 @@ namespace Filament.WPF6.ViewModels
         }
         public TVendorDefnViewModel()
         {
-            WeakReferenceMessenger.Default.Register<Helpers.VendorDefnListChanged>(this,HandleVendorDefnCollectionChanged);
+            WeakReferenceMessenger.Default.Register<Helpers.VendorDefnListChanged>(this, HandleVendorDefnCollectionChanged);
         }
         ~TVendorDefnViewModel()
         {
@@ -96,11 +104,11 @@ namespace Filament.WPF6.ViewModels
         }
         private void HandleVendorDefnCollectionChanged(object recipient, VendorDefnListChanged message)
         {
-            if(message.Value != null)
+            if (message.Value != null)
             {
-                Items=message.Value;
-                SelectedItem=Items.FirstOrDefault();
-            }    
+                Items = message.Value;
+                SelectedItem = Items.FirstOrDefault();
+            }
             //throw new NotImplementedException();
         }
     }

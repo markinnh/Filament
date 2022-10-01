@@ -12,7 +12,7 @@ using System.Windows.Input;
 
 namespace Filament.WPF6.ViewModels
 {
-    public class PrintSettingsByVendorViewModel : BaseBrowserViewModel<VendorDefn, DatabaseObject>
+    public class PrintSettingsByVendorViewModel : BaseBrowserViewModel<VendorDefn, DataDefinitions.DatabaseObject>
     {
         public IEnumerable<FilamentDefn> Filaments { get => Singleton<DAL.DataLayer>.Instance.FilamentList; }
         public IEnumerable<PrintSettingDefn> PrintSettings { get => Singleton<DAL.DataLayer>.Instance.PrintSettingsList; }
@@ -80,20 +80,20 @@ namespace Filament.WPF6.ViewModels
         {
             //throw new NotImplementedException();
         }
-        private DatabaseObject? selectedRow;
+        private DataDefinitions.DatabaseObject? selectedRow;
 
-        public DatabaseObject SelectedRow
+        public DataDefinitions.DatabaseObject SelectedRow
         {
             get => selectedRow;
-            set => Set<DatabaseObject>(ref selectedRow, value);
+            set => base.Set<DataDefinitions.DatabaseObject>(ref selectedRow, value);
         }
 
-        private ICommand deleteSelectedRow = new RelayCommand<DatabaseObject>(HandleDeleteSelectedRow);
+        private ICommand deleteSelectedRow = new RelayCommand<DataDefinitions.DatabaseObject>(HandleDeleteSelectedRow);
         public ICommand DeleteSelectedRow => deleteSelectedRow;
 
-        private static void HandleDeleteSelectedRow(DatabaseObject? obj)
+        private static void HandleDeleteSelectedRow(DataDefinitions.DatabaseObject? obj)
         {
-            if (obj != null && obj is DatabaseObject)
+            if (obj != null && obj is DataDefinitions.DatabaseObject)
                 DAL.Abstraction.Remove(obj);
 
             //throw new NotImplementedException();

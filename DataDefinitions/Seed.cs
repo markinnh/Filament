@@ -80,7 +80,7 @@ namespace DataDefinitions
             var vendor1 = new VendorDefn()
             {
                 Name = "3d Solutech",
-                WebUrl = "https://www.3dsolutech.com/",
+                WebUrl = String.Empty,
                 FoundOnAmazon = true
             };
             vendor1.SpoolDefns.Add(new SpoolDefn()

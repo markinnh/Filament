@@ -17,7 +17,7 @@ namespace DataDefinitions.Models
     /// <summary>
     /// Allows for definition of 3d print filament. Default FilamentDefn is Generic PLA
     /// </summary>
-    public class FilamentDefn : DatabaseObject//,IEditableObject
+    public class FilamentDefn : DataDefinitions.DatabaseObject//,IEditableObject
     {
 
 

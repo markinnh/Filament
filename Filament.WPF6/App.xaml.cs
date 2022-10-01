@@ -24,5 +24,10 @@ namespace Filament.WPF6
             DAL.Abstraction.SeedData() ;
             DAL.Abstraction.VerifySeed();
         }
+
+        private void Application_Exit(object sender, ExitEventArgs e)
+        {
+            Filament.WPF6.Properties.Settings.Default.Save();
+        }
     }
 }

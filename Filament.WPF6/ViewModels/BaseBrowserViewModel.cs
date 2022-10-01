@@ -13,12 +13,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using MyLibraryStandard.Attributes;
+using static System.Diagnostics.Debug;
+using System.Diagnostics;
 
 namespace Filament.WPF6.ViewModels
 {
-    public abstract class BaseBrowserViewModel<TBrowse, TSelect> : Observable where TBrowse : DatabaseObject, new()
-        where TSelect : DatabaseObject, new()
+    public abstract class BaseBrowserViewModel<TBrowse, TSelect> : Observable where TBrowse : DataDefinitions.DatabaseObject, new()
+        where TSelect : DataDefinitions.DatabaseObject, new()
     {
+#if DEBUG
+    public bool ShowDebugElements=>true;
+#else
+        public bool ShowDebugElements => false;
+#endif
+
         protected static bool ready = true;
         protected virtual bool SupportsFiltering { get; } = true;
 
@@ -28,15 +37,20 @@ namespace Filament.WPF6.ViewModels
             set { Set(ref ready, value); }
         }
 
-        private ObservableCollection<TBrowse> _browse;
+        private ObservableCollection<TBrowse>? _browse;
         public ObservableCollection<TBrowse>? Items { get => _browse; set => Set(ref _browse, value); }
         private TSelect? selectedItem;
-
+        [Affected(Names = new string[] { nameof(CanDelete), nameof(SelectedItemNotNull) })]
         public TSelect? SelectedItem
         {
             get => selectedItem;
-            set => Set(ref selectedItem, value);
+            set
+            {
+                Set(ref selectedItem, value);
+            }
         }
+        public bool CanDelete => SelectedItem?.InDatabase ?? false;
+        public bool SelectedItemNotNull => SelectedItem!=null;
 
         public bool HasModifiedItems => Items?.Count(it => it.IsModified) > 0 && !InAddNew;
         public bool CanAdd => !InAddNew;
@@ -146,10 +160,10 @@ namespace Filament.WPF6.ViewModels
                 if (Items != null)
                 {
                     RemoveEventLinks();
-                    Items?.Clear();
+                    Items.Clear();
                     foreach (var filament in newItems)
                     {
-                        Items?.Add(filament);
+                        Items.Add(filament);
                         //filament?.InitNotificationHandler();
                     }
                 }
@@ -226,6 +240,7 @@ namespace Filament.WPF6.ViewModels
         protected virtual void UpdateSelectedItemHander()
         {
             if (SelectedItem != null)
+            {
                 if (SelectedItem.IsValid)
                 {
                     bool needsAdd;
@@ -240,15 +255,30 @@ namespace Filament.WPF6.ViewModels
                             Items?.Add(select);
                     }
                     //SelectedItem.SetContainedModifiedState(false);
+                    OnPropertyChanged(nameof(SelectedItemNotNull));
+                    OnPropertyChanged(nameof(CanDelete));
                 }
+                else
+                {
+                    WriteLine("Selected Item is not valid.");
+                }
+            }
+            else
+                WriteLine("SelectedItem is null");
+
             //System.Diagnostics.Debug.WriteLine($"Update selected item for {typeof(TBrowse).Name} not implemented.");
         }
+        protected virtual void UpdateAfterItemDelete() { }
         protected virtual void DeleteSelectedHandler()
         {
             if (SelectedItem != null)
             {
                 if (SelectedItem.InDatabase)
+                {
+                    //Singleton<DAL.DataLayer>.Instance.Remove(SelectedItem);
                     DAL.Abstraction.Remove(SelectedItem);
+                    UpdateAfterItemDelete();
+                }
             }
             // TODO: This needs a lot of work and consideration whether to support deleting items.
             //try

@@ -1,0 +1,402 @@
+﻿<Page x:Class="Filament.WPF6.Pages.SimpleInventoryPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Filament.WPF6"
+      xmlns:rsrc="clr-namespace:Filament.WPF6.Properties"
+      xmlns:vm="clr-namespace:Filament.WPF6.ViewModels"
+      xmlns:models="clr-namespace:DataDefinitions.Models;assembly=DataDefinitions"
+      
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="SimpleInventoryPage">
+    <Page.DataContext>
+        <vm:SimpleInventoryViewModel/>
+    </Page.DataContext>
+    <Page.Resources>
+        <CollectionViewSource x:Key="InventoryCollection" Source="{Binding Inventory}" IsLiveGroupingRequested="True">
+            <CollectionViewSource.GroupDescriptions>
+                <PropertyGroupDescription PropertyName="VendorName"/>
+                <PropertyGroupDescription PropertyName="SpoolDescription"/>
+            </CollectionViewSource.GroupDescriptions>
+        </CollectionViewSource>
+        <DataTemplate x:Key="DispInventorySpool" DataType="models:InventorySpool">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="75"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Border BorderBrush="Brown" BorderThickness="1">
+                    <Image  Width="16" Height="16" >
+                        <Image.Source>
+                            <DrawingImage>
+                                <DrawingImage.Drawing>
+                                    <GeometryDrawing Brush="{Binding ColorName}" Geometry="{StaticResource FilamentGeometry}"/>
+                                </DrawingImage.Drawing>
+                            </DrawingImage>
+                        </Image.Source>
+                    </Image>
+                    <!--<Path VerticalAlignment="Center" Grid.RowSpan="2" Stroke="{Binding ColorName}" Data="{StaticResource FilamentPathData}"/>-->
+                </Border>
+                <TextBlock Grid.Column="1" Text="{Binding ColorName}"/>
+                <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding DateOpened,StringFormat={}{0:d}}"/>
+
+            </Grid>
+        </DataTemplate>
+        
+    </Page.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="{Binding SimpleInvColumn1, Source={StaticResource LeakPrfSettings},Mode=TwoWay}"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="500"/>
+        </Grid.RowDefinitions>
+        <ToolBarPanel Grid.ColumnSpan="3">
+            <ToolBar>
+                <Button Style="{StaticResource IconCommandButton}" 
+                        Content="{StaticResource RefreshIcon}"
+                        Command="{Binding RefreshListCommand}">
+                    <!--<Button.Content>
+                        <Rectangle Width="16 " Height="16">
+                            <Rectangle.Resources>
+                                <SolidColorBrush x:Key="canvas" Opacity="0" />
+                                <SolidColorBrush x:Key="light-blue" Color="#005dba" Opacity="1" />
+                            </Rectangle.Resources>
+                            <Rectangle.Fill>
+                                <DrawingBrush Stretch="None">
+                                    <DrawingBrush.Drawing>
+                                        <DrawingGroup>
+                                            <DrawingGroup >
+                                                <GeometryDrawing Brush="{DynamicResource canvas}" Geometry="F1M16,16H0V0H16Z" />
+                                            </DrawingGroup>
+                                            <DrawingGroup >
+                                                <GeometryDrawing Brush="{DynamicResource light-blue}" Geometry="F1M15,8A7,7,0,1,1,4.44,2H1.5V1h4l.5.5v4H5V2.829a5.983,5.983,0,1,0,5.57-.244l.43-.9A7.031,7.031,0,0,1,15,8Z" />
+                                            </DrawingGroup>
+                                        </DrawingGroup>
+                                    </DrawingBrush.Drawing>
+                                </DrawingBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </Button.Content>-->
+                </Button>
+            </ToolBar>
+        </ToolBarPanel>
+        <ListView Grid.Row="1" ItemsSource="{Binding Source={StaticResource InventoryCollection}}" 
+                  ItemTemplate="{StaticResource DispInventorySpool}" 
+                  SelectedItem="{Binding SelectedItem,Mode=TwoWay}" 
+                  ScrollViewer.HorizontalScrollBarVisibility="Disabled" Style="{StaticResource StandardControl}">
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+            <ListView.GroupStyle>
+                <GroupStyle>
+                    <GroupStyle.HeaderTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock  >
+                                    <Run Text="{Binding Name,Mode=OneWay}"/>
+
+                                </TextBlock>
+                            </StackPanel>
+
+                        </DataTemplate>
+                    </GroupStyle.HeaderTemplate>
+                </GroupStyle>
+            </ListView.GroupStyle>
+        </ListView>
+        <GridSplitter Grid.Column="1" Grid.Row="1" ResizeDirection="Columns" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="AliceBlue" ResizeBehavior="PreviousAndNext" />
+        <StackPanel Grid.Column="2" Grid.Row="1">
+            <ContentControl Content="{Binding SelectedItem}" ContentTemplate="{StaticResource EditInventorySpoolItems}"/>
+            <StackPanel Orientation="Horizontal" >
+                <CheckBox Name="cbNullCheck" 
+                          IsChecked="{Binding SelectedItemNotNull,Mode=OneWay}" 
+                          IsEnabled="False"
+                          Visibility="{Binding ShowDebugElements,Converter={StaticResource EnhancedVisibilityConverter}}"/>
+                <CheckBox Name="cbSelModified"
+                          IsChecked="{Binding SelectedItem.IsModified,Mode=OneWay}"
+                          IsEnabled="False"
+                          Visibility="{Binding ShowDebugElements,Converter={StaticResource EnhancedVisibilityConverter}}"/>
+                <Button Name="btnSave"
+                        Command="{Binding UpdateCommand}"
+                        Style="{StaticResource IconCommandButton}">
+                    <Button.IsEnabled>
+                        <MultiBinding Converter="{StaticResource MultiBoolConverter}">
+                            <Binding ElementName="cbNullCheck" Path="IsChecked" Mode="OneWay"/>
+                            <Binding ElementName="cbSelModified" Path="IsChecked" Mode="OneWay"/>
+                        </MultiBinding>
+                    </Button.IsEnabled>
+                    <Button.Content>
+                        <Rectangle Width="16 " Height="16">
+                            <Rectangle.Resources>
+                                <SolidColorBrush x:Key="canvas" Opacity="0" />
+                                <SolidColorBrush x:Key="light-blue-10" Color="#005dba" Opacity="0.1" />
+                                <SolidColorBrush x:Key="light-blue" Color="#005dba" Opacity="1" />
+
+                            </Rectangle.Resources>
+                            <Rectangle.Fill>
+                                <DrawingBrush Stretch="None">
+                                    <DrawingBrush.Drawing>
+                                        <DrawingGroup>
+                                            <DrawingGroup >
+                                                <GeometryDrawing Brush="{DynamicResource canvas}" Geometry="F1M16,16H0V0H16Z" />
+                                            </DrawingGroup>
+                                            <DrawingGroup>
+                                                <GeometryDrawing Brush="{DynamicResource light-blue-10}" Geometry="F1M14.515,3.5v11h-13V1.5h11Z" />
+                                                <GeometryDrawing Brush="{DynamicResource light-blue}" Geometry="F1M14.854,3.146l-2-2L12.5,1H1.5L1,1.5v13l.5.5h13l.5-.5V3.5ZM5,2h6V6H5Zm9,12H2V2H4V6.5l.5.5h7l.5-.5V2h.293L14,3.707Z" />
+                                                <DrawingGroup Opacity="{DynamicResource cls-1}">
+                                                    <GeometryDrawing Brush="{DynamicResource light-blue}" Geometry="F1M13,8.5v6H12V9H4v5.5H3v-6L3.5,8h9Z" />
+                                                </DrawingGroup>
+                                            </DrawingGroup>
+                                        </DrawingGroup>
+                                    </DrawingBrush.Drawing>
+                                </DrawingBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </Button.Content>
+                </Button>
+                <Button Style="{StaticResource IconCommandButton}"
+                        IsEnabled="{Binding CanDelete, Mode=OneWay}" 
+                        Command="{Binding DeleteSelectedCommand}"
+                        
+                        >
+                    <Button.Content>
+                        <Rectangle Width="16 " Height="16">
+                            <Rectangle.Resources>
+                                <SolidColorBrush x:Key="canvas" Opacity="0" />
+                                <SolidColorBrush x:Key="light-defaultgrey-10" Color="#212121" Opacity="0.1" />
+                                <SolidColorBrush x:Key="light-defaultgrey" Color="#212121" Opacity="1" />
+                            </Rectangle.Resources>
+                            <Rectangle.Fill>
+                                <DrawingBrush Stretch="None">
+                                    <DrawingBrush.Drawing>
+                                        <DrawingGroup>
+                                            <DrawingGroup >
+                                                <GeometryDrawing Brush="{DynamicResource canvas}" Geometry="F1M16,16H0V0H16Z" />
+                                            </DrawingGroup>
+                                            <DrawingGroup>
+                                                <GeometryDrawing Brush="{DynamicResource light-defaultgrey-10}" Geometry="F1M12.5,2.5v13H2.5V2.5Z" />
+                                                <GeometryDrawing Brush="{DynamicResource light-defaultgrey}" Geometry="F1M14,2H10V1A1,1,0,0,0,9,0H6A1,1,0,0,0,5,1V2H1V3H2V15.5l.5.5h10l.5-.5V3h1ZM6,1H9V2H6Zm6,14H3V3h9ZM5,13V5H6v8Zm5,0H9V5h1ZM8,13H7V5H8Z" />
+                                            </DrawingGroup>
+                                        </DrawingGroup>
+                                    </DrawingBrush.Drawing>
+                                </DrawingBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </Button.Content>
+                </Button>
+                
+            </StackPanel>
+            <Expander x:Name="AddInventory" Header="{x:Static rsrc:Resources.AddInventoryHeader}" IsExpanded="False">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Label >
+                        <Label.Content>
+                            <TextBlock Text="{x:Static rsrc:Resources.VendorSpoolHeader}"/>
+                        </Label.Content>
+                    </Label>
+                    <ComboBox ItemsSource="{Binding SpoolDefns}" 
+                              Grid.Column="1" 
+                              SelectedItem="{Binding NewInventorySpool.SpoolDefn,Mode=TwoWay}" 
+                              IsEnabled="{Binding InAddInventory,Mode=OneWay}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate DataType="{x:Type models:SpoolDefn}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock>
+                                        <Run Text="{Binding Vendor.Name}"/>
+                                        <Run Text=" - "/>
+                                        <Run Text="{Binding Description}"/>
+                                    </TextBlock>
+
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Label  Grid.Row="1">
+                        <Label.Content>
+                            <TextBlock Text="{x:Static rsrc:Resources.DateOpenedHeader}"/>
+                        </Label.Content>
+                    </Label>
+                    <DatePicker Grid.Column="1" 
+                                Grid.Row="1" 
+                                SelectedDate="{Binding NewInventorySpool.DateOpened,Mode=TwoWay}" 
+                                IsEnabled="{Binding InAddInventory,Mode=OneWay}"/>
+                    <Label  Grid.Row="2">
+                        <Label.Content>
+                            <TextBlock Text="{x:Static rsrc:Resources.ColorHeader}"/>
+                        </Label.Content>
+                    </Label>
+                    <ComboBox ItemsSource="{Binding SupportedColorsCode}" 
+                              Grid.Column="1" 
+                              Grid.Row="2" 
+                              SelectedItem="{Binding NewInventorySpool.ColorName,Mode=TwoWay}" 
+                              IsEnabled="{Binding InAddInventory,Mode=OneWay}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="{Binding }" BorderThickness="5" CornerRadius="4">
+                                    <TextBlock Text="{Binding }"/>
+                                </Border>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Label Grid.Row="3">
+                        <Label.Content>
+                            <TextBlock Text="{x:Static rsrc:Resources.FilamentLabel}"/>
+                        </Label.Content>
+                    </Label>
+                    <ComboBox ItemsSource="{Binding FilamentDefns}" 
+                              SelectedItem="{Binding NewInventorySpool.FilamentDefn,Mode=TwoWay}"
+                              Grid.Row="3" 
+                              Grid.Column="1"
+                              IsEnabled="{Binding InAddInventory,Mode=OneWay}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <Run Text="{Binding MaterialType,Converter={StaticResource EnumDescriptionConverter}}"/>
+                                    <Run Text="{Binding FilamentDefnId}"/>
+                                </TextBlock>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.ColumnSpan="2">
+                        <!--<Button Style="{StaticResource FontSymbolCommandButton}"
+                                Content="{StaticResource AddSymbol}" 
+                                Visibility="{Binding InAddInventory,Converter={StaticResource EnhancedVisibilityConverter},ConverterParameter='NOT'}" 
+                                Command="{Binding AddNewInventoryCommand}"/>-->
+                        <!--<Button Style="{StaticResource IconCommandButton}"
+                                >
+                            <Button.Content>
+                                <Rectangle Width="16" Height="16">
+                                    <Rectangle.Fill>
+                                        <DrawingBrush>
+                                            <DrawingBrush.Drawing>
+                                                <DrawingGroup>
+                                                    <DrawingGroup.Children>
+                                                        <GeometryDrawing Brush="#00FFFFFF" Geometry="F1M16,16L0,16 0,0 16,0z" />
+                                                        <GeometryDrawing Brush="#FFF6F6F6" Geometry="F1M6.0186,12L6.0186,10 3.9996,10 3.9996,6.018 6.0186,6.018 6.0186,4 9.9996,4 9.9996,6.018 11.9996,6.018 11.9996,10 9.9996,10 9.9996,12z" />
+                                                        <GeometryDrawing Brush="#FF388A34" Geometry="F1M11,9L9,9 9,11 7.019,11 7.019,9 5,9 5,7.018 7.019,7.018 7.019,5 9,5 9,7.018 11,7.018z" />
+                                                    </DrawingGroup.Children>
+                                                </DrawingGroup>
+                                            </DrawingBrush.Drawing>
+                                        </DrawingBrush>
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                            </Button.Content></Button>-->
+                        <Button Style="{StaticResource IconCommandButton}" 
+                                Visibility="{Binding InAddInventory,Converter={StaticResource EnhancedVisibilityConverter},ConverterParameter='Collapsed,Visible'}" 
+                                Command="{Binding AddNewInventoryCommand}"
+                                Content="{StaticResource AddIcon}">
+                            <!--<Button.Content>
+                                <Rectangle Width="16 " Height="16">
+                                    <Rectangle.Resources>
+                                        <SolidColorBrush x:Key="canvas" Opacity="0" />
+                                        <SolidColorBrush x:Key="light-green" Color="#1f801f" Opacity="1" />
+                                    </Rectangle.Resources>
+                                    <Rectangle.Fill>
+                                        <DrawingBrush Stretch="None">
+                                            <DrawingBrush.Drawing>
+                                                <DrawingGroup>
+                                                    <DrawingGroup x:Name="canvas">
+                                                        <GeometryDrawing Brush="{DynamicResource canvas}" Geometry="F1M16,16H0V0H16Z" />
+                                                    </DrawingGroup>
+                                                    <DrawingGroup x:Name="level_1">
+                                                        <GeometryDrawing Brush="{DynamicResource light-green}" Geometry="F1M14,7V8H8v6H7V8H1V7H7V1H8V7Z" />
+                                                    </DrawingGroup>
+                                                </DrawingGroup>
+                                            </DrawingBrush.Drawing>
+                                        </DrawingBrush>
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                            </Button.Content>-->
+                        </Button>
+                        <!--<Button Style="{StaticResource FontSymbolCommandButton}"
+                                Content="{StaticResource SaveSymbol}" 
+                                Visibility="{Binding InAddInventory,Converter={StaticResource EnhancedVisibilityConverter}}"
+                                Command="{Binding SaveNewInventoryCommand}"/>-->
+                        <Button Style="{StaticResource IconCommandButton}"
+                                Visibility="{Binding InAddInventory,Converter={StaticResource EnhancedVisibilityConverter}}"
+                                Command="{Binding SaveNewInventoryCommand}"
+                                Content="{StaticResource SaveIcon}">
+                            <!--<Button.Content>
+                                <Rectangle Width="16 " Height="16">
+                                    <Rectangle.Resources>
+                                        <SolidColorBrush x:Key="canvas" Opacity="0" />
+                                        <SolidColorBrush x:Key="light-blue-10" Color="#005dba" Opacity="0.1" />
+                                        <SolidColorBrush x:Key="light-blue" Color="#005dba" Opacity="1" />
+                                        
+                                    </Rectangle.Resources>
+                                    <Rectangle.Fill>
+                                        <DrawingBrush Stretch="None">
+                                            <DrawingBrush.Drawing>
+                                                <DrawingGroup>
+                                                    <DrawingGroup >
+                                                        <GeometryDrawing Brush="{DynamicResource canvas}" Geometry="F1M16,16H0V0H16Z" />
+                                                    </DrawingGroup>
+                                                    <DrawingGroup >
+                                                        <GeometryDrawing Brush="{DynamicResource light-blue-10}" Geometry="F1M14.515,3.5v11h-13V1.5h11Z" />
+                                                        <GeometryDrawing Brush="{DynamicResource light-blue}" Geometry="F1M14.854,3.146l-2-2L12.5,1H1.5L1,1.5v13l.5.5h13l.5-.5V3.5ZM5,2h6V6H5Zm9,12H2V2H4V6.5l.5.5h7l.5-.5V2h.293L14,3.707Z" />
+                                                        <DrawingGroup Opacity="{DynamicResource cls-1}">
+                                                            <GeometryDrawing Brush="{DynamicResource light-blue}" Geometry="F1M13,8.5v6H12V9H4v5.5H3v-6L3.5,8h9Z" />
+                                                        </DrawingGroup>
+                                                    </DrawingGroup>
+                                                </DrawingGroup>
+                                            </DrawingBrush.Drawing>
+                                        </DrawingBrush>
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                            </Button.Content>-->
+                        </Button>
+                        <!--<Button Style="{StaticResource FontSymbolCommandButton}"
+                                Content="{StaticResource UndoSymbol}"
+                                Visibility="{Binding InAddInventory,Converter={StaticResource EnhancedVisibilityConverter}}"
+                                Command="{Binding UndoNewInventoryCommand}"/>-->
+                        <Button Style="{StaticResource IconCommandButton}"
+                                Visibility="{Binding InAddInventory,Converter={StaticResource EnhancedVisibilityConverter}}"
+                                Command="{Binding UndoNewInventoryCommand}"
+                                Content="{StaticResource UndoIcon}">
+                            <!--<Button.Content>
+                                <Rectangle Width="16" Height="16">
+                                    <Rectangle.Fill>
+                                        <DrawingBrush>
+                                            <DrawingBrush.Drawing>
+                                                <DrawingGroup>
+                                                    <DrawingGroup.Children>
+                                                        <GeometryDrawing Brush="#00FFFFFF" Geometry="F1M16,16L0,16 0,0 16,0z" />
+                                                        <GeometryDrawing Brush="#FFF6F6F6" Geometry="F1M14.8877,5.9717C14.8967,7.5607,14.2837,9.0537,13.1597,10.1757L7.3357,15.9997 7.0937,15.9997 4.3867,13.2927 10.3317,7.3477C10.6967,6.9837 10.8967,6.4987 10.8967,5.9847 10.8967,5.4697 10.6967,4.9847 10.3317,4.6207 9.9637,4.2527 9.4937,4.0377 8.9997,4.0107L8.9997,7.9997 0.999700000000001,7.9997 0.999700000000001,-0.000300000000000189 4.9997,-0.000300000000000189 4.9997,1.4737C6.0807,0.5217 7.4557,0.00170000000000048 8.9127,0.00170000000000048 10.4977,0.00170000000000048 11.9867,0.6177 13.1047,1.7367 14.2457,2.8777 14.8787,4.3817 14.8877,5.9717" />
+                                                        <GeometryDrawing Brush="#FF00539C" Geometry="F1M12.4531,9.4688L7.2151,14.7068 5.8011,13.2928 11.0391,8.0548C11.5921,7.5018 11.8961,6.7658 11.8961,5.9848 11.8961,5.2018 11.5921,4.4668 11.0391,3.9138 9.8411,2.7158 7.9831,2.7158 6.8421,3.8578L5.7001,4.9998 8.0001,4.9998 8.0001,6.9998 2.0001,6.9998 2.0001,0.9998 4.0001,0.9998 4.0001,3.8718 5.4281,2.4438C7.3491,0.521800000000001 10.4751,0.520799999999999 12.3971,2.4438 14.3751,4.4208 14.3751,7.5478 12.4531,9.4688" />
+                                                    </DrawingGroup.Children>
+                                                </DrawingGroup>
+                                            </DrawingBrush.Drawing>
+                                        </DrawingBrush>
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                            </Button.Content>-->
+                        </Button>
+                    </StackPanel>
+
+
+                </Grid>
+            </Expander>
+        </StackPanel>
+    </Grid>
+</Page>

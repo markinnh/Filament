@@ -7,6 +7,7 @@
       xmlns:helpers="clr-namespace:Filament.WPF6.Helpers"
       xmlns:vm="clr-namespace:Filament.WPF6.ViewModels"
       xmlns:model="clr-namespace:DataDefinitions.Models;assembly=DataDefinitions"
+      xmlns:properties="clr-namespace:Filament.WPF6.Properties"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="ByFilamentPage" Name="MyPage" IsEnabled="{Binding Ready,Mode=OneWay}">
@@ -62,12 +63,13 @@
                           />
 
 
-                <DataGrid ItemsSource="{Binding FilteredInventory}"
+                <DataGrid ItemsSource="{Binding FilteredInventory}" 
+                          Style="{StaticResource StdDataGrid}"
                       AutoGenerateColumns="False"
                       Grid.Row="4"
                       Grid.ColumnSpan="2"
                       CanUserDeleteRows="False"
-                      FontSize="{StaticResource StdFontSize}"
+                      
                       
                       >
                     <DataGrid.Columns>
@@ -106,7 +108,7 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Width="100"
+                        <DataGridTemplateColumn Width="{Binding ColorColumnWidth,Source={StaticResource LeakPrfSettings},Mode=TwoWay}"
                                             Header="Color"
                                             >
                             <DataGridTemplateColumn.CellTemplate>
@@ -136,7 +138,7 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellEditingTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Width="100"
+                        <DataGridTemplateColumn Width="{Binding DateOpenedColumnWidth,Source={StaticResource LeakPrfSettings},Mode=TwoWay}"
                         Header="Date Opened">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -150,7 +152,7 @@
                             </DataGridTemplateColumn.CellEditingTemplate>
                         </DataGridTemplateColumn>
                         <DataGridTemplateColumn Header="Filament"
-                                            Width="100">
+                                            Width="{Binding FilamentColumnWidth,Source={StaticResource LeakPrfSettings},Mode=TwoWay}">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding FilamentDefn.MaterialType}"/>
@@ -174,7 +176,7 @@
                             </DataGridTemplateColumn.CellEditingTemplate>
                         </DataGridTemplateColumn>
                         <DataGridCheckBoxColumn Header="Stop Using"
-                                            Width="100"
+                                            Width="{Binding StopUsingColumnWidth,Source={StaticResource LeakPrfSettings},Mode=TwoWay}"
                                             Binding="{Binding StopUsing}"/>
                     </DataGrid.Columns>
                 </DataGrid>
@@ -194,7 +196,8 @@
     </Page.DataContext>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="{Binding ByVendorColumn1,Source={StaticResource LeakPrfSettings},Mode=TwoWay}"/>
+            <ColumnDefinition Width="5"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
@@ -213,7 +216,8 @@
                   Height="{StaticResource StandardListViewHeight}"
                   VerticalAlignment="Top"
                   Margin="5"
-                  Grid.Row="1"  >
+                  Grid.Row="1"
+                  Background="{StaticResource StandardBackground}">
             <TreeView.ItemContainerStyle>
                 <Style TargetType="TreeViewItem">
                     <Setter Property="IsExpanded" Value="{Binding DataContext.ExpandTreeNodesOnStartup, ElementName=MyPage}"/>
@@ -267,16 +271,30 @@
                         <TextBlock Text="{StaticResource EditIconSymbol}"
                                    Style="{StaticResource FontIcon}"
                                    Visibility="{Binding IsModified,Converter={StaticResource VisibilityConverter}}"/>
-                        <Border  BorderThickness="3" CornerRadius="3" BorderBrush="{Binding ColorName}">
+                        <!--<Border  BorderThickness="3" CornerRadius="3" BorderBrush="{Binding ColorName}">-->
                             <!--<Rectangle Fill="{Binding ColorName,Converter={StaticResource ColorFromNameConverter}}"
                                    Width="30"
                                    Height="16"/>-->
-                            <TextBlock Text="{Binding FilamentDefn.MaterialType,StringFormat='{}{0,-15}'}"/>
-                        </Border>
+                        <Image  Width="16" Height="16" >
+                            <Image.Source>
+                                <DrawingImage>
+                                    <DrawingImage.Drawing>
+                                        <GeometryDrawing Brush="{Binding ColorName}" Geometry="{StaticResource FilamentGeometry}"/>
+                                    </DrawingImage.Drawing>
+                                </DrawingImage>
+                            </Image.Source>
+                        </Image>
+                        <TextBlock Text="{Binding FilamentDefn.MaterialType,StringFormat='{}{0,-15}'}"/>
+                        <!--</Border>-->
                         
 
                         <StackPanel.ToolTip>
                             <StackPanel>
+                                <TextBlock>
+                                    <Run Text="Color"/>
+                                    <Run Text=":"/>
+                                    <Run Text="{Binding ColorName}"/>
+                                </TextBlock>
                                 <TextBlock>
                             <Run Text="Inventory #"/>
                             <Run Text="{Binding InventorySpoolId}"/>
@@ -293,30 +311,49 @@
             </TreeView.Resources>
 
         </TreeView>
+        <GridSplitter Grid.Column="1" Grid.RowSpan="3" ResizeDirection="Columns"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Stretch"
+                      ResizeBehavior="PreviousAndNext"
+                      Background="AliceBlue"/>
         <ContentControl Content="{Binding SelectedItem}"
                         ContentTemplateSelector="{StaticResource EditTemplateSelector}"
-                        Grid.Column="1" Grid.Row="1"/>
+                        Grid.Column="2" Grid.Row="1"/>
         <StackPanel Orientation="Horizontal"
-                    Grid.Column="1"
+                    Grid.Column="2"
                     Grid.Row="2">
+            <CheckBox Name="cbNullCheck" 
+                          IsChecked="{Binding SelectedItemNotNull,Mode=OneWay}" 
+                          IsEnabled="False"
+                          Visibility="{Binding ShowDebugElements,Converter={StaticResource EnhancedVisibilityConverter}}"/>
+            <CheckBox Name="cbSelModified"
+                          IsChecked="{Binding SelectedItem.IsModified,Mode=OneWay}"
+                          IsEnabled="False"
+                          Visibility="{Binding ShowDebugElements,Converter={StaticResource EnhancedVisibilityConverter}}"/>
             <Button Content="&#xE109;"
                     Style="{StaticResource FontSymbolCommandButton}"
                     Visibility="Collapsed"/>
-            <Button Content="&#xE105;"
-                    Style="{StaticResource FontSymbolCommandButton}"
+            <Button Content="{StaticResource SaveIcon}"
+                    Style="{StaticResource IconCommandButton}"
                     Command="{Binding UpdateCommand}"
-                    IsEnabled="{Binding SelectedItem.IsModified,Mode=OneWay}">
+                    >
+                <Button.IsEnabled>
+                    <MultiBinding Converter="{StaticResource MultiBoolConverter}">
+                        <Binding ElementName="cbNullCheck" Path="IsChecked" Mode="OneWay"/>
+                        <Binding ElementName="cbSelModified" Path="IsChecked" Mode="OneWay"/>
+                    </MultiBinding>
+                </Button.IsEnabled>
                 <Button.ToolTip>
                     <TextBlock>
                         <Run Text="Save"/>
                         <Run Text="{Binding ChildTypename,Mode=OneWay}"/>
                     </TextBlock>
                 </Button.ToolTip></Button>
-            <Button Content="&#xE107;"
-                    Style="{StaticResource FontSymbolCommandButton}"
+            <Button Content="{StaticResource DeleteIcon}"
+                    Style="{StaticResource IconCommandButton}"
                     ToolTip="Delete the selected item"
                     Command="{Binding DeleteSelectedCommand}"
-                    IsEnabled="{Binding SelectedItem.SupportsDelete,Mode=OneWay}"
+                    IsEnabled="{Binding CanDelete,Mode=OneWay}"
                     Visibility="{Binding SelectedItem.SupportsDelete,Converter={StaticResource VisibilityConverter}}"/>
         </StackPanel>
     </Grid>

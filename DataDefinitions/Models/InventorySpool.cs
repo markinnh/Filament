@@ -15,7 +15,7 @@ using System.Reflection;
 namespace DataDefinitions.Models
 {
     [UIHints(AddType = "Inventory")]
-    public class InventorySpool : DatabaseObject, IEditableObject
+    public class InventorySpool : DataDefinitions.DatabaseObject, IEditableObject
     {
         public static event InDataOpsChangedHandler InDataOpsChanged;
 
@@ -101,7 +101,10 @@ namespace DataDefinitions.Models
         public int AgeInDays => (DateTime.Today - DateOpened).Days;
         [NotMapped, JsonIgnore]
         public string Name => $"{ColorName} - {InventorySpoolId}";
-
+        [NotMapped, JsonIgnore]
+        public string VendorName => SpoolDefn?.Vendor?.Name ?? "Undefined";
+        [NotMapped, JsonIgnore]
+        public string SpoolDescription => SpoolDefn?.Description ?? "Undefined";
         public double CalcInitialDepth()
         {
             const double utilizationFactor = 0.95;
@@ -262,7 +265,7 @@ namespace DataDefinitions.Models
         }
         public override void SetContainedModifiedState(bool state)
         {
-            
+
             foreach (var dm in DepthMeasurements)
                 dm.IsModified = state;
             IsModified = state;

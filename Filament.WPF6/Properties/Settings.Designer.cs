@@ -12,7 +12,7 @@ namespace Filament.WPF6.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.1.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.3.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -69,6 +69,282 @@ namespace Filament.WPF6.Properties {
             }
             set {
                 this["ExpandNodesOnStartup"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool UseSwissArmyKnifeUI {
+            get {
+                return ((bool)(this["UseSwissArmyKnifeUI"]));
+            }
+            set {
+                this["UseSwissArmyKnifeUI"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("300")]
+        public string SimpleInvColumn1 {
+            get {
+                return ((string)(this["SimpleInvColumn1"]));
+            }
+            set {
+                this["SimpleInvColumn1"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("200")]
+        public string ByVendorColumn1 {
+            get {
+                return ((string)(this["ByVendorColumn1"]));
+            }
+            set {
+                this["ByVendorColumn1"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("250")]
+        public string VendorDefnColumn1 {
+            get {
+                return ((string)(this["VendorDefnColumn1"]));
+            }
+            set {
+                this["VendorDefnColumn1"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("200")]
+        public string FilamentDefnColumn1 {
+            get {
+                return ((string)(this["FilamentDefnColumn1"]));
+            }
+            set {
+                this["FilamentDefnColumn1"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public int SelectedTabIndex {
+            get {
+                return ((int)(this["SelectedTabIndex"]));
+            }
+            set {
+                this["SelectedTabIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("200")]
+        public string DescriptionColumnWidth {
+            get {
+                return ((string)(this["DescriptionColumnWidth"]));
+            }
+            set {
+                this["DescriptionColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("75")]
+        public string DiameterColumnWidth {
+            get {
+                return ((string)(this["DiameterColumnWidth"]));
+            }
+            set {
+                this["DiameterColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public string MeasuredOnColumnWidth {
+            get {
+                return ((string)(this["MeasuredOnColumnWidth"]));
+            }
+            set {
+                this["MeasuredOnColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("90")]
+        public string DepthLeftColumnWidth {
+            get {
+                return ((string)(this["DepthLeftColumnWidth"]));
+            }
+            set {
+                this["DepthLeftColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("90")]
+        public string DepthRightColumnWidth {
+            get {
+                return ((string)(this["DepthRightColumnWidth"]));
+            }
+            set {
+                this["DepthRightColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public string RemainingGColumnWidth {
+            get {
+                return ((string)(this["RemainingGColumnWidth"]));
+            }
+            set {
+                this["RemainingGColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public string RemainingMColumnWidth {
+            get {
+                return ((string)(this["RemainingMColumnWidth"]));
+            }
+            set {
+                this["RemainingMColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("75")]
+        public string SpoolWidthColumnWidth {
+            get {
+                return ((string)(this["SpoolWidthColumnWidth"]));
+            }
+            set {
+                this["SpoolWidthColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("75")]
+        public string DrumDiameterColumnWidth {
+            get {
+                return ((string)(this["DrumDiameterColumnWidth"]));
+            }
+            set {
+                this["DrumDiameterColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("75")]
+        public string WeightColumnWidth {
+            get {
+                return ((string)(this["WeightColumnWidth"]));
+            }
+            set {
+                this["WeightColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("75")]
+        public string StopUsingColumnWidth {
+            get {
+                return ((string)(this["StopUsingColumnWidth"]));
+            }
+            set {
+                this["StopUsingColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("75")]
+        public string VerifiedColumnWidth {
+            get {
+                return ((string)(this["VerifiedColumnWidth"]));
+            }
+            set {
+                this["VerifiedColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public string FilamentColumnWidth {
+            get {
+                return ((string)(this["FilamentColumnWidth"]));
+            }
+            set {
+                this["FilamentColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public string DefinitionColumnWidth {
+            get {
+                return ((string)(this["DefinitionColumnWidth"]));
+            }
+            set {
+                this["DefinitionColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public string DateOpenedColumnWidth {
+            get {
+                return ((string)(this["DateOpenedColumnWidth"]));
+            }
+            set {
+                this["DateOpenedColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public string ColorColumnWidth {
+            get {
+                return ((string)(this["ColorColumnWidth"]));
+            }
+            set {
+                this["ColorColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Simple")]
+        public string CurrentInventoryDisplayStyle {
+            get {
+                return ((string)(this["CurrentInventoryDisplayStyle"]));
+            }
+            set {
+                this["CurrentInventoryDisplayStyle"] = value;
             }
         }
     }

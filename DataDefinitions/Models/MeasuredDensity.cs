@@ -11,7 +11,7 @@ namespace DataDefinitions.Models
     /// <summary>
     /// determine the density of filament using empirical measurement
     /// </summary>
-    public class MeasuredDensity : DatabaseObject, IDensity,IEditableObject
+    public class MeasuredDensity : DataDefinitions.DatabaseObject, IDensity,IEditableObject
     {
         public static event InDataOpsChangedHandler InDataOpsChanged;
 

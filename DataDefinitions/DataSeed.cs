@@ -34,7 +34,7 @@ namespace DataDefinitions
                     }
                     else
                     {
-                        System.Diagnostics.Debug.WriteLine(setting);
+                        WriteLine(setting);
                         if (setting < AddVendorDefn)
                             SeedVendorData<TContext>(setting, filamentContext);
                         if (setting < AddPrinterSettingDefn)
@@ -57,7 +57,7 @@ namespace DataDefinitions
         }
         protected static void SeedData<TContext>(Setting setting,double UpdatedSeedValue,BaseFilamentContext filamentContext,IEnumerable<DatabaseObject> databaseObjects) where TContext:BaseFilamentContext,new()
         {
-            foreach (DatabaseObject databaseObject in databaseObjects)
+            foreach (DepthMeasurement databaseObject in databaseObjects)
                 databaseObject.UpdateItem<TContext>();
             
             setting.SetValue(UpdatedSeedValue);
@@ -82,7 +82,7 @@ namespace DataDefinitions
         }
         private static void InitialSeeding<TContext>() where TContext : BaseFilamentContext, new()
         {
-            System.Diagnostics.Debug.WriteLine("Performing initial seeding of FilamentDefns");
+            WriteLine("Performing initial seeding of FilamentDefns");
             var filamentDefns = DataDefinitions.Seed.InitialFilamentDefinitions();
             foreach (var item in filamentDefns)
             {
@@ -98,7 +98,7 @@ namespace DataDefinitions
         }
         private static void SeedVendorData<TContext>(Setting setting, BaseFilamentContext filamentContext) where TContext : BaseFilamentContext, new()
         {
-            System.Diagnostics.Debug.WriteLine("Seeding VendorDefns");
+            WriteLine("Seeding VendorDefns");
             var seedVendors = DataDefinitions.Seed.InitialVendorDefinitions();
             foreach (var item in seedVendors)
                 item.UpdateItem<TContext>();

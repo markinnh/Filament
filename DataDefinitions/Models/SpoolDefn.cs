@@ -15,7 +15,7 @@ namespace DataDefinitions.Models
 {
     // TODO: Develop a UI for SpoolDefinition; Add, Update, Delete
     [UIHints(AddType = "Spool Definition")]
-    public class SpoolDefn : DatabaseObject, IEditableObject
+    public class SpoolDefn : DataDefinitions.DatabaseObject, IEditableObject
     {
         public static event InDataOpsChangedHandler InDataOpsChanged;
 

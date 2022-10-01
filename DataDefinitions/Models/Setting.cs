@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace DataDefinitions.Models
 {
-    public class Setting : DatabaseObject
+    public class Setting : DataDefinitions.DatabaseObject
     {
         public static event InDataOpsChangedHandler InDataOpsChanged;
 

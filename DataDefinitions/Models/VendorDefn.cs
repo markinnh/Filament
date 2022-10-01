@@ -15,7 +15,7 @@ namespace DataDefinitions.Models
 {
     // TODO: Develop a UI for VendorDefn; Add, Delete, Update
     // TODO: Develop a DataObject class the sit between data classes and Observable since the data is going to be disconnected from the DbContext
-    public class VendorDefn : DatabaseObject, IDataErrorInfo, IEditableObject
+    public class VendorDefn : DataDefinitions.DatabaseObject, IDataErrorInfo, IEditableObject
     {
         public static event InDataOpsChangedHandler InDataOpsChanged;
 
@@ -252,8 +252,8 @@ namespace DataDefinitions.Models
             }
             else
             {
-                context.SetDataItemsState<DatabaseObject>(SpoolDefns.Where(Added), Microsoft.EntityFrameworkCore.EntityState.Added);
-                context.SetDataItemsState(VendorSettings.Where<DatabaseObject>(Added), Microsoft.EntityFrameworkCore.EntityState.Added);
+                context.SetDataItemsState(SpoolDefns.Where(Added), Microsoft.EntityFrameworkCore.EntityState.Added);
+                context.SetDataItemsState(VendorSettings.Where(Added), Microsoft.EntityFrameworkCore.EntityState.Added);
             }
             foreach (VendorSettingsConfig settingsConfig in VendorSettings)
                 settingsConfig.UpdateContainedItemEntryState<TContext>(context);

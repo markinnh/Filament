@@ -15,7 +15,7 @@ namespace DataDefinitions.Models
     /// Stores actually depth measurements to determine remaining amount of filament
     /// </summary>
     [UIHints(AddType = "Measurement")]
-    public class DepthMeasurement : DatabaseObject, IEditableObject
+    public class DepthMeasurement : DataDefinitions.DatabaseObject, IEditableObject
     {
         const double FilamentDensityInCC = 1.24;
         const double ConvertFromCMMToCCM = 0.001;

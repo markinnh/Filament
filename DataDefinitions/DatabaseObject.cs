@@ -74,6 +74,7 @@ namespace DataDefinitions
         public virtual bool InDatabase { get => throw new NotSupportedException(); }
         [NotMapped]
         public bool NotInDatabase => !InDatabase;
+        
         /// <summary>
         /// Supports delete, default is false, each definition will need a decision made about supporting a delete.
         /// </summary>
@@ -180,7 +181,7 @@ namespace DataDefinitions
         /// <summary>
         /// Probably Obsolete
         /// </summary>
-        protected bool AddedItems<TItem>(TItem item) where TItem : DatabaseObject
+        protected bool AddedItems<TItem>(TItem item) where TItem : DepthMeasurement
         {
             if (item != null)
                 return !item.InDatabase && item.IsValid;

@@ -10,6 +10,7 @@ namespace Filament.WPF6.Resources
 {
     public class SupportingItems:ResourceDictionary
     {
+        public string Stuck => "Stuck In Class";
         public SupportingItems()
         {
             System.Diagnostics.Debug.WriteLine("Initializing SupportingItems");

@@ -16,7 +16,11 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <DataGrid ItemsSource="{Binding Items}" AutoGenerateColumns="False" Height="500" SelectedItem="{Binding SelectedItem}" >
+        <DataGrid ItemsSource="{Binding Items}" 
+                  AutoGenerateColumns="False" 
+                  Height="500" 
+                  SelectedItem="{Binding SelectedItem}" 
+                  Style="{StaticResource StdDataGrid}">
             <DataGrid.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Delete Row" ToolTip="Delete selected row" Command="{Binding DeleteRowCommand}"/>

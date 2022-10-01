@@ -14,7 +14,7 @@ namespace DataDefinitions.Models
     /// <summary>
     /// Settings specific to a certain type of filament
     /// </summary>
-    public class VendorSettingsConfig : DatabaseObject
+    public class VendorSettingsConfig : DataDefinitions.DatabaseObject
     {
         public static event InDataOpsChangedHandler InDataOpsChanged;
 

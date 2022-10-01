@@ -5,6 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:Filament.WPF6.Pages"
       xmlns:vm="clr-namespace:Filament.WPF6.ViewModels"
+      xmlns:properties="clr-namespace:Filament.WPF6.Properties"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="VendorDefnPage" Name="MyPage">
@@ -16,7 +17,8 @@
     </Page.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="250"/>
+            <ColumnDefinition Width="{Binding VendorDefnColumn1,Source={StaticResource LeakPrfSettings},Mode=TwoWay}"/>
+            <ColumnDefinition Width="5"/>
             <ColumnDefinition Width="250"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
@@ -27,11 +29,14 @@
         <Label Content="Defined Vendors"/>
         <ListView
             Grid.Row="1"
-            Height="{StaticResource StandardListViewHeight}"
+            MaxHeight="450"
             ItemsSource="{Binding Items}"
             ItemTemplate="{Binding Mode=OneWay, Source={StaticResource DisplayVendorDefnInListView}}"
             SelectedItem="{Binding SelectedItem,Mode=TwoWay}"/>
-        <Grid Grid.RowSpan="2" Grid.Column="1" Grid.ColumnSpan="2">
+        <GridSplitter Grid.Column="1" Grid.RowSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="AliceBlue" 
+                      ResizeBehavior="PreviousAndNext"
+                      ResizeDirection="Columns"/>
+        <Grid Grid.RowSpan="2" Grid.Column="2" Grid.ColumnSpan="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200"/>
                 <ColumnDefinition Width="*"/>
