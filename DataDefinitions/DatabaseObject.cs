@@ -1,9 +1,9 @@
 ﻿using DataDefinitions.Models;
-using Microsoft.EntityFrameworkCore;
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations.Schema;
+
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -12,96 +12,102 @@ using System.Threading.Tasks;
 using static System.Diagnostics.Debug;
 using System.Reflection;
 using MyLibraryStandard.Attributes;
+using System.Linq.Expressions;
+using System.Xml.Serialization;
+using DataDefinitions.Interfaces;
+using LiteDB;
+using DataDefinitions.LiteDBSupport;
 
 namespace DataDefinitions
 {
-    public enum DatabaseObjectActions { ItemAdded,ItemRemoved };
+    public enum DatabaseObjectActions { ItemAdded, ItemRemoved };
 
+    /// <summary>
+    /// Root items that are stored in the LiteDb database, not called documents because they don't support the LiteDb Document class
+    /// </summary>
     [UIHints(AddType = "Not supported")]
-    public class DatabaseObject : Observable, JsonSupport.ILinked
+    public class DatabaseObject : DataObject,ILinked
     {
+        protected const string keyInitializedError = "Key ID is already initialized and AssignKey is called";
+
         /// <summary>
         /// Sets a Property value through the backing member
         /// </summary>
         /// <returns>true if the property was changed</returns>
-        protected override bool Set<T>(ref T target, T value, bool blockUpdate = false, [CallerMemberName] string propertyName = null)
-        {
-            if (base.Set(ref target, value, blockUpdate, propertyName) && !InDataOperations && propertyName != nameof(IsModified) && !blockUpdate)
-            {
-                IsModified = true;
-                return true;
-            }
-            return false;
-        }
         protected static int passUpCount = 0;
         /// <summary>
         /// Flag to tell if data operations are currently being conducted
         /// </summary>
         /// <remarks>prevents editing of objects while this is going on</remarks>
         /// <value>whether or not database operations are currently being conducted</value>
-        [NotMapped]
-        public virtual bool InDataOperations { get; }
+        //[JsonIgnore, BsonIgnore]
+        //public virtual bool InDataOperations { get; }
 
         /// <summary>
         /// Tracks the ability to modify contents of an object through the UI
         /// </summary>
         /// <remarks>Overridden in FilamentDefn to prevent editing items that are flagged as 'IsIntrisic'</remarks>
         /// <value>Usually true</value>
-        [NotMapped]
-        public virtual bool CanEdit => !InDataOperations;
+        //[JsonIgnore, BsonIgnore]
+        //public virtual bool CanEdit => !InDataOperations;
         /// <summary>
         /// flag to tell if the current object is 'ready' to be saved to the database
         /// </summary>
         /// <value>true or false</value>
-        [NotMapped]
-        public virtual bool IsValid { get => false; }
-        protected bool isModified;
-        /// <summary>
-        /// flag to tell if the object is modified
-        /// </summary>
-        /// <value>state of object compared to the database</value>
-        [NotMapped,Affected(Names =new string[] {nameof(InDatabase)})]
-        public virtual bool IsModified
-        {
-            get => isModified;
-            set => Set<bool>(ref isModified, value);
-        }
+        //[JsonIgnore, BsonIgnore]
+        //public virtual bool IsValid { get => false; }
+        //protected bool isModified;
+        ///// <summary>
+        ///// flag to tell if the object is modified
+        ///// </summary>
+        ///// <value>state of object compared to the database</value>
+        //[JsonIgnore, Affected(Names = new string[] { nameof(InDatabase) }),XmlIgnore,BsonIgnore]
+        //public virtual bool IsModified
+        //{
+        //    get => isModified;
+        //    set => Set<bool>(ref isModified, value);
+        //}
         /// <summary>
         /// Checks if the PrimaryKey is a non-default value
         /// </summary>
         /// <value>whether or not the item is in the database</value>
-        [NotMapped]
-        public virtual bool InDatabase { get => throw new NotSupportedException(); }
-        [NotMapped]
+        /// <remarks><b>needs to be rewritten to support items that do not have a 'key', or all items that are 'serialized' need a key, which would be a simpler solution</b></remarks>
+        [JsonIgnore, BsonIgnore]
+        public virtual bool InDatabase { get => KeyID != default; }
+        /// <summary>
+        /// needed for XAML markup, unless using a NOT converter
+        /// </summary>
+        [JsonIgnore,BsonIgnore]
         public bool NotInDatabase => !InDatabase;
-        
+
         /// <summary>
         /// Supports delete, default is false, each definition will need a decision made about supporting a delete.
         /// </summary>
-        [NotMapped]
-        public virtual bool SupportsDelete => false;
-        /// <summary>
-        /// An internal tracking feature to monitor which class have not implemented SetContainedModifiedState
-        /// </summary>
-        /// <remarks>Should be overridden if this diagnostic is needed in troubleshoot, but currently the classes that have contained items implement SetContainedModifiedState</remarks>
-        /// <value>intially set to false</value>
-        [NotMapped]
-        protected virtual bool HasContainedItems => false;
+        //[JsonIgnore, BsonIgnore]
+        //public virtual bool SupportsDelete => false;
+        ///// <summary>
+        ///// An internal tracking feature to monitor which class have not implemented SetContainedModifiedState
+        ///// </summary>
+        ///// <remarks>Should be overridden if this diagnostic is needed in troubleshoot, but currently the classes that have contained items implement SetContainedModifiedState</remarks>
+        ///// <value>intially set to false</value>
+        //[JsonIgnore,BsonIgnore]
+        //protected virtual bool HasContainedItems => false;
         /// <summary>
         /// JsonDocument reference
         /// </summary>
         /// <remarks>Contains a reference to a JsonDocument</remarks>
         /// <value>JsonDocument</value>
-        [NotMapped]
-        public JsonSupport.IDocument Document { get; protected set; }
-
+        //[JsonIgnore,XmlIgnore,BsonIgnore]
+        //public IJsonFilamentDocument Document { get; protected set; }
+        [JsonIgnore,BsonIgnore]
+        public virtual bool RequiresChildLinks => true;
 
         private bool inEdit;
         /// <summary>
         /// flag to tell if the item is being edited in a UWP DataGrid
         /// </summary>
         /// <value>true or false</value>
-        [JsonIgnore, NotMapped]
+        [JsonIgnore,XmlIgnore,BsonIgnore]
         public bool InEdit
         {
             get => inEdit;
@@ -110,46 +116,105 @@ namespace DataDefinitions
         /// <summary>
         /// Called to 'Update' an object to the database.
         /// </summary>
-        /// <remarks>Has enough logic to 'flag' the contained items for saving too.  does need to be virtual, since there is one class that overrides the 'default' save routine.</remarks>
-        public virtual void UpdateItem<TContext>() where TContext : DbContext, new()
+        /// <remarks>Has enough logic to 'flag' the contained items for saving too.  does need to be virtual,
+        /// since there is one class that overrides the 'default' save routine.  Changed for JSON DatabaseObjects</remarks>
+        public virtual void UpdateItem()
         {
             WriteLine($"UpdateItem using base definition for {GetType().Name}");
-            using (TContext context = new TContext())
+            // TODO: Rewrite UpdateItem to support JSONDocuments
+
+            // call AssignKey, the logic is contained within the overriden methods
+            // AssignKey();
+            // if(!
+            //using (TContext context = new TContext())
+            //{
+            //    SetDataOpsState(true);
+            //    if (InDatabase)
+            //    {
+            //        context.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+            //        UpdateContainedItemEntryState(context);
+            //        context.Update(this);
+            //        context.SaveChanges();
+            //    }
+            //    else
+            //    {
+            //        context.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Added;
+            //        UpdateContainedItemEntryState(context);
+            //        context.Add(this);
+            //        context.SaveChanges();
+            //        //OnPropertyChanged(nameof(InDatabase));
+            //    }
+            //    SetDataOpsState(false);
+
+            //    SetContainedModifiedState(false);
+            //    //IsModified = false;
+
+            //}
+            var needsAdd = !InDatabase;
+            //if (!InDatabase)
+            //    AssignKey(Document.Counters.NextID(this));
+
+            UpdateContainedItems();
+            
+            if (needsAdd)
             {
-                SetDataOpsState(true);
-                if (InDatabase)
-                {
-                    context.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                    UpdateContainedItemEntryState(context);
-                    context.Update(this);
-                    context.SaveChanges();
-                }
-                else
-                {
-                    context.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Added;
-                    UpdateContainedItemEntryState(context);
-                    context.Add(this);
-                    context.SaveChanges();
-                    //OnPropertyChanged(nameof(InDatabase));
-                }
-                SetDataOpsState(false);
-
-                SetContainedModifiedState(false);
-                //IsModified = false;
-
+                //TODO: Develop a virtual method to save the object to the 'database' should only apply for Settings, VendorDefn, FilamentDefn and PrintSettingDefn
+                SaveToJsonDatabase();
             }
         }
+        /// <summary>
+        /// This is the only method that actually 'stores' data into the database, all the others walk up the tree until they reach the 'root' DatabaseObject
+        /// </summary>
+        /// <param name="dal"></param>
+        public override void UpdateItem(LiteDBDal dal)
+        {
+            dal.SmartAdd(this);
+            //if (InDatabase)
+            //    dal.Update(this);
+            //else
+            //    dal.Add(this);
+        }
+        protected virtual void SaveToJsonDatabase()
+        {
+            // does nothing for most methods, but does actually save item in the case of Setting, VendorDefn, FilamentDefn and PrintSettingDefn
+        }
+        [JsonIgnore, BsonIgnore]
+        protected virtual bool NeedsKey => false;
+        internal virtual void AssignKey(int myId)
+        {
+            if (KeyID == default)
+                KeyID = myId;
+            else
+                ReportKeyAlreadyInitialized();
+
+        }
+        [JsonIgnore]
+        internal virtual int KeyID { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         /// <summary>
         /// Establishes a JsonDocument link
         /// </summary>
         /// <remarks>Currently not finished</remarks>
-        public virtual void EstablishLink(JsonSupport.IDocument document)
+        //public virtual void EstablishLink(IJsonFilamentDocument document)
+        //{
+        //    if (document != null)
+        //    {
+        //        Document = document;
+        //        // TODO: Add code to link dependent objects
+        //        LinkChildren(this);
+        //    }
+        //    else
+        //        ReportNullDocument(nameof(document));
+        //}
+        //protected void ReportNullDocument(string documentName)
+        //{
+        //    throw new ArgumentNullException(documentName, $"{documentName} is null, a non-null value is required");
+        //}
+        protected void ReportKeyAlreadyInitialized() => throw new ArgumentException(keyInitializedError);
+        public virtual void LinkChildren<ParentType>(ParentType parent)
         {
-            if (document != null)
-                Document = document;
-            else
-                throw new ArgumentNullException(nameof(document), $"{nameof(document)} is null, a non-null value is required");
+            Assert(RequiresChildLinks, $"{GetType().Name} requires childlinks, but this method is not overridden, or calls the base class.");
         }
+        /* not used for JSONDocuments
         /// <summary>
         /// Called during Save/Update to database
         /// </summary>
@@ -157,7 +222,7 @@ namespace DataDefinitions
         internal virtual void UpdateContainedItemEntryState<TContext>(TContext context) where TContext : DbContext
         {
             WriteLine($"{nameof(UpdateContainedItemEntryState)} not implemented for {GetType().Name}");
-        }
+        }*/
         /// <summary>
         /// Set the Database Operations state
         /// </summary>
@@ -166,28 +231,31 @@ namespace DataDefinitions
         {
             WriteLine($"In the base {nameof(SetDataOpsState)}, this should be implemented by each consumer of DatabaseObject");
         }
+        internal virtual void UpdateContainedItems()
+        {
+
+        }
         /// <summary>
         /// Set the contained items IsModified 'state'
         /// </summary>
         /// <remarks>Usually called after saving the item to the database</remarks>
-        public virtual void SetContainedModifiedState(bool state)
-        {
-            WriteLine($"Unable to set the ContainedModifiedState to '{state}' for {GetType().Name}, this is{(HasContainedItems ? string.Empty : " not")} required.");
-            Assert(!HasContainedItems);  // This should only fire if this is not implemented and the class has contained items.
-        }
-        public virtual string UIHintAddType() => GetType().GetCustomAttribute<UIHintsAttribute>()?.AddType ?? string.Empty;
+        //public virtual void SetContainedModifiedState(bool state)
+        //{
+        //    WriteLine($"Unable to set the ContainedModifiedState to '{state}' for {GetType().Name}, this is{(HasContainedItems ? string.Empty : " not")} required.");
+        //    Assert(!HasContainedItems);  // This should only fire if this is not implemented and the class has contained items.
+        //}
 
         public virtual void AddChild() => WriteLine($"Add child not supported in {GetType().Name}");
         /// <summary>
         /// Probably Obsolete
         /// </summary>
-        protected bool AddedItems<TItem>(TItem item) where TItem : DepthMeasurement
-        {
-            if (item != null)
-                return !item.InDatabase && item.IsValid;
-            else
-                return false;
-        }
+        //protected bool AddedItems<TItem>(TItem item) where TItem : DepthMeasurement
+        //{
+        //    if (item != null)
+        //        return !item.InDatabase && item.IsValid;
+        //    else
+        //        return false;
+        //}
         /// <summary>
         /// Tests if a DatabaseObject was just created but not currently in the database
         /// </summary>
@@ -196,7 +264,7 @@ namespace DataDefinitions
         /// Tests if a DatabaseObject is in the database, but modified
         /// </summary>
         protected Func<DatabaseObject, bool> Modified = (databaseObject) => databaseObject.IsValid && databaseObject.IsModified && databaseObject.InDatabase;
-
+        /* not used for JSONDocuments
         /// <summary>
         /// Removes the referenced DatabaseObject from the database
         /// </summary>
@@ -208,7 +276,7 @@ namespace DataDefinitions
                 context.Remove(this);
                 context.SaveChanges();
             }
-        }
+        }*/
         /// <summary>
         /// Handle notifications of Properties being updated in contained members
         /// </summary>
@@ -220,7 +288,7 @@ namespace DataDefinitions
             {
                 case nameof(IsModified):
 
-                    if (passUpCount == 0 || (passUpCount>0 && GetType() != typeof(VendorDefn) || GetType() != typeof(FilamentDefn)))
+                    if (passUpCount == 0 || (passUpCount > 0 && GetType() != typeof(VendorDefn) || GetType() != typeof(FilamentDefn)))
                     {
                         OnPropertyChanged(nameof(IsModified));
                         passUpCount++;

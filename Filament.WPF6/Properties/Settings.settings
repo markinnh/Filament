@@ -83,5 +83,14 @@
     <Setting Name="CurrentInventoryDisplayStyle" Type="System.String" Scope="User">
       <Value Profile="(Default)">Simple</Value>
     </Setting>
+    <Setting Name="DataPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Filament</Value>
+    </Setting>
+    <Setting Name="ShowStateFlag" Type="System.String" Scope="User">
+      <Value Profile="(Default)">ShowAll</Value>
+    </Setting>
+    <Setting Name="LastPageVisited" Type="System.String" Scope="User">
+      <Value Profile="(Default)">IntuitivePage</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

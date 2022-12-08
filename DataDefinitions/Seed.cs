@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
 using DataDefinitions.Models;
 namespace DataDefinitions
@@ -83,7 +84,7 @@ namespace DataDefinitions
                 WebUrl = String.Empty,
                 FoundOnAmazon = true
             };
-            vendor1.SpoolDefns.Add(new SpoolDefn()
+            var spool1 = new SpoolDefn()
             {
                 Description = "Black plastic",
                 DrumDiameter = 80,
@@ -91,7 +92,8 @@ namespace DataDefinitions
                 SpoolWidth = 55,
                 Vendor = vendor1,
                 Weight = 1
-            });
+            };
+            vendor1.SpoolDefns.Add(spool1);
             var vendor2 = new VendorDefn()
             {
                 Name = "HatchBox",
@@ -146,7 +148,7 @@ namespace DataDefinitions
             };
             vendor5.SpoolDefns.Add(new SpoolDefn()
             {
-                Description = "Prusament",
+                Description = "Black",
                 DrumDiameter = 53,
                 SpoolWidth = 53,
                 SpoolDiameter = 190,

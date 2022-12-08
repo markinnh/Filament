@@ -2,20 +2,25 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel.DataAnnotations.Schema;
+
 //using System.Text.Json.Serialization;
 using System.Linq;
 using MyLibraryStandard.Attributes;
 using System.Windows.Input;
-using System.ComponentModel.DataAnnotations;
+
 using System.ComponentModel;
 using System.Reflection;
+using System.Text.Json.Serialization;
+using System.Xml.Serialization;
+using DataDefinitions.Interfaces;
+using LiteDB;
+using DataDefinitions.LiteDBSupport;
 
 namespace DataDefinitions.Models
 {
     // TODO: Develop a UI for SpoolDefinition; Add, Update, Delete
     [UIHints(AddType = "Spool Definition")]
-    public class SpoolDefn : DataDefinitions.DatabaseObject, IEditableObject
+    public class SpoolDefn : ParentLinkedDataObject<VendorDefn>, ITrackUsable
     {
         public static event InDataOpsChangedHandler InDataOpsChanged;
 
@@ -31,21 +36,22 @@ namespace DataDefinitions.Models
                 InDataOpsChanged?.Invoke(EventArgs.Empty);
             }
         }
+        [JsonIgnore]
         public override bool InDataOperations => InDataOps;
-
+        [JsonIgnore, XmlIgnore, BsonIgnore]
         public override bool IsModified
         {
             get => base.IsModified || Inventory?.Count(inv => inv.IsModified) > 0;
             set => base.IsModified = value;
         }
+        [JsonIgnore, BsonIgnore]
+        public override bool IsValid => !double.IsNaN(SpoolDiameter) && !double.IsNaN(DrumDiameter)
+            && !double.IsNaN(Weight) && !double.IsNaN(SpoolWidth) && Parent != null;
 
-        public override bool IsValid => spoolDiameter != double.NaN && drumDiameter != double.NaN
-            && weight != double.NaN && spoolWidth != double.NaN && Vendor != null;
-
-        public override bool InDatabase => SpoolDefnId != default;
+        //public override bool InDatabase => SpoolDefnId != default;
 
         private string description = "Black Plastic";
-        [MaxLength(128)]
+        [XmlAttribute("description")]
         public string Description
         {
             get => description;
@@ -60,7 +66,7 @@ namespace DataDefinitions.Models
         /// <value>
         /// The spool diameter.
         /// </value>
-        [Affected(Names = new string[] { nameof(IsValid) })]
+        [Affected(Names = new string[] { nameof(IsValid) }), XmlAttribute("spoolDia")]
         public double SpoolDiameter
         {
             get => spoolDiameter;
@@ -73,8 +79,18 @@ namespace DataDefinitions.Models
         /// <value>
         /// The minimum diameter.
         /// </value>
-        [Affected(Names = new string[] { nameof(IsValid) })]
-        public double DrumDiameter { get => drumDiameter; set => Set<double>(ref drumDiameter, value); }
+        [Affected(Names = new string[] { nameof(IsValid) }), XmlAttribute("drumDia")]
+        public double DrumDiameter
+        {
+            get => drumDiameter; set
+            {
+                if (Set<double>(ref drumDiameter, value))
+                {
+                    spoolDepth = (spoolDiameter - drumDiameter) / 2;
+                    OnPropertyChanged(nameof(SpoolDepth));
+                }
+            }
+        }
 
         private double spoolWidth = double.NaN;
         /// <summary>
@@ -83,19 +99,19 @@ namespace DataDefinitions.Models
         /// <value>
         /// The width of the spool.
         /// </value>
-        [Affected(Names = new string[] { nameof(IsValid) })]
+        [Affected(Names = new string[] { nameof(IsValid) }), XmlAttribute("spoolWidth")]
         public double SpoolWidth
         {
             get => spoolWidth;
             set => Set<double>(ref spoolWidth, value);
         }
-        [NotMapped]
+        [JsonIgnore, BsonIgnore]
         public bool CanUseDepthMeasurement => !double.IsNaN(spoolDiameter) && !double.IsNaN(drumDiameter) && !double.IsNaN(spoolWidth);
-        [NotMapped]
+        [JsonIgnore, BsonIgnore]
         public double MaxDepth => !double.IsNaN(spoolDiameter) && !double.IsNaN(drumDiameter) ? (spoolDiameter - drumDiameter) / 2 : double.NaN;
 
-        private double spoolDepth= double.NaN;
-        [NotMapped]
+        private double spoolDepth = double.NaN;
+        [JsonIgnore, XmlIgnore]
         public double SpoolDepth
         {
             get => spoolDepth;
@@ -117,7 +133,7 @@ namespace DataDefinitions.Models
         //}
 
         private int spoolDefnID;
-
+        [XmlAttribute("ID"), JsonPropertyName("ID"), BsonIgnore]
         public int SpoolDefnId
         {
             get => spoolDefnID;
@@ -131,6 +147,7 @@ namespace DataDefinitions.Models
         /// <value>
         ///   <c>true</c> if [stop using]; otherwise, <c>false</c>.
         /// </value>
+        [XmlAttribute("stopUsing")]
         public bool StopUsing
         {
             get => stopUsing;
@@ -159,7 +176,7 @@ namespace DataDefinitions.Models
         /// <value>
         /// The weight.
         /// </value>
-        [Affected(Names = new string[] { nameof(IsValid) })]
+        [Affected(Names = new string[] { nameof(IsValid) }), XmlAttribute("weight")]
         public double Weight
         {
             get => weight;
@@ -173,6 +190,7 @@ namespace DataDefinitions.Models
         /// <value>
         ///   <c>true</c> if verified; otherwise, <c>false</c>.
         /// </value>
+        [XmlAttribute("verified")]
         public bool Verified
         {
             get => verified;
@@ -186,6 +204,7 @@ namespace DataDefinitions.Models
         /// <value>
         /// The vendor identifier.
         /// </value>
+        [XmlAttribute("VendID"), BsonIgnore]
         public int VendorDefnId
         {
             get => vendorID;
@@ -200,7 +219,7 @@ namespace DataDefinitions.Models
         /// <value>
         /// The vendor.
         /// </value>
-
+        [JsonIgnore, XmlIgnore, BsonRef]
         public VendorDefn Vendor
         {
             get => vendor;
@@ -212,7 +231,7 @@ namespace DataDefinitions.Models
         }
 
         private bool showInUse;
-        [NotMapped]
+        [JsonIgnore, XmlIgnore, BsonIgnore]
         public bool ShowInUse
         {
             get => showInUse;
@@ -223,8 +242,8 @@ namespace DataDefinitions.Models
             }
         }
 
-        public virtual ICollection<InventorySpool> Inventory { get; set; }
-        [NotMapped]
+        public virtual ObservableCollection<InventorySpool> Inventory { get; set; }
+        [JsonIgnore, BsonIgnore]
         public IEnumerable<InventorySpool> FilteredInventory => showInUse ? Inventory.Where(inv => !inv.StopUsing) : Inventory;
         /// <summary>
         /// Gets the name of the spool.
@@ -232,17 +251,19 @@ namespace DataDefinitions.Models
         /// <value>
         /// The name of the spool.
         /// </value>
-        [NotMapped]
+        [JsonIgnore, BsonIgnore]
         public string SpoolName => $"{Vendor?.Name ?? Constants.DefaultVendorName} - {Weight}Kg";
         // TODO: Add Inventory Spools as a collection to spool defn
 
         public SpoolDefn()
         {
             Inventory = new ObservableCollection<InventorySpool>();
-            if (Inventory is ObservableCollection<InventorySpool> oInventory)
-                oInventory.CollectionChanged += OInventory_CollectionChanged;
-
+            InitEventHandlers();
             //Init();
+        }
+        private void InitEventHandlers()
+        {
+            Inventory.CollectionChanged += OInventory_CollectionChanged;
         }
         public void LinkToInventorySpools()
         {
@@ -258,12 +279,15 @@ namespace DataDefinitions.Models
                 foreach (var item in e.NewItems)
                     if (item is InventorySpool inventorySpool)
                     {
-                        inventorySpool.SpoolDefn = this;
-                        inventorySpool.SpoolDefnId = spoolDefnID;
+                        inventorySpool.Parent = this;
+                        //inventorySpool.SpoolDefn = this;
+                        //inventorySpool.SpoolDefnId = spoolDefnID;
                         inventorySpool.Subscribe(WatchContainedHandler);
                         inventorySpool.WatchContained();
                     }
-                OnPropertyChanged(nameof(IsModified));
+                if (!InDataOperations)
+                    IsModified = true;
+                //OnPropertyChanged(nameof(IsModified));
             }
             else if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Remove && e.OldItems != null)
             {
@@ -326,6 +350,21 @@ namespace DataDefinitions.Models
             return result;
         }
 
+        //internal override int KeyID
+        //{
+        //    get => spoolDefnID;
+        //    set
+        //    {
+        //        bool assignChildren = !InDatabase;
+        //        Set(ref spoolDefnID, value);
+        //        foreach (var item in Inventory)
+        //        {
+        //            item.SpoolDefnId = spoolDefnID;
+        //            if (assignChildren)
+        //                item.AssignKey(Document.Counters.NextID(item));
+        //        }
+        //    }
+        //}
         //public override void UpdateItem<TContext>() 
         //{
         //    if (IsValid)
@@ -360,6 +399,7 @@ namespace DataDefinitions.Models
         //    }
         //    //throw new NotImplementedException();
         //}
+        /*
         internal override void UpdateContainedItemEntryState<TContext>(TContext context)
         {
             context.SetDataItemsState(Inventory.Where(inv => Modified(inv)), Microsoft.EntityFrameworkCore.EntityState.Modified);
@@ -369,7 +409,7 @@ namespace DataDefinitions.Models
                 foreach (DepthMeasurement depthMeasurement in item.DepthMeasurements)
                     depthMeasurement.UpdateContainedItemEntryState<TContext>(context);
             }
-        }
+        }*/
         public override void SetContainedModifiedState(bool state)
         {
             IsModified = state;
@@ -382,66 +422,103 @@ namespace DataDefinitions.Models
                 }
             }
         }
-        #region IEditableObject Implementation
-        struct BackupData
+        internal override void LinkToParent(VendorDefn parent)
         {
-            public string Description { get; set; }
-            public double Weight { get; set; }
-            public bool StopUsing { get; set; }
-            public double SpoolWidth { get; set; }
-            public double SpoolDiameter { get; set; }
-            public double DrumDiameter { get; set; }
-            public bool Verified { get; set; }
+            base.LinkToParent(parent);
+            foreach (var inv in Inventory)
+                inv.LinkToParent(this);
+        }
+        public override void PostDataRetrieveActions()
+        {
+            InitEventHandlers();
+            WatchContained();
+            foreach (var inv in Inventory)
+                inv.PostDataRetrieveActions();
+        }
+        internal override void PrepareToSave(LiteDBDal dBDal)
+        {
+            foreach (var inv in Inventory)
+                inv.PrepareToSave(dBDal);
+        }
+        //public override void LinkChildren<ParentType>(ParentType parent)
+        //{
+        //    if (parent is Models.VendorDefn defn)
+        //    {
+        //        Vendor = defn;
+        //        foreach (var inv in Inventory)
+        //            inv.LinkChildren<Models.SpoolDefn>(this);
+        //    }
+        //}
+        //internal override void UpdateContainedItems()
+        //{
+        //    foreach (var inv in Inventory)
+        //    {
+        //        if (inv.IsValid && !inv.InDatabase)
+        //            inv.AssignKey(Document.Counters.NextID(inv));
 
-            internal BackupData(string description, double weight, bool stopUsing, double spoolWidth, double spoolDiameter, double drumDiameter, bool verified)
-            {
-                Description = description;
-                Weight = weight;
-                StopUsing = stopUsing;
-                SpoolWidth = spoolWidth;
-                SpoolDiameter = spoolDiameter;
-                DrumDiameter = drumDiameter;
-                Verified = verified;
-            }
-        }
-        BackupData backupData;
-        void IEditableObject.BeginEdit()
-        {
-            if (!InEdit)
-            {
-                backupData = new BackupData(Description, Weight, StopUsing, SpoolWidth, SpoolDiameter, DrumDiameter, Verified);
-                InEdit = true;
-            }
-            //throw new NotImplementedException();
-        }
+        //        inv.UpdateContainedItems();
+        //    }
+        //}
+        /*        #region IEditableObject Implementation
+                struct BackupData
+                {
+                    public string Description { get; set; }
+                    public double Weight { get; set; }
+                    public bool StopUsing { get; set; }
+                    public double SpoolWidth { get; set; }
+                    public double SpoolDiameter { get; set; }
+                    public double DrumDiameter { get; set; }
+                    public bool Verified { get; set; }
 
-        void IEditableObject.CancelEdit()
-        {
-            if (InEdit)
-            {
-                Description = backupData.Description;
-                Weight = backupData.Weight;
-                StopUsing = backupData.StopUsing;
-                SpoolDiameter = backupData.SpoolDiameter;
-                SpoolWidth = backupData.SpoolWidth;
-                DrumDiameter = backupData.DrumDiameter;
-                Verified = backupData.Verified;
-                backupData = default(BackupData);
-                InEdit = false;
-                SetContainedModifiedState(false);
-            }
-            //throw new NotImplementedException();
-        }
+                    internal BackupData(string description, double weight, bool stopUsing, double spoolWidth, double spoolDiameter, double drumDiameter, bool verified)
+                    {
+                        Description = description;
+                        Weight = weight;
+                        StopUsing = stopUsing;
+                        SpoolWidth = spoolWidth;
+                        SpoolDiameter = spoolDiameter;
+                        DrumDiameter = drumDiameter;
+                        Verified = verified;
+                    }
+                }
+                BackupData backupData;
+                void IEditableObject.BeginEdit()
+                {
+                    if (!InEdit)
+                    {
+                        backupData = new BackupData(Description, Weight, StopUsing, SpoolWidth, SpoolDiameter, DrumDiameter, Verified);
+                        InEdit = true;
+                    }
+                    //throw new NotImplementedException();
+                }
 
-        void IEditableObject.EndEdit()
-        {
-            if (InEdit)
-            {
-                backupData = default(BackupData);
-                InEdit = false;
-            }
-            //throw new NotImplementedException();
-        }
-        #endregion
+                void IEditableObject.CancelEdit()
+                {
+                    if (InEdit)
+                    {
+                        Description = backupData.Description;
+                        Weight = backupData.Weight;
+                        StopUsing = backupData.StopUsing;
+                        SpoolDiameter = backupData.SpoolDiameter;
+                        SpoolWidth = backupData.SpoolWidth;
+                        DrumDiameter = backupData.DrumDiameter;
+                        Verified = backupData.Verified;
+                        backupData = default(BackupData);
+                        InEdit = false;
+                        SetContainedModifiedState(false);
+                    }
+                    //throw new NotImplementedException();
+                }
+
+                void IEditableObject.EndEdit()
+                {
+                    if (InEdit)
+                    {
+                        backupData = default(BackupData);
+                        InEdit = false;
+                    }
+                    //throw new NotImplementedException();
+                }
+                #endregion*/
     }
 }

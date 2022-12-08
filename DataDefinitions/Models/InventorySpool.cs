@@ -4,19 +4,25 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
-using System.ComponentModel.DataAnnotations.Schema;
+
 using System.Collections.ObjectModel;
 
 using MyLibraryStandard.Attributes;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
 using System.Reflection;
+using System.Xml.Serialization;
+using DataDefinitions.Interfaces;
+using LiteDB;
+using DataDefinitions.LiteDBSupport;
+using static System.Diagnostics.Debug;
 
 namespace DataDefinitions.Models
 {
     [UIHints(AddType = "Inventory")]
-    public class InventorySpool : DataDefinitions.DatabaseObject, IEditableObject
+    public class InventorySpool : ParentLinkedDataObject<SpoolDefn>, ITrackUsable,ISupportDelete
     {
+        // TODO: Establish an cumulative counter for the InventorySpool it must be stored in the database 
         public static event InDataOpsChangedHandler InDataOpsChanged;
 
         private static bool inDataOps;
@@ -31,22 +37,44 @@ namespace DataDefinitions.Models
                 InDataOpsChanged?.Invoke(EventArgs.Empty);
             }
         }
-        [JsonIgnore]
+        [JsonIgnore, BsonIgnore]
         public override bool InDataOperations => inDataOps;
-        [JsonIgnore]
-        public override bool IsModified { get => base.IsModified || DepthMeasurements.Count(dm => dm.IsModified) > 0; set => base.IsModified = value; }
-        [JsonIgnore]
-        public override bool IsValid => FilamentDefn != null && !string.IsNullOrEmpty(ColorName) && SpoolDefn != null && SpoolDefnId != default;
-        [JsonIgnore]
-        public override bool SupportsDelete => true;
-        [JsonIgnore]
-        public override bool InDatabase => InventorySpoolId != default;
-        public int InventorySpoolId { get; set; }
+        [JsonIgnore, BsonIgnore]
+        public override bool IsModified { get => base.IsModified || DepthMeasurements.Cast<ITrackModified>().Any(dm => dm.IsModified); set => base.IsModified = value; }
+        [JsonIgnore, BsonIgnore]
+        public override bool IsValid => FilamentDefn != null && !string.IsNullOrEmpty(ColorName);
+        //[JsonIgnore, BsonIgnore]
+        //public override bool SupportsDelete => true;
+        //private int inventorySpoolId;
+        ////public override bool InDatabase => InventorySpoolId != default;
+        //[XmlAttribute("ID"), JsonPropertyName("ID"), BsonField("ID")]
+        //public int InventorySpoolId
+        //{
+        //    get => inventorySpoolId;
+        //    set
+        //    {
+        //        if (inventorySpoolId != value)
+        //        {
+        //            inventorySpoolId = value;
+        //            if (inventorySpoolId != default)
+        //                foreach (var dm in DepthMeasurements)
+        //                    dm.InventorySpoolId = inventorySpoolId;
+        //        }
+        //    }
+        //}
+        private int inventorySpoolId;
 
+        public int InventoryCount
+        {
+            get => inventorySpoolId;
+            set => Set<int>(ref inventorySpoolId, value);
+        }
+
+        [XmlAttribute("filamentID"), BsonField("filamentID")]
         public int FilamentDefnId { get; set; }
 
         private FilamentDefn filamentDefn;
-        [Affected(Names = new string[] { nameof(IsValid) }), JsonIgnore]
+        [Affected(Names = new string[] { nameof(IsValid) }), JsonIgnore, XmlIgnore, BsonIgnore]
         public FilamentDefn FilamentDefn
         {
             get => filamentDefn;
@@ -56,22 +84,22 @@ namespace DataDefinitions.Models
                     FilamentDefnId = filamentDefn.FilamentDefnId;
             }
         }
-
-        public int SpoolDefnId { get; set; }
-        private SpoolDefn spoolDefn;
-        [JsonIgnore]
-        public SpoolDefn SpoolDefn
-        {
-            get => spoolDefn;
-            set
-            {
-                if (Set<SpoolDefn>(ref spoolDefn, value) && spoolDefn != null)
-                    SpoolDefnId = spoolDefn.SpoolDefnId;
-            }
-        }
+        //[XmlAttribute("spoolID"), BsonIgnore]
+        //public int SpoolDefnId { get; set; }
+        //private SpoolDefn spoolDefn;
+        //[JsonIgnore, XmlIgnore, BsonIgnore]
+        //public SpoolDefn SpoolDefn
+        //{
+        //    get => spoolDefn;
+        //    set
+        //    {
+        //        if (Set<SpoolDefn>(ref spoolDefn, value) && spoolDefn != null)
+        //            SpoolDefnId = spoolDefn.SpoolDefnId;
+        //    }
+        //}
 
         private string colorName;
-
+        [XmlAttribute("color")]
         public string ColorName
         {
 #pragma warning disable CS8603 // Possible null reference return.
@@ -83,68 +111,88 @@ namespace DataDefinitions.Models
         }
 
         private DateTime dateOpened = DateTime.Today;
-
+        [XmlAttribute("opened"), JsonPropertyName("opened"), BsonField("opened")]
         public DateTime DateOpened
         {
             get => dateOpened;
             set => Set(ref dateOpened, value);
         }
         private bool stopUsing;
-
+        [XmlAttribute("notUsed"), JsonPropertyName("Used")]
         public bool StopUsing
         {
             get => stopUsing;
             set => Set<bool>(ref stopUsing, value);
         }
 
-        [NotMapped, JsonIgnore]
+        [JsonIgnore, BsonIgnore]
         public int AgeInDays => (DateTime.Today - DateOpened).Days;
-        [NotMapped, JsonIgnore]
-        public string Name => $"{ColorName} - {InventorySpoolId}";
-        [NotMapped, JsonIgnore]
-        public string VendorName => SpoolDefn?.Vendor?.Name ?? "Undefined";
-        [NotMapped, JsonIgnore]
-        public string SpoolDescription => SpoolDefn?.Description ?? "Undefined";
+        [JsonIgnore, BsonIgnore]
+        public string Name => $"{ColorName}";
+        [JsonIgnore, BsonIgnore]
+        public string VendorName => Parent?.Parent?.Name ?? "Undefined";
+        [JsonIgnore, BsonIgnore]
+        public string SpoolDescription => Parent?.Description ?? "Undefined";
         public double CalcInitialDepth()
         {
             const double utilizationFactor = 0.95;
             const double layerOverlap = .95;
             bool initialLayer = true;
-            if (SpoolDefn != null && FilamentDefn != null)
+            if (Parent != null && FilamentDefn != null)
             {
                 var initialLength = InitialLength;
                 if (!double.IsNaN(initialLength))
                 {
-                    double depth = (SpoolDefn.SpoolDiameter - SpoolDefn.DrumDiameter) / 2 + (FilamentDefn.Diameter / 2);
+                    double depth = (Parent.SpoolDiameter - Parent.DrumDiameter) / 2 + (FilamentDefn.Diameter / 2);
                     double length = 0;
                     do
                     {
-                        var turns = SpoolDefn.SpoolWidth / FilamentDefn.Diameter * utilizationFactor;
-                        var windLength = (SpoolDefn.SpoolDiameter - depth * 2) * Math.PI / 1000;
+                        var turns = Parent.SpoolWidth / FilamentDefn.Diameter * utilizationFactor;
+                        var windLength = (Parent.SpoolDiameter - depth * 2) * Math.PI / 1000;
                         var amountAdded = turns * windLength;
                         length += amountAdded;
                         depth -= FilamentDefn.Diameter * (initialLayer ? 1.0 : layerOverlap);
                         initialLayer = false;
                     } while (depth > 0 && length < initialLength);
-                    return depth;
+                    return Math.Round(depth, 3);
                 }
                 return double.NaN;
             }
             else
                 return double.NaN;
         }
-        [NotMapped]
+        [JsonIgnore, BsonIgnore]
         public double InitialLength
         {
             get
             {
-                if (SpoolDefn != null && FilamentDefn != null)
+                if (Parent != null && FilamentDefn != null)
                 {
-                    return FilamentMath.LengthFromWeightBasedOnDensity(FilamentDefn.DensityAlias, SpoolDefn.Weight * 1000, FilamentDefn.Diameter) / 1000;
+                    return FilamentMath.LengthFromWeightBasedOnDensity(FilamentDefn.DensityAlias, Parent.Weight * 1000, FilamentDefn.Diameter) / 1000;
 
                 }
                 else
                     return double.NaN;
+            }
+        }
+        [BsonIgnore]
+        public double GramsRemaining
+        {
+            get
+            {
+                if (DepthMeasurements.OrderBy(dm => dm.MeasureDateTime).FirstOrDefault() is DepthMeasurement depthMeasurement)
+                {
+                    return depthMeasurement.FilamentRemainingInGrams;
+                }
+                else
+                    return Parent.Weight * 1000;
+                //var lastMeasurement = DepthMeasurements.OrderBy(dm => dm.MeasureDateTime).FirstOrDefault();
+                //if (lastMeasurement == null)
+                //    return 100;
+                //else
+                //{
+                //    return Math.Round(lastMeasurement.FilamentRemainingInGrams / (SpoolDefn.Weight * 1000) * 100, 3);
+                //}
             }
         }
         //private string? ignoreThis="Ignore This";
@@ -155,7 +203,7 @@ namespace DataDefinitions.Models
         //    set => Set<string>(ref ignoreThis, value);
         //}
 
-        public virtual ICollection<DepthMeasurement> DepthMeasurements { get; set; }
+        public virtual ObservableCollection<DepthMeasurement> DepthMeasurements { get; set; }
         // if this is used in the wpf app it will need to exist in some form, probably for the UWP app,
         // BindableInventorySpool will have to be inherited from InventorySpool
         //[NotMapped]
@@ -177,11 +225,24 @@ namespace DataDefinitions.Models
         {
             DepthMeasurements = new ObservableCollection<DepthMeasurement>();
             if (DepthMeasurements is ObservableCollection<DepthMeasurement> Measurement)
-                Measurement.CollectionChanged += Measurement_CollectionChanged;
+                InitEventHandlers(Measurement);
 
             InDataOpsChanged += InventorySpool_InDataOpsChanged;
         }
 
+        private void InitEventHandlers(ObservableCollection<DepthMeasurement> Measurement)
+        {
+            Measurement.CollectionChanged += Measurement_CollectionChanged;
+        }
+        public override void PostDataRetrieveActions()
+        {
+            InitEventHandlers(DepthMeasurements);
+        }
+        //public override void EstablishLink(IJsonFilamentDocument document)
+        //{
+        //    base.EstablishLink(document);
+        //    InitEventHandlers(DepthMeasurements);
+        //}
         public override void WatchContained()
         {
             foreach (var dm in DepthMeasurements)
@@ -192,7 +253,7 @@ namespace DataDefinitions.Models
             foreach (var dm in DepthMeasurements)
                 dm.Unsubscribe(WatchContainedHandler);
         }
-        public override string UIHintAddType() => typeof(DepthMeasurement).GetCustomAttribute<UIHintsAttribute>()?.AddType ?? string.Empty;
+        //public override string UIHintAddType() => typeof(DepthMeasurement).GetCustomAttribute<UIHintsAttribute>()?.AddType ?? string.Empty;
         private void Measurement_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add && e.NewItems != null)
@@ -200,12 +261,17 @@ namespace DataDefinitions.Models
                 foreach (var item in e.NewItems)
                     if (item is DepthMeasurement measurement)
                     {
-                        measurement.InventorySpool = this;
-                        if (!measurement.InDatabase)
+                        measurement.Parent = this;
+                        if (!DepthMeasurement.InDataOps)
                         {
-                            measurement.InventorySpoolId = InventorySpoolId;
-                            measurement.Depth1 = CalcInitialDepth();
-                            measurement.Depth2 = CalcInitialDepth();
+                            //measurement.InventorySpoolId = InventorySpoolId;
+                            ///<remarks>
+                            /// prevents changing depth if not the initial values
+                            ///</remarks>
+                            if (measurement.Depth1 == DepthMeasurement.FilamentStartingDepth)
+                                measurement.Depth1 = CalcInitialDepth();
+                            if (measurement.Depth2 == DepthMeasurement.FilamentStartingDepth)
+                                measurement.Depth2 = CalcInitialDepth();
                         }
                         measurement.Subscribe(WatchContainedHandler);
                     }
@@ -219,6 +285,34 @@ namespace DataDefinitions.Models
         private void HandleMeasurementPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             //throw new NotImplementedException();
+        }
+        public override void UpdateItem(LiteDBDal dal)
+        {
+            AssignInventoryCount(dal);
+            Parent.UpdateItem(dal);
+        }
+        internal override void PrepareToSave(LiteDBDal dBDal)
+        {
+            AssignInventoryCount(dBDal);
+        }
+        protected void AssignInventoryCount(LiteDBDal dal)
+        {
+            if (InventoryCount == default)
+            {
+                var setting = dal.Settings.FirstOrDefault(d => d.Name.Contains("InventorySpoolCounter"));
+                if (setting != null)
+                {
+                    setting.SetValue(setting + 1);
+                    InventoryCount = setting;
+                    dal.Update(setting);
+                }
+                else
+                {
+                    InventoryCount = 1;
+                    setting = new Setting("InventorySpoolCounter", 1);
+                    dal.Add(setting);
+                }
+            }
         }
 
         ~InventorySpool()
@@ -258,11 +352,21 @@ namespace DataDefinitions.Models
         //        SetContainedModifiedState(false);
         //    }
         //}
-        internal override void UpdateContainedItemEntryState<TContext>(TContext context)
-        {
-            context.SetDataItemsState(DepthMeasurements.Where(dm => Added(dm)), Microsoft.EntityFrameworkCore.EntityState.Added);
-            context.SetDataItemsState(DepthMeasurements.Where(dm => Modified(dm)), Microsoft.EntityFrameworkCore.EntityState.Modified);
-        }
+        //internal override void UpdateContainedItemEntryState<TContext>(TContext context)
+        //{
+        //    context.SetDataItemsState(DepthMeasurements.Where(dm => Added(dm)), Microsoft.EntityFrameworkCore.EntityState.Added);
+        //    context.SetDataItemsState(DepthMeasurements.Where(dm => Modified(dm)), Microsoft.EntityFrameworkCore.EntityState.Modified);
+        //}
+        //public override void LinkChildren<ParentType>(ParentType parent)
+        //{
+        //    if (parent is Models.SpoolDefn spDefn)
+        //    {
+        //        SpoolDefn = spDefn;
+        //        foreach (var dm in DepthMeasurements)
+        //            dm.LinkChildren(this);
+        //    }
+        //    //base.LinkChildren(parent);
+        //}
         public override void SetContainedModifiedState(bool state)
         {
 
@@ -278,56 +382,96 @@ namespace DataDefinitions.Models
                 FilamentDefn = filaments.Single(fil => fil.FilamentDefnId == FilamentDefnId);
             }
         }
+        internal override void LinkToParent(SpoolDefn parent)
+        {
+            base.LinkToParent(parent);
+            foreach (var dm in DepthMeasurements)
+                dm.LinkToParent(this);
+        }
+        public void Delete()
+        {
+            Parent.DeleteMe(this);
+        }
+        //internal override int KeyID
+        //{
+        //    get => InventorySpoolId;
+        //    set
+        //    {
+        //        bool assignChildren = !InDatabase && InventorySpoolId != value;
+        //        if (assignChildren)
+        //            InventorySpoolId = value;
+
+        //        foreach (var item in DepthMeasurements)
+        //        {
+        //            if (assignChildren)
+        //                item.InventorySpoolId = value;
+        //            //if (!item.InDatabase)
+        //            //    item.AssignKey(Document.Counters.NextID(item.GetType()));
+        //        }
+        //    }
+
+        //}
+        //internal override void UpdateContainedItems()
+        //{
+        //    if (!InDatabase)
+        //        AssignKey(Document.Counters.NextID(this));
+        //    //foreach (var item in DepthMeasurements)
+        //    //{
+        //    //    if ( item.IsValid)
+        //    //        item.AssignKey(Document.Counters.NextID(item));
+        //    //}
+        //}
         #region IEditableObject Implementation
-        struct BackupData
-        {
-            public string ColorName { get; set; }
-            public DateTime DateOpened { get; set; }
-            public int FilamentDefnId { get; set; }
-            public FilamentDefn FilamentDefn { get; set; }
-            internal BackupData(InventorySpool inventorySpool)
-            {
-                ColorName = inventorySpool.ColorName;
-                DateOpened = inventorySpool.DateOpened;
-                FilamentDefnId = inventorySpool.FilamentDefnId;
-                FilamentDefn = inventorySpool.FilamentDefn;
-            }
-        }
-        BackupData backupData;
-        void IEditableObject.BeginEdit()
-        {
-            if (!InEdit)
-            {
-                backupData = new BackupData(this);
-                InEdit = true;
-            }
-            //throw new NotImplementedException();
-        }
+        /*        struct BackupData
+                {
+                    public string ColorName { get; set; }
+                    public DateTime DateOpened { get; set; }
+                    public int FilamentDefnId { get; set; }
+                    public FilamentDefn FilamentDefn { get; set; }
+                    internal BackupData(InventorySpool inventorySpool)
+                    {
+                        ColorName = inventorySpool.ColorName;
+                        DateOpened = inventorySpool.DateOpened;
+                        FilamentDefnId = inventorySpool.FilamentDefnId;
+                        FilamentDefn = inventorySpool.FilamentDefn;
+                    }
+                }
+                BackupData backupData;
+                void IEditableObject.BeginEdit()
+                {
+                    if (!InEdit)
+                    {
+                        backupData = new BackupData(this);
+                        InEdit = true;
+                    }
+                    //throw new NotImplementedException();
+                }
 
-        void IEditableObject.CancelEdit()
-        {
-            if (InEdit)
-            {
-                ColorName = backupData.ColorName;
-                DateOpened = backupData.DateOpened;
-                FilamentDefnId = backupData.FilamentDefnId;
-                FilamentDefn = backupData.FilamentDefn;
-                SetContainedModifiedState(false);
-                backupData = default(BackupData);
-                InEdit = false;
-            }
-            //throw new NotImplementedException();
-        }
+                void IEditableObject.CancelEdit()
+                {
+                    if (InEdit)
+                    {
+                        ColorName = backupData.ColorName;
+                        DateOpened = backupData.DateOpened;
+                        FilamentDefnId = backupData.FilamentDefnId;
+                        FilamentDefn = backupData.FilamentDefn;
+                        SetContainedModifiedState(false);
+                        backupData = default(BackupData);
+                        InEdit = false;
+                    }
+                    //throw new NotImplementedException();
+                }
 
-        void IEditableObject.EndEdit()
-        {
-            if (InEdit)
-            {
-                backupData = default(BackupData);
-                InEdit = false;
-            }
-            //throw new NotImplementedException();
-        }
+                void IEditableObject.EndEdit()
+                {
+                    if (InEdit)
+                    {
+                        backupData = default(BackupData);
+                        InEdit = false;
+                    }
+                    //throw new NotImplementedException();
+                }
+        */
         #endregion
     }
 }

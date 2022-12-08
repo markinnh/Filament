@@ -1,3 +1,4 @@
 ﻿	Right now my thoughts are the InventorySpool and DepthMeasurements are transient items and it is safe to deleted them. 
 	Add support for converting from various units of length and mass.  Currently this is in DepthMeasurement and SpoolDefn
 	Working on adding print settings and notes for each spool of filament.
+	Support 'Tagging' Vendors and Notes to allow a 'tag' search of entries.

@@ -20,7 +20,7 @@ namespace Filament.WPF6.Helpers
             {
                 if (item is VendorDefn)
                     return SupportedFilamentsTemplate;
-                else if (item is VendorSettingsConfig)
+                else if (item is VendorPrintSettingsConfig)
                     return PrintSettingsEditorTemplate;
                 else
                     return base.SelectTemplate(item, container);

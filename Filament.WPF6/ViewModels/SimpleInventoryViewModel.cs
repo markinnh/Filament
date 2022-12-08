@@ -3,16 +3,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Data;
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.Input;
+using DataDefinitions.JsonSupport;
+using DataDefinitions.LiteDBSupport;
 using DataDefinitions.Models;
 using Filament.WPF6.Helpers;
-using Microsoft.Toolkit.Mvvm.Input;
+
 
 namespace Filament.WPF6.ViewModels
 {
     internal class SimpleInventoryViewModel : ByVendorViewModel
     {
         
+        public SimpleInventoryViewModel()
+        {
+            ViewSource = new System.Windows.Data.CollectionViewSource();
+            ViewSource.Source = Inventory;
+            ViewSource.IsLiveGroupingRequested = true;
+            ViewSource.GroupDescriptions.Add(new PropertyGroupDescription("VendorName"));
+            ViewSource.GroupDescriptions.Add(new PropertyGroupDescription("SpoolDescription"));
+        }
         public IEnumerable<InventorySpool>? Inventory
         {
             get => GetInventory();
@@ -21,8 +33,8 @@ namespace Filament.WPF6.ViewModels
 
         private IEnumerable<InventorySpool> GetInventory()
         {
-            if (Items != null)
-                foreach (var item in Items)
+            
+                foreach (var item in Singleton<LiteDBDal>.Instance.Vendors)
                     foreach (var defn in item.SpoolDefns)
                         foreach (var spool in defn.Inventory)
                             yield return spool;
@@ -41,11 +53,11 @@ namespace Filament.WPF6.ViewModels
         public IEnumerable<SpoolDefn> SpoolDefns => GetSpoolDefns();
         private IEnumerable<SpoolDefn> GetSpoolDefns()
         {
-            foreach(var vendor in Singleton<DAL.DataLayer>.Instance.VendorList)
+            foreach(var vendor in Singleton<LiteDBDal>.Instance.Vendors)
                 foreach(var sd in vendor.SpoolDefns)
                     yield return sd;
         }
-        public IEnumerable<FilamentDefn> FilamentDefns => Singleton<DAL.DataLayer>.Instance.FilamentList;
+        public IEnumerable<FilamentDefn> FilamentDefns => Singleton<LiteDBDal>.Instance.Filaments;
 
         private InventorySpool? newInventorySpool;
 
@@ -65,7 +77,7 @@ namespace Filament.WPF6.ViewModels
         public ICommand AddNewInventoryCommand => addNewInventoryCommand ??= new RelayCommand(() =>
         {
             InAddInventory = true;
-            if ((newInventorySpool != null && newInventorySpool.IsValid && newInventorySpool.InDatabase)||newInventorySpool==null)
+            if ((newInventorySpool != null && newInventorySpool.IsValid )||newInventorySpool==null)
                 NewInventorySpool = new InventorySpool();
         });
         private ICommand? saveNewInventoryCommand;
@@ -73,14 +85,14 @@ namespace Filament.WPF6.ViewModels
         {
             if (NewInventorySpool?.IsValid ?? false)
             {
-                bool needsAdd = !NewInventorySpool.InDatabase;
-                DAL.Abstraction.UpdateItem(NewInventorySpool);
-                if (needsAdd)
-                {
-                    //Singleton<DAL.DataLayer>.Instance.Add(NewInventorySpool);
-                    NewInventorySpool.SpoolDefn.Inventory.Add(NewInventorySpool);
-                    OnPropertyChanged(nameof(Inventory));
-                }
+                //bool needsAdd = !NewInventorySpool.InDatabase;
+                NewInventorySpool.UpdateItem(Singleton<LiteDBDal>.Instance);
+                //if (needsAdd)
+                //{
+                //    //Singleton<DAL.DataLayer>.Instance.Add(NewInventorySpool);
+                //    NewInventorySpool.SpoolDefn.Inventory.Add(NewInventorySpool);
+                //    OnPropertyChanged(nameof(Inventory));
+                //}
                 InAddInventory = false;
             }
             else

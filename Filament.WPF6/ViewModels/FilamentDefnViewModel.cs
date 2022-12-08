@@ -2,27 +2,38 @@
 using DataDefinitions;
 
 using DataDefinitions.Models;
-using DataContext;
-using Microsoft.Toolkit.Mvvm.Input;
+//using DataContext;
+//using Microsoft.Toolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using DAL;
+using DataDefinitions.JsonSupport;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using DataDefinitions.LiteDBSupport;
+using CommunityToolkit.Mvvm.Input;
+//using DAL;
 
 namespace Filament.WPF6.ViewModels
 {
     public class FilamentDefnViewModel : BaseBrowserViewModel<FilamentDefn, FilamentDefn>
     {
+        public FilamentDefnViewModel() : base()
+        {
+
+        }
         protected override void DerivedInitItems()
         {
             PrepareForDataOperations();
-            if (Singleton<DataLayer>.Instance.FilamentList is IEnumerable<FilamentDefn> filaments)
-            {
-                InitItems(filaments);
-            }
+            ViewSource.Source = Singleton<LiteDBDal>.Instance.Filaments;
+            //if (Singleton<JsonDAL>.Instance.Document.Filaments is ObservableCollection<FilamentDefn> filaments)
+            //{
+            //    Items = filaments;
+            //    //InitItems(filaments);
+            //}
             FinishedDataOperations();
         }
 
@@ -30,11 +41,11 @@ namespace Filament.WPF6.ViewModels
 
         protected override void PrepareForDataOperations() => FilamentDefn.InDataOps = true;
 
-        protected override IEnumerable<FilamentDefn>? GetAllItems() => Singleton<DataLayer>.Instance.FilamentList;
-        protected override IEnumerable<FilamentDefn>? GetInUseItems() => Singleton<DataLayer>.Instance.GetFilteredFilaments(f => !f.StopUsing);
+        //protected override IEnumerable<FilamentDefn>? GetAllItems() => throw new NotImplementedException();
+        //protected override IEnumerable<FilamentDefn>? GetInUseItems() => throw new NotImplementedException();
 
-        protected override IEnumerable<FilamentDefn>? GetFilteredItems(Func<FilamentDefn, bool> predicate) =>
-            Singleton<DataLayer>.Instance.GetFilteredFilaments(predicate);
+        //protected override IEnumerable<FilamentDefn>? GetFilteredItems(Func<FilamentDefn, bool> predicate) =>
+        //    throw new NotImplementedException();
         //protected override void ShowAllItems()
         //{
         //    if (FilamentContext.GetAllFilaments() is IEnumerable<FilamentDefn> filaments)
@@ -44,8 +55,11 @@ namespace Filament.WPF6.ViewModels
         //}
         protected override void PostItemsInitialization()
         {
-            if (Items != null)
-                SelectedItem = Items.First();
+            //if (Items != null)
+            //    SelectedItem = Items.First();
+            if (ViewSource.View.CurrentItem is FilamentDefn databaseObject)
+                SelectedItem = databaseObject;
+                
         }
 
         //protected void InitItems(IEnumerable<FilamentDefn> filaments)

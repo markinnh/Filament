@@ -1,6 +1,9 @@
-﻿using MyLibraryStandard.Attributes;
+﻿using DataDefinitions.Interfaces;
+using LiteDB;
+using MyLibraryStandard.Attributes;
 using System;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+
 
 /*
  * The configuration is now part of the vendor definition, it should be there, since the settings are specific to the vendor, and not a spool definition
@@ -12,7 +15,7 @@ namespace DataDefinitions.Models
     /// <summary>
     /// Individual settings for the configuration.
     /// </summary>
-    public class ConfigItem : DataDefinitions.DatabaseObject
+    public class ConfigItem : DataObject,ITrackModified
     {
         public static event InDataOpsChangedHandler InDataOpsChanged;
 
@@ -28,19 +31,28 @@ namespace DataDefinitions.Models
                 InDataOpsChanged?.Invoke(EventArgs.Empty);
             }
         }
-        public override bool InDataOperations => InDataOps;
+        
+        
+        
+        
+
+        [JsonIgnore,BsonIgnore]
+        public override  bool InDataOperations => InDataOps;
         private int configItemId;
         //[Affected(Names = new string[] { nameof(InDatabase) })]
+        [BsonIgnore]
         public int ConfigItemId
         {
             get => configItemId;
             set => Set(ref configItemId, value);
         }
         public int VendorSettingsConfigId { get; set; }
-        public virtual VendorSettingsConfig VendorSettings { get; set; }
+        [JsonIgnore, BsonIgnore]
+        public virtual VendorPrintSettingsConfig VendorSettings { get; set; }
 
         public int PrintSettingDefnId { get; set; }
         private PrintSettingDefn settingDefn;
+        [JsonIgnore, BsonIgnore]
         public virtual PrintSettingDefn PrintSettingDefn
         {
             get => settingDefn; set
@@ -68,7 +80,7 @@ namespace DataDefinitions.Models
                 Set<string>(ref myTextValue, value);
             }
         }
-        [NotMapped]
+        [System.Text.Json.Serialization.JsonIgnore,BsonIgnore]
         public object Value
         {
             get
@@ -77,13 +89,24 @@ namespace DataDefinitions.Models
                     switch (PrintSettingDefn.SettingValueType)
                     {
                         case SupportedSettingValueType.Integer:
-                            return Convert.ToInt32(TextValue);
+                            if (int.TryParse(myTextValue, out int value))
+                                return value;
+                            else
+                                throw new ArgumentOutOfRangeException($"Unable to convert {myTextValue} to an integer");
                             break;
                         case SupportedSettingValueType.YesNo:
+                            var ynResult =myTextValue.ToLower()=="yes";
+                            return ynResult;
+                            break;
+
                         case SupportedSettingValueType.Boolean:
-                            return Convert.ToBoolean(TextValue);
+                            if (bool.TryParse(myTextValue, out bool result))
+                                return result;
+                            else
+                                throw new ArgumentOutOfRangeException($"unable to convert {myTextValue} to a boolean(true/false)");
                             break;
                         case SupportedSettingValueType.Float:
+
                             return Convert.ToSingle(TextValue);
                             break;
 
@@ -100,7 +123,20 @@ namespace DataDefinitions.Models
                 OnPropertyChanged(nameof(Value));
             }
         }
-        public override bool InDatabase => ConfigItemId != default;
+        //public override bool InDatabase => ConfigItemId != default;
+        //internal override int KeyID 
+        //{ 
+        //    get => ConfigItemId; 
+        //    set => ConfigItemId = value; 
+        //}
+        //protected override void AssignKey(int myId)
+        //{
+        //    if (ConfigItemId == default)
+        //        ConfigItemId = myId;
+        //    else
+        //        ReportKeyAlreadyInitialized();
+        //}
+        [JsonIgnore,BsonIgnore]
         public override bool IsValid => PrintSettingDefnId != default && !string.IsNullOrEmpty(myTextValue);
     }
 }

@@ -1,5 +1,6 @@
-﻿using DataDefinitions.Models;
-using Microsoft.Toolkit.Mvvm.Messaging.Messages;
+﻿using CommunityToolkit.Mvvm.Messaging.Messages;
+using DataDefinitions.Models;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,7 +16,10 @@ namespace Filament.WPF6.Helpers
         {
         }
     }
-    
+    public class TagInteractionNotification : ValueChangedMessage<TagInteraction>
+    {
+        public TagInteractionNotification(TagInteraction value) : base(value) { }
+    }
     public class VendorDefnListChanged : ValueChangedMessage<ObservableCollection<VendorDefn>>
     {
         public VendorDefnListChanged(ObservableCollection<VendorDefn> value) : base(value)

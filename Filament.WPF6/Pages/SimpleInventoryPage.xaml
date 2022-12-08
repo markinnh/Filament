@@ -30,6 +30,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <Border BorderBrush="Brown" BorderThickness="1">
                     <Image  Width="16" Height="16" >
@@ -45,7 +46,7 @@
                 </Border>
                 <TextBlock Grid.Column="1" Text="{Binding ColorName}"/>
                 <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding DateOpened,StringFormat={}{0:d}}"/>
-
+                <TextBlock FontSize="10" Grid.Column="1" Grid.Row="2" Text="{Binding GramsRemaining,StringFormat='{}{0:0} g'}"/>
             </Grid>
         </DataTemplate>
         
@@ -90,7 +91,7 @@
                 </Button>
             </ToolBar>
         </ToolBarPanel>
-        <ListView Grid.Row="1" ItemsSource="{Binding Source={StaticResource InventoryCollection}}" 
+        <ListView Grid.Row="1" ItemsSource="{Binding ViewSource.View}" 
                   ItemTemplate="{StaticResource DispInventorySpool}" 
                   SelectedItem="{Binding SelectedItem,Mode=TwoWay}" 
                   ScrollViewer.HorizontalScrollBarVisibility="Disabled" Style="{StaticResource StandardControl}">

@@ -30,7 +30,7 @@
         <ListView
             Grid.Row="1"
             MaxHeight="450"
-            ItemsSource="{Binding Items}"
+            ItemsSource="{Binding ViewSource.View}"
             ItemTemplate="{Binding Mode=OneWay, Source={StaticResource DisplayVendorDefnInListView}}"
             SelectedItem="{Binding SelectedItem,Mode=TwoWay}"/>
         <GridSplitter Grid.Column="1" Grid.RowSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="AliceBlue" 

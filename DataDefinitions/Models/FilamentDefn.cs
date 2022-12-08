@@ -1,12 +1,16 @@
 ﻿
+using DataDefinitions.Interfaces;
+using DataDefinitions.LiteDBSupport;
+using LiteDB;
 using MyLibraryStandard.Attributes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations.Schema;
+
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Xml.Serialization;
 
 namespace DataDefinitions.Models
 {
@@ -17,7 +21,7 @@ namespace DataDefinitions.Models
     /// <summary>
     /// Allows for definition of 3d print filament. Default FilamentDefn is Generic PLA
     /// </summary>
-    public class FilamentDefn : DataDefinitions.DatabaseObject//,IEditableObject
+    public class FilamentDefn : DataDefinitions.DatabaseObject, ITrackUsable, ISupportRemoval //,IEditableObject
     {
 
 
@@ -35,20 +39,22 @@ namespace DataDefinitions.Models
                 InDataOpsChanged?.Invoke(EventArgs.Empty);
             }
         }
-        [JsonIgnore]
+        [JsonIgnore, BsonIgnore]
         public override bool InDataOperations => InDataOps;
-        [JsonIgnore]
+        [JsonIgnore, BsonIgnore]
         public override bool CanEdit => base.CanEdit && !isIntrinsic;
-        [JsonIgnore]
+        [JsonIgnore, BsonIgnore]
         public override bool InDatabase => FilamentDefnId != default;
-        [JsonIgnore]
-        public override bool SupportsDelete => true && !IsIntrinsic;
+        [JsonIgnore, BsonIgnore]
+        public override bool SupportsDelete => !IsIntrinsic;
+        [XmlIgnore, JsonIgnore, BsonIgnore]
         public override bool IsModified { get => base.IsModified || (DensityAlias?.IsModified ?? false); set => base.IsModified = value; }
+        [JsonIgnore, BsonIgnore]
         public override bool IsValid => !double.IsNaN(Diameter);
         /// <summary>
         /// Database identifier for FilamentDefn
         /// </summary>
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [JsonPropertyName("ID"), BsonId]
         public int FilamentDefnId { get; set; }
         /// <summary>
         /// Standard filament diameter in mm
@@ -70,7 +76,7 @@ namespace DataDefinitions.Models
         /// <value>
         /// The diameter.
         /// </value>
-        [Affected(Names = new string[] { nameof(MgPerMM) })]
+        [Affected(Names = new string[] { nameof(MgPerMM) }), XmlAttribute("diameter")]
         public double Diameter
         {
             get => diameter;
@@ -84,12 +90,13 @@ namespace DataDefinitions.Models
         /// <value>
         ///   <c>true</c> if [stop using]; otherwise, <c>false</c>.
         /// </value>
+        [XmlAttribute("notUsed")]
         public bool StopUsing
         {
             get => stopUsing;
             set => Set<bool>(ref stopUsing, value);
         }
-        [NotMapped]
+        [JsonIgnore]
         //public bool EventsMapped => (InDataOpsChanged?.GetInvocationList().Cast<InDataOpsChangedHandler>().Contains(FilamentDefn_InDataOpsChanged) ?? false) && (DensityAlias?.IsLinkedToNotifyContainer ?? false);
         //private double density = DefinedDensity.BasicPLADensity;
         ///// <summary>
@@ -106,7 +113,7 @@ namespace DataDefinitions.Models
         /// <value>
         /// The type of the material.
         /// </value>
-        [Affected(Names = new string[] { nameof(MgPerMM) })]
+        [Affected(Names = new string[] { nameof(MgPerMM) }), XmlAttribute("material"), JsonPropertyName("Material")]
         public MaterialType MaterialType { get => materialType; set => Set<MaterialType>(ref materialType, value); }
         ///// <summary>
         ///// Density in grams per cc
@@ -117,7 +124,7 @@ namespace DataDefinitions.Models
         /// <summary>
         /// Reference to contained DensityAlias
         /// </summary>
-        [Affected(Names = new[] { nameof(MgPerMM) })]
+        [Affected(Names = new[] { nameof(MgPerMM) }), JsonPropertyName("Alias")]
         public DensityAlias DensityAlias
         {
             get => densityAlias;
@@ -138,6 +145,7 @@ namespace DataDefinitions.Models
         /// Determines whether object can be 'edited'
         /// </summary>
         /// <remarks>Currently only set in the database</remarks>
+        [XmlAttribute("intrisic"), JsonPropertyName("Intrinsic")]
         public bool IsIntrinsic
         {
             get => isIntrinsic;
@@ -147,9 +155,9 @@ namespace DataDefinitions.Models
         /// <summary>
         /// flag used by the UI to <b>show</b> or <b>hide</b> features
         /// </summary>
-        [NotMapped, JsonIgnore]
+        [JsonIgnore, BsonIgnore]
         public bool MeasuredDensityVisible => DensityAlias?.DensityType == DensityType.Measured;
-        [NotMapped, JsonIgnore]
+        [JsonIgnore, BsonIgnore]
         public bool DefinedDensityVisible => DensityAlias?.DensityType == DensityType.Defined;
         #endregion
         private void DensityAlias_NotifyContainer(object sender, MyLibraryStandard.NotifyContainerEventArgs e)
@@ -231,7 +239,7 @@ namespace DataDefinitions.Models
         /// <value>
         /// The shelf life in days.
         /// </value>
-        [JsonIgnore]
+        [JsonIgnore, XmlAttribute("shelfLife")]
         public int ShelfLifeInDays { get => shelfLife; set => Set<int>(ref shelfLife, value); }
         /// <summary>
         /// Initializes a new instance of the <see cref="FilamentDefn"/> class.
@@ -255,7 +263,12 @@ namespace DataDefinitions.Models
             Init();
             Diameter = StandardFilamentDiameter;
             //DensityUnion = new DefinedDensity(DefinedDensity.BasicPLADensity);
-            DensityAlias = new DensityAlias() { DensityType = DensityType.Defined };
+            DensityAlias = new DensityAlias()
+            {
+                DensityType = DensityType.Defined,
+                FilamentDefn = this
+            };
+
             MaterialType = MaterialType.PLA;
         }
         /// <summary>
@@ -299,41 +312,91 @@ namespace DataDefinitions.Models
         /// <value>
         /// The milligrams per millimeter (mg/mm)
         /// </value>
-        [Description("Milligrams per millimeter")]
+        [Description("Milligrams per millimeter"), JsonIgnore, BsonIgnore]
         public double MgPerMM => DensityAlias != null ? FilamentMath.FilamentVolumeInCubicCentimeters(Diameter / 2, 1.0) * DensityAlias.Density * 1000 : double.NaN;
 
-        public override void UpdateItem<TContext>()
-        {
-            using (TContext context = new TContext())
-            {
-                InDataOps = true;
+        //public override void UpdateItem()
+        //{
+        // TODO: Rewrite to support JsonDocument
+        //using (TContext context = new TContext())
+        //{
+        //    InDataOps = true;
 
-                if (InDatabase)
-                {
-                    context.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                    context.Entry(this.DensityAlias).State = DensityAlias.InDatabase ? Microsoft.EntityFrameworkCore.EntityState.Modified : Microsoft.EntityFrameworkCore.EntityState.Added;
-                    UpdateContainedItemEntryState(context);
-                    context.Update(this);
-                }
-                else
-                {
-                    context.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Added;
-                    context.Entry(this.DensityAlias).State = DensityAlias.InDatabase ? Microsoft.EntityFrameworkCore.EntityState.Modified : Microsoft.EntityFrameworkCore.EntityState.Added;
-                    UpdateContainedItemEntryState(context);
-                    context.Add(this);
-                }
+        //    if (InDatabase)
+        //    {
+        //        context.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+        //        context.Entry(this.DensityAlias).State = DensityAlias.InDatabase ? Microsoft.EntityFrameworkCore.EntityState.Modified : Microsoft.EntityFrameworkCore.EntityState.Added;
+        //        UpdateContainedItemEntryState(context);
+        //        context.Update(this);
+        //    }
+        //    else
+        //    {
+        //        context.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Added;
+        //        context.Entry(this.DensityAlias).State = DensityAlias.InDatabase ? Microsoft.EntityFrameworkCore.EntityState.Modified : Microsoft.EntityFrameworkCore.EntityState.Added;
+        //        UpdateContainedItemEntryState(context);
+        //        context.Add(this);
+        //    }
 
-                //context.Update(this);
-                context.SaveChanges();
-                InDataOps = false;
-                SetContainedModifiedState(false);
-            }
-        }
+        //    //context.Update(this);
+        //    context.SaveChanges();
+        //    InDataOps = false;
+        //    SetContainedModifiedState(false);
+        //}
+        //}
+        /*
         internal override void UpdateContainedItemEntryState<TContext>(TContext context)
         {
             context.SetDataItemsState<MeasuredDensity>(DensityAlias?.MeasuredDensity?.Where(md => Added(md)), Microsoft.EntityFrameworkCore.EntityState.Added);
             context.SetDataItemsState<MeasuredDensity>(DensityAlias?.MeasuredDensity?.Where(md => Modified(md)), Microsoft.EntityFrameworkCore.EntityState.Modified);
+        }*/
+        //public override void EstablishLink(IJsonFilamentDocument document)
+        //{
+        //    if (document != null)
+        //    {
+        //        Document = document;
+        //        //DensityAlias.EstablishLink(document);
+        //    }
+        //    else
+        //        throw new ArgumentNullException($"{nameof(document)} is null, a valid reference is required.");
+        //}
+        public override void LinkChildren<ParentType>(ParentType parent)
+        {
+            DensityAlias.LinkChildren(this);
         }
+        protected override void SaveToJsonDatabase()
+        {
+            //if (Document != null)
+            //    Document.Filaments.Add(this);
+        }
+        internal override int KeyID
+        {
+            get => FilamentDefnId;
+            set
+            {
+                FilamentDefnId = value;
+                if (DensityAlias != null)
+                {
+                    DensityAlias.FilamentDefnId = FilamentDefnId;
+                    DensityAlias.FilamentDefn = this;
+                    //DensityAlias.UpdateItem();
+                }
+            }
+        }
+        internal override void UpdateContainedItems()
+        {
+            //DensityAlias.UpdateContainedItems();
+        }
+        //protected override void AssignKey(int myID)
+        //{
+        //    if (Document != null)
+        //    {
+        //        if (FilamentDefnId == default)
+        //        {
+        //            FilamentDefnId = myID;
+        //        }
+
+        //    }
+        //}
         public static void SetDataOperationsState(bool state)
         {
             InDataOps = state;
@@ -347,6 +410,23 @@ namespace DataDefinitions.Models
                 foreach (var md in DensityAlias.MeasuredDensity)
                     md.IsModified = state;
             }
+        }
+
+        public (RemovalResult, object) Remove(LiteDBDal dBDal)
+        {
+            // Get the reference usage list for the FilamentDefn, if the list is empty the deletion can proceed.
+            IEnumerable<DataObject> references;
+            if (dBDal is IReferenceUsage<FilamentDefn> referenceUsage)
+            {
+                references = referenceUsage.GetReferences(this);
+
+                if (references != null)
+                    return (RemovalResult.HasReferences, references);
+                else
+                    //TODO : code to remove the FilamentDefn from the database
+                    ;
+            }
+            throw new NotImplementedException();
         }
         //struct BackupData
         //{

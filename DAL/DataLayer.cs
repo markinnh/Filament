@@ -1,4 +1,5 @@
-﻿using DataDefinitions.Models;
+﻿using DataDefinitions.JsonSupport;
+using DataDefinitions.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,6 +12,7 @@ namespace DAL
 {
     public class DataLayer : INotifyPropertyChanged
     {
+        public IJsonFilamentDocument CurrentJsonFilamentDocument { get; set; }
         protected ObservableCollection<VendorDefn> Vendors { get; set; }
         protected ObservableCollection<FilamentDefn> Filaments { get; set; }
 
@@ -20,10 +22,10 @@ namespace DAL
         public Func<VendorDefn, bool> FilterVendor { get; set; }
         public Func<FilamentDefn, bool> FilterFilament { get; set; }
 
-        public IEnumerable<VendorDefn> VendorList { get => FilterVendor == null ? Vendors : Vendors.Where(FilterVendor); }
-        public IEnumerable<FilamentDefn> FilamentList { get => FilterFilament == null ? Filaments : Filaments.Where(FilterFilament); }
+        public IEnumerable<VendorDefn> VendorList { get => FilterVendor == null ? CurrentJsonFilamentDocument.Vendors : CurrentJsonFilamentDocument.Vendors.Where(FilterVendor); }
+        public IEnumerable<FilamentDefn> FilamentList { get => FilterFilament == null ? CurrentJsonFilamentDocument.Filaments :CurrentJsonFilamentDocument.Filaments.Where(FilterFilament); }
 
-        public IEnumerable<PrintSettingDefn> PrintSettingsList { get => PrintSettings; }
+        public IEnumerable<PrintSettingDefn> PrintSettingsList { get => CurrentJsonFilamentDocument.PrintSettingsDefn; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -31,27 +33,27 @@ namespace DAL
 
         public IEnumerable<Setting> GetFilteredSettings(Func<Setting, bool> func) => Settings.Where(x => func(x));
         public Setting? GetSingleSetting(Func<Setting, bool> func) => GetFilteredSettings(func).SingleOrDefault();
-        public IEnumerable<VendorDefn> GetFilteredVendors(Func<VendorDefn, bool> func) => Vendors.Where(v => func(v));
+        public IEnumerable<VendorDefn> GetFilteredVendors(Func<VendorDefn, bool> func) => CurrentJsonFilamentDocument.Vendors.Where(v => func(v));
 
-        public IEnumerable<FilamentDefn> GetFilteredFilaments(Func<FilamentDefn, bool> func) => Filaments.Where(f => func(f));
+        public IEnumerable<FilamentDefn> GetFilteredFilaments(Func<FilamentDefn, bool> func) => CurrentJsonFilamentDocument.Filaments.Where(f => func(f));
 
-        public IEnumerable<PrintSettingDefn> GetFilteredPrintSettingDefns(Func<PrintSettingDefn, bool> func) => PrintSettings.Where(x => func(x));
-        public PrintSettingDefn? GetSinglePrintSettingDefn(Func<PrintSettingDefn, bool> func) => PrintSettings?.FirstOrDefault(ps => func(ps));
+        public IEnumerable<PrintSettingDefn> GetFilteredPrintSettingDefns(Func<PrintSettingDefn, bool> func) =>CurrentJsonFilamentDocument.PrintSettingsDefn.Where(x => func(x));
+        public PrintSettingDefn? GetSinglePrintSettingDefn(Func<PrintSettingDefn, bool> func) => CurrentJsonFilamentDocument.PrintSettingsDefn.FirstOrDefault(ps => func(ps));
 
         #region Add Methods
         public void Add(VendorDefn vendor)
         {
-            Vendors.Add(vendor);
+            CurrentJsonFilamentDocument.Add(vendor);
             OnPropertyChanged(nameof(FilamentList));
         }
         public void Add(FilamentDefn filament)
         {
-            Filaments.Add(filament);
+            CurrentJsonFilamentDocument.Add(filament);
             OnPropertyChanged(nameof(FilamentList));
         }
         public void Add(PrintSettingDefn printSetting)
         {
-            PrintSettings.Add(printSetting);
+            CurrentJsonFilamentDocument.Add(printSetting);
             OnPropertyChanged(nameof(PrintSettingsList));
         }
         
@@ -71,7 +73,7 @@ namespace DAL
 
         public void Add(Setting setting)
         {
-            Settings.Add(setting);
+           CurrentJsonFilamentDocument.Settings.Add(setting);
         }
         #endregion
         public void Remove(PrintSettingDefn settingDefn)
@@ -99,16 +101,16 @@ namespace DAL
             FilamentDefn.SetDataOperationsState(true);
             PrintSettingDefn.SetDataOperationsState(true);
 
-            if (Abstraction.GetAllVendors() is List<VendorDefn> v)
-                Vendors = new ObservableCollection<VendorDefn>(v);
+            //if (Abstraction.GetAllVendors() is List<VendorDefn> v)
+            //    Vendors = new ObservableCollection<VendorDefn>(v);
 
 
-            FilamentDefn.SetDataOperationsState(true);
-            if (Abstraction.GetAllFilaments() is List<FilamentDefn> fi)
-                Filaments = new ObservableCollection<FilamentDefn>(fi);
+            //FilamentDefn.SetDataOperationsState(true);
+            //if (Abstraction.GetAllFilaments() is List<FilamentDefn> fi)
+            //    Filaments = new ObservableCollection<FilamentDefn>(fi);
 
-            if(Abstraction.GetAllPrintSettingDefns() is List<PrintSettingDefn> ps)
-                PrintSettings= new ObservableCollection<PrintSettingDefn>(ps);
+            //if(Abstraction.GetAllPrintSettingDefns() is List<PrintSettingDefn> ps)
+            //    PrintSettings= new ObservableCollection<PrintSettingDefn>(ps);
             
 
             if (Vendors != null && Filaments != null)
@@ -119,8 +121,9 @@ namespace DAL
                     
                     foreach(var settingsConfig in vend.VendorSettings) { 
                         settingsConfig.WatchContained();
-                        settingsConfig.Link(Filaments);
-                        settingsConfig.Link(PrintSettings);
+                        // these are linked in document deserialization
+                        //settingsConfig.Link(Filaments);
+                        //settingsConfig.Link(PrintSettings);
                     }
                     foreach (var sp in vend.SpoolDefns)
                     {

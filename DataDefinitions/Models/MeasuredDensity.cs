@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
 
+using System.Text;
+using System.Text.Json.Serialization;
 using MyLibraryStandard.Attributes;
 
 namespace DataDefinitions.Models
@@ -11,7 +11,7 @@ namespace DataDefinitions.Models
     /// <summary>
     /// determine the density of filament using empirical measurement
     /// </summary>
-    public class MeasuredDensity : DataDefinitions.DatabaseObject, IDensity,IEditableObject
+    public class MeasuredDensity : DataDefinitions.DatabaseObject, IDensity, IEditableObject
     {
         public static event InDataOpsChangedHandler InDataOpsChanged;
 
@@ -28,7 +28,7 @@ namespace DataDefinitions.Models
             }
         }
         public override bool InDataOperations => InDataOps;
-        [NotMapped]
+        [JsonIgnore]
         public static dynamic Initializer { get; set; }
         private int measuredDensityId;
 
@@ -83,14 +83,14 @@ namespace DataDefinitions.Models
             get => weight;
             set => Set<double>(ref weight, value);
         }
-
+        internal override int KeyID { get => measuredDensityId; set => Set(ref measuredDensityId, value); }
         /// <summary>
         /// Gets the density in gm per cc.
         /// </summary>
         /// <value>
         /// The density in gm per cc.
         /// </value>
-        
+
         public double DensityInGmPerCC { get => (Length > 0 && Diameter > 0 && Weight > 0) ? CalcDensity() : double.NaN; }
         //static bool dependenciesIntialized = false;
         //[JsonIgnore]
@@ -99,7 +99,7 @@ namespace DataDefinitions.Models
         //public override bool HasDependencies => true;
 
         //protected override bool DocInitialized => throw new NotImplementedException();
-        
+
         [Affected(Names = new[] { nameof(Density), nameof(DensityInGmPerCC) })]
         public double Density => DensityInGmPerCC;
 
@@ -109,7 +109,7 @@ namespace DataDefinitions.Models
         /// <param name="weight">The weight.</param>
         /// <param name="diameter">The diameter.</param>
         /// <param name="length">The length.</param>
-        public MeasuredDensity(double weight, double length, double diameter=FilamentDefn.StandardFilamentDiameter)
+        public MeasuredDensity(double weight, double length, double diameter = FilamentDefn.StandardFilamentDiameter)
         {
             Weight = weight;
             Length = length;
@@ -118,8 +118,8 @@ namespace DataDefinitions.Models
         public MeasuredDensity()
         {
             // this allows initialization using the larger diameter size if using the UI
-            
-                Diameter = FilamentDefn.StandardFilamentDiameter;
+
+            Diameter = FilamentDefn.StandardFilamentDiameter;
             //Init();
         }
         /// <summary>
@@ -171,7 +171,14 @@ namespace DataDefinitions.Models
                 return false;
             //throw new NotImplementedException();
         }
+        //protected override void AssignKey(int myId)
+        //{
+        //    if (MeasuredDensityId == default)
+        //        MeasuredDensityId = myId;
+        //    else
+        //        ReportKeyAlreadyInitialized();
 
+        //}
         public override int GetHashCode()
         {
             return length.GetHashCode() ^ weight.GetHashCode() ^ diameter.GetHashCode();
@@ -212,9 +219,9 @@ namespace DataDefinitions.Models
             if (InEdit)
             {
                 Length = backupData.Length;
-                Weight= backupData.Weight;
-                Diameter= backupData.Diameter;
-                backupData=default(BackupData);
+                Weight = backupData.Weight;
+                Diameter = backupData.Diameter;
+                backupData = default(BackupData);
                 InEdit = false;
             }
             //throw new NotImplementedException();
@@ -225,7 +232,7 @@ namespace DataDefinitions.Models
             if (InEdit)
             {
                 backupData = default(BackupData);
-                InEdit= false;
+                InEdit = false;
             }
             //throw new NotImplementedException();
         }

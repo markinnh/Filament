@@ -4,18 +4,23 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+
 using System.Text;
 using static System.Diagnostics.Debug;
 using System.Linq;
-using System.ComponentModel.DataAnnotations.Schema;
+
 using System.Reflection;
+using System.Text.Json.Serialization;
+using System.Xml.Serialization;
+using LiteDB;
+using DataDefinitions.Interfaces;
+using DataDefinitions.LiteDBSupport;
 
 namespace DataDefinitions.Models
 {
     // TODO: Develop a UI for VendorDefn; Add, Delete, Update
     // TODO: Develop a DataObject class the sit between data classes and Observable since the data is going to be disconnected from the DbContext
-    public class VendorDefn : DataDefinitions.DatabaseObject, IDataErrorInfo, IEditableObject
+    public class VendorDefn : TaggedDatabaseObject, IDataErrorInfo, IEditableObject, ITrackUsable, IReferenceUsage<FilamentDefn>
     {
         public static event InDataOpsChangedHandler InDataOpsChanged;
 
@@ -31,11 +36,13 @@ namespace DataDefinitions.Models
                 InDataOpsChanged?.Invoke(EventArgs.Empty);
             }
         }
+        [JsonIgnore, XmlIgnore, BsonIgnore]
         public override bool InDataOperations => InDataOps;
+        [JsonIgnore, XmlIgnore, BsonIgnore]
         public override bool IsModified { get => base.IsModified || SpoolDefns?.Count(sd => sd.IsModified) > 0 || VendorSettings?.Count(vs => vs.IsModified) > 0; set => base.IsModified = value; }
         protected override bool HasContainedItems => true;
-        public override bool InDatabase => vendorID != default;
-
+        //public override bool InDatabase => vendorID != default;
+        [JsonIgnore, XmlIgnore, BsonIgnore]
         public override bool IsValid => !string.IsNullOrEmpty(name);
         //public const string _3DSolutechName = "3D Solutech";
         //public const string HatchBoxName = "HatchBox";
@@ -48,10 +55,23 @@ namespace DataDefinitions.Models
         /// <value>
         /// The vendor identifier.
         /// </value>
+        [XmlAttribute("ID"), JsonPropertyName("ID")]
         public int VendorDefnId
         {
             get => vendorID;
             set => Set<int>(ref vendorID, value);
+        }
+        internal override int KeyID
+        {
+            get => vendorID;
+            set
+            {
+                Set(ref vendorID, value);
+                foreach (var item in VendorSettings)
+                    item.VendorDefnId = value;
+                foreach (var item in SpoolDefns)
+                    item.VendorDefnId = value;
+            }
         }
 
         private string name;
@@ -61,7 +81,7 @@ namespace DataDefinitions.Models
         /// <value>
         /// The name.
         /// </value>
-        [Required]
+        [XmlAttribute("name")]
         public string Name
         {
             get => name;
@@ -75,6 +95,7 @@ namespace DataDefinitions.Models
         /// <value>
         ///   <c>true</c> if [found on amazon]; otherwise, <c>false</c>.
         /// </value>
+        [XmlAttribute("onAmazon")]
         public bool FoundOnAmazon
         {
             get => foundOnAmazon;
@@ -88,12 +109,13 @@ namespace DataDefinitions.Models
         /// <value>
         /// The web URL.
         /// </value>
+        [XmlAttribute("link")]
         public string WebUrl
         {
             get => webUrl;
             set => Set<string>(ref webUrl, value);
         }
-
+        [JsonIgnore, XmlIgnore, BsonIgnore]
         public Uri WebUri => !string.IsNullOrEmpty(webUrl) ? new Uri(webUrl, UriKind.Absolute) : new Uri("https://www.google.com");
         private bool stopUsing;
         /// <summary>
@@ -102,17 +124,20 @@ namespace DataDefinitions.Models
         /// <value>
         ///   <c>true</c> if [stop using]; otherwise, <c>false</c>.
         /// </value>
+        [XmlAttribute("notUsed")]
         public bool StopUsing
         {
             get => stopUsing;
             set => Set<bool>(ref stopUsing, value);
         }
-        [NotMapped]
+        [JsonIgnore, BsonIgnore]
         public bool CollectionNotInitialized { get => SpoolDefns == null; }
         public ObservableCollection<SpoolDefn> SpoolDefns { get; set; }
-        public ObservableCollection<VendorSettingsConfig> VendorSettings { get; set; }
-
+        public ObservableCollection<VendorPrintSettingsConfig> VendorSettings { get; set; }
+        [JsonIgnore]
         public string Error => null;
+        //private string tags;
+        //public string Tags { get => tags; set => Set(ref tags, value); }
 
         public string this[string columnName]
         {
@@ -129,26 +154,25 @@ namespace DataDefinitions.Models
             Name = "Undefined";
             InDataOpsChanged += VendorDefn_InDataOpsChanged;
             SpoolDefns = new ObservableCollection<SpoolDefn>();
-            if (SpoolDefns is ObservableCollection<SpoolDefn> defns)
-                defns.CollectionChanged += Defns_CollectionChanged;
+            //if (SpoolDefns is ObservableCollection<SpoolDefn> defns)
+            //    defns.CollectionChanged += Defns_CollectionChanged;
 
-            if (new ObservableCollection<VendorSettingsConfig>() is ObservableCollection<VendorSettingsConfig> vendorPrintSettings)
-            {
-                VendorSettings = vendorPrintSettings;
-                vendorPrintSettings.CollectionChanged += PrintSettings_CollectionChanged;
-            }
+            VendorSettings = new ObservableCollection<VendorPrintSettingsConfig>();
+            //VendorSettings.CollectionChanged += PrintSettings_CollectionChanged;
+            InitEventHandlers();
         }
 
         private void PrintSettings_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add && e.NewItems.Count > 0)
             {
-                foreach (VendorSettingsConfig settingDefn in e.NewItems)
+                foreach (VendorPrintSettingsConfig settingDefn in e.NewItems)
                 {
                     settingDefn.Subscribe(WatchContainedHandler);
                     settingDefn.WatchContained();
                     settingDefn.VendorDefnId = vendorID;
                     settingDefn.VendorDefn = this;
+                    //settingDefn.EstablishLink(Document);
                 }
                 if (!InDataOperations)
                     IsModified = true;
@@ -166,7 +190,7 @@ namespace DataDefinitions.Models
                     {
                         spoolDefn.Subscribe(WatchContainedHandler);
                         spoolDefn.WatchContained();
-                        spoolDefn.Vendor = this;
+                        spoolDefn.Parent = this;
                         spoolDefn.VendorDefnId = VendorDefnId;
                     }
             if (!InDataOperations)
@@ -221,7 +245,11 @@ namespace DataDefinitions.Models
         }
         public override string UIHintAddType() => typeof(SpoolDefn).GetCustomAttribute<UIHintsAttribute>()?.AddType ?? String.Empty;
 
-
+        protected override void SaveToJsonDatabase()
+        {
+            //if (Document != null)
+            //    Document.Add(this);
+        }
 
         /// <summary>
         /// Creates the vendor.
@@ -241,30 +269,30 @@ namespace DataDefinitions.Models
             };
             return result;
         }
-        internal override void UpdateContainedItemEntryState<TContext>(TContext context)
-        {
-            if (InDatabase)
-            {
-                context.SetDataItemsState<SpoolDefn>(SpoolDefns.Where(sd => Modified(sd)), Microsoft.EntityFrameworkCore.EntityState.Modified);
-                context.SetDataItemsState<SpoolDefn>(SpoolDefns.Where(sd => Added(sd)), Microsoft.EntityFrameworkCore.EntityState.Added);
-                context.SetDataItemsState(VendorSettings.Where(vs => Modified(vs)), Microsoft.EntityFrameworkCore.EntityState.Modified);
-                context.SetDataItemsState(VendorSettings.Where(vs => Added(vs)), Microsoft.EntityFrameworkCore.EntityState.Added);
-            }
-            else
-            {
-                context.SetDataItemsState(SpoolDefns.Where(Added), Microsoft.EntityFrameworkCore.EntityState.Added);
-                context.SetDataItemsState(VendorSettings.Where(Added), Microsoft.EntityFrameworkCore.EntityState.Added);
-            }
-            foreach (VendorSettingsConfig settingsConfig in VendorSettings)
-                settingsConfig.UpdateContainedItemEntryState<TContext>(context);
-        }
+        //internal override void UpdateContainedItemEntryState<TContext>(TContext context)
+        //{
+        //    if (InDatabase)
+        //    {
+        //        context.SetDataItemsState<SpoolDefn>(SpoolDefns.Where(sd => Modified(sd)), Microsoft.EntityFrameworkCore.EntityState.Modified);
+        //        context.SetDataItemsState<SpoolDefn>(SpoolDefns.Where(sd => Added(sd)), Microsoft.EntityFrameworkCore.EntityState.Added);
+        //        context.SetDataItemsState(VendorSettings.Where(vs => Modified(vs)), Microsoft.EntityFrameworkCore.EntityState.Modified);
+        //        context.SetDataItemsState(VendorSettings.Where(vs => Added(vs)), Microsoft.EntityFrameworkCore.EntityState.Added);
+        //    }
+        //    else
+        //    {
+        //        context.SetDataItemsState(SpoolDefns.Where(Added), Microsoft.EntityFrameworkCore.EntityState.Added);
+        //        context.SetDataItemsState(VendorSettings.Where(Added), Microsoft.EntityFrameworkCore.EntityState.Added);
+        //    }
+        //    foreach (VendorSettingsConfig settingsConfig in VendorSettings)
+        //        settingsConfig.UpdateContainedItemEntryState<TContext>(context);
+        //}
         public static void SetDataOperationsState(bool state)
         {
             InDataOps = state;
             SpoolDefn.InDataOps = state;
             InventorySpool.InDataOps = state;
             DepthMeasurement.InDataOps = state;
-            VendorSettingsConfig.InDataOps = state;
+            VendorPrintSettingsConfig.InDataOps = state;
             ConfigItem.InDataOps = state;
         }
         public override void SetContainedModifiedState(bool state)
@@ -281,12 +309,95 @@ namespace DataDefinitions.Models
                             dm.IsModified = state;
                     }
                 }
-            if(VendorSettings!=null)
+            if (VendorSettings != null)
                 foreach (var settingsConfig in VendorSettings)
                     settingsConfig.SetContainedModifiedState(state);
 
             IsModified = state;
             OnPropertyChanged(nameof(IsModified));
+        }
+
+        public override void LinkChildren<ParentType>(ParentType parent)
+        {
+            //Assert(Document != null, "Document is not initialized before calling this method.");
+
+            //spoolDefn.LinkChildren<VendorDefn>(this);
+        }
+        public void LinkInventoryToFilaments(IEnumerable<FilamentDefn> filaments)
+        {
+            foreach (var spoolDefn in SpoolDefns)
+                foreach (var inv in spoolDefn.Inventory)
+                    inv.FilamentDefn = filaments.First(f => f.FilamentDefnId == inv.FilamentDefnId);
+
+            foreach (var vSetting in VendorSettings)
+                vSetting.FilamentDefn = filaments.First(f => f.FilamentDefnId == vSetting.FilamentDefnId);
+        }
+        public void LinkVendorSettingsToPrintDefns(IEnumerable<PrintSettingDefn> printSettings)
+        {
+            foreach (var vSetting in VendorSettings)
+                foreach (var cfgItem in vSetting.ConfigItems)
+                    cfgItem.PrintSettingDefn = printSettings.First(ps => ps.PrintSettingDefnId == cfgItem.PrintSettingDefnId);
+        }
+        //public override void EstablishLink(IJsonFilamentDocument document)
+        //{
+        //    base.EstablishLink(document);
+        //    InitEventHandlers();
+
+        //    foreach (var printSetting in VendorSettings)
+        //    {
+        //        printSetting.Link(document.Filaments);
+        //        printSetting.Link(document.PrintSettingsDefn);
+        //        //printSetting.EstablishLink(document);
+        //    }
+        //    foreach (var spoolDefn in SpoolDefns)
+        //    {
+        //        //spoolDefn.EstablishLink(document);
+        //        foreach (var inventory in spoolDefn.Inventory)
+        //            inventory.Link(document.Filaments);
+        //    }
+        //}
+        public override void PostDataRetrieveActions()
+        {
+            InitEventHandlers();
+            foreach (SpoolDefn spoolDefn in SpoolDefns)
+            {
+                spoolDefn.LinkToParent(this);
+                spoolDefn.PostDataRetrieveActions();
+            }
+        }
+        private void InitEventHandlers()
+        {
+            SpoolDefns.CollectionChanged += Defns_CollectionChanged;
+            VendorSettings.CollectionChanged += PrintSettings_CollectionChanged;
+        }
+
+        internal override void AssignKey(int myId)
+        {
+            base.AssignKey(myId);
+            foreach (var spoolDefn in SpoolDefns)
+            {
+                spoolDefn.VendorDefnId = myId;
+                //                spoolDefn.AssignKey(Document.Counters.NextID(spoolDefn));
+            }
+        }
+        /// <summary>
+        /// Called from UpdateItem, used to update contained items, primarily for updating contained item Keys
+        /// </summary>
+        internal override void UpdateContainedItems()
+        {
+            foreach (var spoolDefn in SpoolDefns)
+            {
+                //if (!spoolDefn.InDatabase && spoolDefn.IsValid)
+                //    spoolDefn.AssignKey(Document.Counters.NextID(spoolDefn));
+
+                //spoolDefn.UpdateContainedItems();
+            }
+            foreach (var setting in VendorSettings)
+            {
+                //if (setting.IsValid)
+                //    setting.AssignKey(Document.Counters.NextID(setting));
+                //setting.UpdateContainedItems();
+            }
         }
         #region IEditableObject Implementation
         struct BackupData
@@ -339,6 +450,26 @@ namespace DataDefinitions.Models
             }
             //throw new NotImplementedException();
         }
+
+        public IEnumerable<DataObject> GetReferences(FilamentDefn defn)
+        {
+            foreach (var spool in SpoolDefns)
+                foreach (var inv in spool.Inventory)
+                    if (inv.FilamentDefnId == defn.FilamentDefnId)
+                        yield return inv;
+            foreach (var setting in VendorSettings)
+                if (setting.FilamentDefnId == defn.FilamentDefnId)
+                    yield return setting;
+            //throw new NotImplementedException();
+        }
+
+        //public IEnumerable<string> GetTags()
+        //{
+        //    if (!string.IsNullOrEmpty(Tags))
+        //        return Tags.Split("#",StringSplitOptions.RemoveEmptyEntries|StringSplitOptions.TrimEntries);
+        //    else
+        //        return null;
+        //}
         #endregion
     }
 }

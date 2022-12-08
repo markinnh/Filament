@@ -8,29 +8,35 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using DataDefinitions.Models;
 using Filament.WPF6.Helpers;
-using Microsoft.Toolkit.Mvvm.Input;
-using Microsoft.Toolkit.Mvvm.Messaging;
+using DataDefinitions.JsonSupport;
+using System.Collections.ObjectModel;
+using DataDefinitions.Interfaces;
+using DataDefinitions.LiteDBSupport;
+using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 
 namespace Filament.WPF6.ViewModels
 {
     internal class DefinePrintSettingsViewModel : BaseBrowserViewModel<PrintSettingDefn, PrintSettingDefn>
     {
-        protected override bool SupportsFiltering { get => false; }
+        protected override bool SupportsShowAllFiltering { get => false; }
         protected override void DerivedInitItems()
         {
-            if (Singleton<DAL.DataLayer>.Instance.PrintSettingsList is IEnumerable<PrintSettingDefn> printSettingsList)
-            {
-                InitItems(printSettingsList);
+            ViewSource.Source = Singleton<LiteDBDal>.Instance.PrintSettings;
+            //if (Singleton<JsonDAL>.Instance.Document.PrintSettingsDefn is ObservableCollection<PrintSettingDefn> printSettingsList)
+            //{
+            //    Items=printSettingsList; 
+            //    //InitItems(printSettingsList);
 
-                //if(Items==null)
-                //    Items = new System.Collections.ObjectModel.ObservableCollection<PrintSettingDefn>(printSettingsList);
-                //else
-                //{
-                //    Items.Clear();
-                //    foreach(var item in printSettingsList)
-                //        Items.Add(item);
-                //}
-            }
+            //    //if(Items==null)
+            //    //    Items = new System.Collections.ObjectModel.ObservableCollection<PrintSettingDefn>(printSettingsList);
+            //    //else
+            //    //{
+            //    //    Items.Clear();
+            //    //    foreach(var item in printSettingsList)
+            //    //        Items.Add(item);
+            //    //}
+            //}
             //throw new NotImplementedException();
         }
 
@@ -38,19 +44,26 @@ namespace Filament.WPF6.ViewModels
         {
             //throw new NotImplementedException();
         }
-
-        protected override IEnumerable<PrintSettingDefn>? GetAllItems() => Singleton<DAL.DataLayer>.Instance.PrintSettingsList;
-
-
-        protected override IEnumerable<PrintSettingDefn>? GetFilteredItems(Func<PrintSettingDefn, bool> predicate)
+        protected override void ShowAllItems()
         {
-            throw new NotImplementedException();
-        }
 
-        protected override IEnumerable<PrintSettingDefn>? GetInUseItems()
-        {
-            throw new NotImplementedException();
         }
+        protected override void ShowInUseItems()
+        {
+
+        }
+        //protected override IEnumerable<PrintSettingDefn>? GetAllItems() => throw new NotImplementedException();
+
+
+        //protected override IEnumerable<PrintSettingDefn>? GetFilteredItems(Func<PrintSettingDefn, bool> predicate)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        //protected override IEnumerable<PrintSettingDefn>? GetInUseItems()
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         protected override void PrepareForDataOperations()
         {
@@ -72,13 +85,15 @@ namespace Filament.WPF6.ViewModels
         {
             if (SelectedItem != null)
             {
-                var selItem=SelectedItem ;
+                var selItem = SelectedItem;
                 if (SelectedItem.InDatabase)
                     WeakReferenceMessenger.Default.Send(new ItemRemoved<PrintSettingDefn>(selItem));
-                Singleton<DAL.DataLayer>.Instance.Remove(SelectedItem);
-                Items?.Remove(SelectedItem);
-                DAL.Abstraction.Remove(selItem);
-                
+                if (SelectedItem is ITrackUsable track)
+                    track.StopUsing = true;
+                //Singleton<DAL.DataLayer>.Instance.Remove(SelectedItem);
+                //Items?.Remove(SelectedItem);
+                //DAL.Abstraction.Remove(selItem);
+                selItem = null;
             }
             //throw new NotImplementedException();
         }
@@ -88,18 +103,21 @@ namespace Filament.WPF6.ViewModels
 
         private void HandleSaveChanges()
         {
-            WriteLine($"HandleSaveChanges called, items modified : {Items?.Count(it => it.InDatabase && it.IsModified)}, items added : {Items?.Count(it => !it.InDatabase && it.IsValid)}");
-            if (Items != null)
-                foreach (var item in Items.Where(it => it.IsModified)) { 
-                    bool needsAdd=!item.InDatabase;
-                    DAL.Abstraction.UpdateItem(item);
+            if (ViewSource.Source is IEnumerable<PrintSettingDefn> items && items != null)
+            {
+                WriteLine($"HandleSaveChanges called, items modified : {items.Count(it => it.InDatabase && it.IsModified)}, items added : {items.Count(it => !it.InDatabase && it.IsValid)}");
+                foreach (var item in items.Where(it => it.IsModified))
+                {
+                    bool needsAdd = !item.InDatabase;
+                    item.UpdateItem(Singleton<LiteDBDal>.Instance);
                     if (needsAdd)
                     {
-                        Singleton<DAL.DataLayer>.Instance.Add(item);
+                        //Singleton<DAL.DataLayer>.Instance.Add(item);
                         WeakReferenceMessenger.Default.Send(new ItemAdded<PrintSettingDefn>(item));
                     }
                 }
-            //throw new NotImplementedException();
+                //throw new NotImplementedException();
+            }
         }
     }
 }

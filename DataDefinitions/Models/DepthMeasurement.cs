@@ -1,13 +1,16 @@
 ﻿
+using DataDefinitions.Interfaces;
+using LiteDB;
 using MyLibraryStandard.Attributes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace DataDefinitions.Models
 {
@@ -15,11 +18,11 @@ namespace DataDefinitions.Models
     /// Stores actually depth measurements to determine remaining amount of filament
     /// </summary>
     [UIHints(AddType = "Measurement")]
-    public class DepthMeasurement : DataDefinitions.DatabaseObject, IEditableObject
+    public class DepthMeasurement : ParentLinkedDataObject<InventorySpool>//, IEditableObject
     {
         const double FilamentDensityInCC = 1.24;
         const double ConvertFromCMMToCCM = 0.001;
-        const double FilamentStartingDepth = 12;
+        internal const double FilamentStartingDepth = 12;
         const double stepAdjustment = 4;
         const int digitsOfPrecision = 2;
         //public event EventHandler ValueChanged;
@@ -37,34 +40,28 @@ namespace DataDefinitions.Models
                 InDataOpsChanged?.Invoke(EventArgs.Empty);
             }
         }
-        [JsonIgnore]
+        [JsonIgnore, BsonIgnore]
         public override bool InDataOperations => inDataOps;
-        [JsonIgnore]
-        public override bool InDatabase => DepthMeasurementId != default;
+        [BsonIgnore]
+        public override bool IsModified { get => base.IsModified; set => base.IsModified = value; }
         /// <summary>
         /// Whether or not the DepthMeasurement has all required data
         /// </summary>
-        [JsonIgnore]
-        public override bool IsValid => !double.IsNaN(depth1) && !double.IsNaN(depth2) && measureDateTime != default && ((InventorySpoolId != default && InventorySpool.InventorySpoolId != default) ||
-            /* account for an inventory spool and measurements being added at the same time*/
-            (InventorySpoolId == default && InventorySpool.InventorySpoolId == default));
-        /// <summary>
-        /// Database identifier
-        /// </summary>
-        /// <remarks>Automatically set when object is stored in the database</remarks>
-        public int DepthMeasurementId { get; set; }
+        [JsonIgnore, BsonIgnore]
+        public override bool IsValid => !double.IsNaN(depth1) && !double.IsNaN(depth2) && measureDateTime != default && (Parent != null);
+
         private double depth1 = FilamentStartingDepth;
         /// <summary>
         /// Depth measurement taken from one side of spool
         /// </summary>
-        [Affected(Names = new string[] { nameof(FilamentRemainingInGrams), nameof(FilamentRemainingInMillimeters), nameof(FilamentRemainingInMeters) })]
+        [Affected(Names = new string[] { nameof(FilamentRemainingInGrams), nameof(FilamentRemainingInMillimeters), nameof(FilamentRemainingInMeters),nameof(IsValid) }),
+            XmlAttribute(AttributeName = "depth1")]
         public double Depth1
         {
             get => depth1;
             set
             {
-                if (value <= InventorySpool?.SpoolDefn?.MaxDepth)
-                    Set<double>(ref depth1, value);
+                Set<double>(ref depth1, value);
             }
 
         }
@@ -72,14 +69,21 @@ namespace DataDefinitions.Models
         /// <summary>
         /// Depth measurement taken from the other side of the spool
         /// </summary>
-        [Affected(Names = new string[] { nameof(FilamentRemainingInGrams), nameof(FilamentRemainingInMillimeters), nameof(FilamentRemainingInMeters) })]
+        [Affected(Names = new string[]
+        {
+        nameof(FilamentRemainingInGrams),
+        nameof(FilamentRemainingInMillimeters),
+        nameof(FilamentRemainingInMeters),
+        nameof(IsValid)
+        }),
+            XmlAttribute(AttributeName = "depth2")]
         public double Depth2
         {
             get => depth2;
             set
             {
-                if (value <= InventorySpool?.SpoolDefn?.MaxDepth)
-                    Set<double>(ref depth2, value);
+
+                Set<double>(ref depth2, value);
             }
 
         }
@@ -89,6 +93,8 @@ namespace DataDefinitions.Models
         /// <summary>
         /// Date the measurement was taken
         /// </summary>
+        [XmlAttribute(AttributeName = "MeasuredOn"),
+            JsonPropertyName("Measured"), BsonField("Measured"),Affected(Names =new string[] {nameof(IsValid)})]
         public DateTime MeasureDateTime
         {
             get => measureDateTime;
@@ -98,7 +104,7 @@ namespace DataDefinitions.Models
         /// <summary>
         /// Average of Depth1 and Depth2
         /// </summary>
-        [NotMapped, JsonIgnore]
+        [JsonIgnore, BsonIgnore]
         public double AverageDepth => (depth1 + depth2) / 2;
 
         private double percentOffset = 94;
@@ -106,7 +112,7 @@ namespace DataDefinitions.Models
         /// Amount of interlace between layers of filament wound onto a spool
         /// </summary>
         [Affected(Names = new string[] { nameof(FilamentRemainingInGrams), nameof(FilamentRemainingInMillimeters), nameof(FilamentRemainingInMeters) })]
-        [JsonIgnore]
+        [JsonIgnore, XmlIgnore, BsonIgnore]
         public double PercentOffset
         {
             get => percentOffset;
@@ -118,30 +124,32 @@ namespace DataDefinitions.Models
         /// Compesate for wind in the CalcRemaining calculation
         /// </summary>
         /// <remarks>Normally is false</remarks>
-        [Affected(Names = new string[] { nameof(FilamentRemainingInGrams), nameof(FilamentRemainingInMeters), nameof(FilamentRemainingInMeters) })]
+        [Affected(Names = new string[] { nameof(FilamentRemainingInGrams), nameof(FilamentRemainingInMeters), nameof(FilamentRemainingInMeters) }),
+            JsonIgnore, XmlIgnore, BsonIgnore]
         public bool AdjustForWind
         {
             get { return adjustForWind; }
             set => Set<bool>(ref adjustForWind, value);
         }
-        [JsonIgnore]
+        [JsonIgnore, BsonIgnore]
         public double FilamentRemainingInMillimeters => CalcRemaining();
-        [JsonIgnore]
+        [JsonIgnore, BsonIgnore]
         public double FilamentRemainingInMeters => CalcRemaining() / 1000;
-        [JsonIgnore]
+        [JsonIgnore, BsonIgnore]
         public double FilamentRemainingInGrams => CalcGramsRemaining();
 
         /// <summary>
         /// Identifier of containing InventorySpool
         /// </summary>
         /// <remarks>Actual part that is stored in database</remarks>
+        [XmlAttribute(AttributeName = "InvID"), BsonIgnore]
         public int InventorySpoolId { get; set; }
 
         private InventorySpool inventorySpool;
         /// <summary>
         /// Reference to containing InventorySpool
         /// </summary>
-        [JsonIgnore]
+        [JsonIgnore, XmlIgnore, BsonIgnore]
         public InventorySpool InventorySpool
         {
             get => inventorySpool;
@@ -154,32 +162,38 @@ namespace DataDefinitions.Models
         public DepthMeasurement()
         {
         }
+        public DepthMeasurement(double depth1, double depth2, DateTime date)
+        {
+            Depth1 = depth1;
+            Depth2 = depth2;
+            MeasureDateTime = date;
+        }
         /// <summary>
         /// Determines the amount of filament remaining in millimeters
         /// </summary>
         protected double CalcRemaining()
         {
-            if (InventorySpool != null && InventorySpool.SpoolDefn != null && InventorySpool.FilamentDefn != null)
+            if (Parent != null && Parent.Parent != null && Parent.FilamentDefn != null)
             {
                 //var lostSpool = 10;
                 var percentUtilization = .95;
                 double length = 0.0;
-                double windAmount = (InventorySpool.SpoolDefn.SpoolWidth / InventorySpool.FilamentDefn.Diameter) * percentUtilization;
-                var maxDiameter = InventorySpool.SpoolDefn.SpoolDiameter - (2 * AverageDepth);
-                var curDiameter = InventorySpool.SpoolDefn.DrumDiameter;
+                double windAmount = (Parent.Parent.SpoolWidth / Parent.FilamentDefn.Diameter) * percentUtilization;
+                var maxDiameter = Parent.Parent.SpoolDiameter - (2 * AverageDepth);
+                var curDiameter = Parent.Parent.DrumDiameter;
                 var loop = 0;
                 while (curDiameter < maxDiameter)
                 {
-                    length += (windAmount * (double)Math.PI * curDiameter);
+                    length += windAmount * (double)Math.PI * curDiameter;
                     if (adjustForWind)
                     {
                         var windStep = loop > 0 ? stepAdjustment : 0;
                         length += windStep;
                     }
-                    curDiameter += InventorySpool.FilamentDefn.Diameter * 2 * PercentOffset / 100;
+                    curDiameter += Parent.FilamentDefn.Diameter * 2 * PercentOffset / 100;
                     loop++;
                 }
-                Console.WriteLine($"Loop count : {loop}");
+                Debug.WriteLine($"Loop count : {loop}");
                 return length;
             }
             else
@@ -192,15 +206,26 @@ namespace DataDefinitions.Models
         /// <remarks>Based on the Spool Definition parameters and filament diameter</remarks>
         protected double CalcGramsRemaining()
         {
-            if (InventorySpool.FilamentDefn != null && InventorySpool.FilamentDefn.DensityAlias != null)
+            if (Parent.FilamentDefn != null && Parent.FilamentDefn.DensityAlias != null)
             {
-                var gramsPerMillimeter = Math.Pow((double)InventorySpool.FilamentDefn.Diameter / 2, 2) * Math.PI * InventorySpool.FilamentDefn.DensityAlias.Density * FilamentMath.ConvertFromCubicMillimetersToCubicCentimeters;
+                var gramsPerMillimeter = Math.Pow((double)Parent.FilamentDefn.Diameter / 2, 2) * Math.PI * Parent.FilamentDefn.DensityAlias.Density * FilamentMath.ConvertFromCubicMillimetersToCubicCentimeters;
                 return gramsPerMillimeter * FilamentRemainingInMillimeters;
             }
             return
                 double.NaN;
             //throw new NotImplementedException();
         }
+        //public void LinkChildren<ParentType>(ParentType parent)
+        //{
+        //    if (parent is InventorySpool spool && spool.InventorySpoolId == InventorySpoolId)
+        //        InventorySpool = spool;
+        //}
+        //internal override int KeyID
+        //{
+        //    get => DepthMeasurementId;
+        //    set => DepthMeasurementId = value;
+        //}
+        /*
         #region Support For DataGrid (UWP) Editing
         struct BackupData
         {
@@ -266,6 +291,6 @@ namespace DataDefinitions.Models
         //    OnPropertyChanged(nameof(FilamentRemainingInMillimeters));
         //    OnPropertyChanged(nameof(FilamentRemainingInGrams));
         //}
-
+        */
     }
 }

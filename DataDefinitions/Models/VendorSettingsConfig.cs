@@ -1,20 +1,23 @@
-﻿using MyLibraryStandard.Attributes;
+﻿using DataDefinitions.Interfaces;
+using LiteDB;
+using MyLibraryStandard.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel.DataAnnotations;
+
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 /*
- * 
- */
+* 
+*/
 namespace DataDefinitions.Models
 {
     /// <summary>
     /// Settings specific to a certain type of filament
     /// </summary>
-    public class VendorSettingsConfig : DataDefinitions.DatabaseObject
+    public class VendorPrintSettingsConfig : DataObject
     {
         public static event InDataOpsChangedHandler InDataOpsChanged;
 
@@ -30,23 +33,28 @@ namespace DataDefinitions.Models
                 InDataOpsChanged?.Invoke(EventArgs.Empty);
             }
         }
+        [JsonIgnore]
         public override bool InDataOperations => InDataOps;
-        [Affected(Names =new string[] {nameof(InDatabase)})]
-        public override bool IsModified { get => base.IsModified || ConfigItems.Count(ci => ci.IsModified) > 0; set => base.IsModified = value; }
-        public int VendorSettingsConfigId { get; set; }
+        //private bool isModified;
+        [JsonIgnore, BsonIgnore]
+        public override bool IsModified { get => base.IsModified || ConfigItems.Any(ci => ci.IsModified); set => base.IsModified = value; }
+        //[JsonPropertyName("ID"),BsonIgnore]
+        //public int VendorSettingsConfigId { get; set; }
+        [JsonPropertyName("VendorID")]
         public int VendorDefnId { get; set; }
+        [JsonIgnore, BsonIgnore]
         public virtual VendorDefn VendorDefn { get; set; }
 
         private int filamentDefnId;
-
+        [JsonPropertyName("FilamentID")]
         public int FilamentDefnId
         {
             get => filamentDefnId;
             set => Set<int>(ref filamentDefnId, value);
         }
-
+        //internal override int KeyID { get => VendorSettingsConfigId; set => VendorSettingsConfigId = value; }
         private FilamentDefn filamentDefn;
-
+        [JsonIgnore, BsonIgnore]
         public virtual FilamentDefn FilamentDefn
         {
             get => filamentDefn;
@@ -63,20 +71,23 @@ namespace DataDefinitions.Models
         //    get => colorName;
         //    set => Set<string>(ref colorName, value);
         //}
-
-        public override bool InDatabase => VendorSettingsConfigId != default;
+        //[JsonIgnore]
+        //public override bool InDatabase => VendorSettingsConfigId != default;
+        [JsonIgnore, BsonIgnore]
         public override bool IsValid => FilamentDefnId != default;
-        public ICollection<ConfigItem> ConfigItems { get; set; }
+        public ObservableCollection<ConfigItem> ConfigItems { get; set; }
 
-        public VendorSettingsConfig()
+        public VendorPrintSettingsConfig()
         {
-            if (new ObservableCollection<ConfigItem>() is ObservableCollection<ConfigItem> configItems)
-            {
-                ConfigItems = configItems;
-                configItems.CollectionChanged += ConfigItems_CollectionChanged;
-            }
+            ConfigItems = new ObservableCollection<ConfigItem>();
+            InitEventHandlers();
 
         }
+        protected void InitEventHandlers()
+        {
+            ConfigItems.CollectionChanged += ConfigItems_CollectionChanged;
+        }
+
         public void LinkPrintSettings(IEnumerable<PrintSettingDefn> printSettingDefns)
         {
             foreach (ConfigItem item in ConfigItems)
@@ -90,6 +101,7 @@ namespace DataDefinitions.Models
                 foreach (ConfigItem item in e.NewItems)
                 {
                     item.Subscribe(WatchContainedHandler);
+                    //.EstablishLink(Document);
                 }
             }
             else if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Remove && e.OldItems.Count > 0)
@@ -101,7 +113,32 @@ namespace DataDefinitions.Models
             }
             //throw new NotImplementedException();
         }
+        //protected override void AssignKey(int myId)
+        //{
+        //    if (VendorSettingsConfigId == default)
+        //        VendorSettingsConfigId = myId;
+        //    else
+        //        ReportKeyAlreadyInitialized();
+        //}
 
+        //public override void EstablishLink(IJsonFilamentDocument document)
+        //{
+        //    base.EstablishLink(document);
+        //    InitEventHandlers();
+        //    //foreach (var item in ConfigItems)
+        //    //    item.EstablishLink(document);
+
+        //}
+        //internal override void UpdateContainedItems()
+        //{
+        //    foreach(var cfgItem in ConfigItems)
+        //    {
+        //        cfgItem.VendorSettingsConfigId = VendorSettingsConfigId;
+        //        if (!cfgItem.InDatabase && cfgItem.IsValid)
+        //            cfgItem.AssignKey(Document.Counters.NextID(cfgItem));
+        //        cfgItem.UpdateContainedItems();
+        //    }
+        //}
         public override void WatchContained()
         {
             foreach (var item in ConfigItems)
@@ -123,7 +160,7 @@ namespace DataDefinitions.Models
                 if (item.PrintSettingDefnId != default)
                     item.PrintSettingDefn = settingDefns.First(sd => sd.PrintSettingDefnId == item.PrintSettingDefnId);
         }
-
+        /*
         internal override void UpdateContainedItemEntryState<TContext>(TContext context)
         {
             if (InDatabase)
@@ -134,19 +171,19 @@ namespace DataDefinitions.Models
 
             context.SetDataItemsState(ConfigItems.Where(ci => Added(ci)), Microsoft.EntityFrameworkCore.EntityState.Added);
         }
-
+        */
         public override void SetContainedModifiedState(bool state)
         {
-            Trace.Indent();
-            
+            Debug.Indent();
+
             foreach (var item in ConfigItems)
             {
-                Trace.WriteLine($"item has key {item.ConfigItemId}, {{{item.PrintSettingDefn?.Definition}={item.TextValue}}}");
+                Debug.WriteLine($"item {{{item.PrintSettingDefn?.Definition}={item.TextValue}}}");
                 item.IsModified = state;
             }
             IsModified = state;
-            
-            Trace.Unindent();
+
+            Debug.Unindent();
         }
     }
 }

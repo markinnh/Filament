@@ -7,6 +7,7 @@ using System.Reflection;
 using MyLibraryStandard.Attributes;
 using System.Linq;
 using MyLibraryStandard;
+using DataDefinitions.Interfaces;
 
 namespace DataDefinitions
 {
@@ -14,7 +15,7 @@ namespace DataDefinitions
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected virtual bool Set<T>(ref T target, T value,bool blockUpdate=false, [CallerMemberName] string propertyName = null)
+        protected virtual bool Set<T>(ref T target, T value, bool blockUpdate = false, [CallerMemberName] string propertyName = null)
         {
             if (!string.IsNullOrEmpty(propertyName))
             {
@@ -22,6 +23,10 @@ namespace DataDefinitions
                 {
                     target = value;
                     OnPropertyChanged(propertyName);
+
+                    if (propertyName != nameof(ITrackModified.IsModified) && this is ITrackModified track && !track.InDataOperations)
+                        track.IsModified = true;
+                    
                     UpdateAffected(propertyName);
                     if (this is INotifyContainer notify)
                         UpdateContainer(notify, propertyName);
@@ -98,16 +103,17 @@ namespace DataDefinitions
         {
             System.Diagnostics.Debug.WriteLine($"Unwatch contained not implemented in {GetType().Name}");
         }
-        protected virtual void WatchContainedHandler(object sender,PropertyChangedEventArgs e)
+        protected virtual void WatchContainedHandler(object sender, PropertyChangedEventArgs e)
         {
-            
+
             System.Diagnostics.Debug.WriteLine($"Contained property in {GetType().Name} is changed for {e.PropertyName}");
         }
         public void Subscribe(PropertyChangedEventHandler handler)
         {
-            if(handler!=null)
-                if (!PropertyChanged?.GetInvocationList().Contains(handler) ?? true) { 
-                    PropertyChanged+= handler;
+            if (handler != null)
+                if (!PropertyChanged?.GetInvocationList().Contains(handler) ?? true)
+                {
+                    PropertyChanged += handler;
                     System.Diagnostics.Debug.WriteLine($"Initializing PropertyChangedHandler for {GetType().Name}");
                 }
         }

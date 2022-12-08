@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text;
 using System.Linq;
-using System.ComponentModel.DataAnnotations.Schema;
+//using System.ComponentModel.DataAnnotations.Schema;
 using MyLibraryStandard.Attributes;
 using MyLibraryStandard;
 using System.Reflection;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
+using System.Xml.Serialization;
+using LiteDB;
+using DataDefinitions.Interfaces;
 
 namespace DataDefinitions.Models
 {
@@ -19,14 +22,15 @@ namespace DataDefinitions.Models
     /// <summary>
     /// Allows storing either 'Defined' or 'Measured' densities
     /// </summary>
-    public class DensityAlias : DataDefinitions.DatabaseObject, IDensity, INotifyContainer
+
+    public class DensityAlias : Observable,ITrackModified, IDensity, INotifyContainer
     {
         const int MinimumDensityMeasurementsRequired = 3;
 
         public static event InDataOpsChangedHandler InDataOpsChanged;
 
         private static bool inDataOps;
-        [JsonIgnore]
+        [JsonIgnore, BsonIgnore]
         public static bool InDataOps
         {
             get => inDataOps;
@@ -38,25 +42,38 @@ namespace DataDefinitions.Models
                 InDataOpsChanged?.Invoke(EventArgs.Empty);
             }
         }
-        [JsonIgnore]
-        public override bool InDataOperations => InDataOps;
-        [JsonIgnore]
-        public override bool InDatabase => densityAliasId != default;
-        [NotMapped, JsonIgnore]
+        [JsonIgnore, BsonIgnore]
+        public bool InDataOperations => InDataOps;
+        //[JsonIgnore]
+        //public override bool InDatabase => densityAliasId != default;
+        [JsonIgnore, XmlIgnore, BsonIgnore]
         public bool LinkedToCollectionChangedEH { get; set; } = false;
-        [NotMapped, JsonIgnore]
+        [JsonIgnore, BsonIgnore]
         public bool IsLinkedToNotifyContainer => NotifyContainer != null;
         private int densityAliasId;
 
         /// <summary>
         /// Database identifier
         /// </summary>
+        [XmlAttribute("ID"), JsonPropertyName("ID"), BsonIgnore]
         public int DensityAliasId
         {
             get => densityAliasId;
             set => Set<int>(ref densityAliasId, value);
         }
+        //internal override int KeyID
+        //{
+        //    get => densityAliasId;
+        //    set
+        //    {
+        //        Set(ref densityAliasId, value);
+        //        foreach (var item in MeasuredDensity)
+        //            item.UpdateItem();
 
+        //    }
+        //}
+        [BsonIgnore]
+        public bool IsModified { get;  set; }
         private DensityType densityType;
         /// <summary>
         /// Type of density definition used
@@ -69,7 +86,7 @@ namespace DataDefinitions.Models
                 nameof(Models.FilamentDefn.MgPerMM),
                 nameof(Models.FilamentDefn.MeasuredDensityVisible),
                 nameof(Models.FilamentDefn.DefinedDensityVisible)
-                    })]
+                    }), XmlAttribute("densityType"),BsonField("type")]
         public DensityType DensityType
         {
             get => densityType;
@@ -83,6 +100,7 @@ namespace DataDefinitions.Models
         /// <summary>
         /// A defined density for a 'FilamentDefn'
         /// </summary>
+        [XmlAttribute("definedDensity"), JsonPropertyName("Defined")]
         public double DefinedDensity
         {
             get => definedDensity;
@@ -93,19 +111,20 @@ namespace DataDefinitions.Models
         /// </summary>
         /// <remarks>value must be set to store the object in the database.</remarks>
         /// <value>Valid FilamentDefnId</value>
+        [XmlAttribute("filamentID"),BsonIgnore]
         public int FilamentDefnId { get; set; }
         /// <summary>
         /// reference to the applicable FilamentDefn
         /// </summary>
         /// <remarks>Stored in a separate table and relinked after retrieving from the database.</remarks>
         /// <value>FilamentDefn or null</value>
-        [JsonIgnore]
+        [JsonIgnore, XmlIgnore,BsonIgnore]
         public FilamentDefn FilamentDefn { get; set; }
 
         /// <summary>
         /// An alias for either the 'DefinedDensity' or the 'MeasuredDensity'
         /// </summary>
-        [NotMapped, JsonIgnore, ContainerPropertiesAffected(new[] { nameof(Models.FilamentDefn.MgPerMM) })]
+        [JsonIgnore,BsonIgnore, ContainerPropertiesAffected(new[] { nameof(Models.FilamentDefn.MgPerMM) })]
         public double Density
         {
             get => densityType == DensityType.Defined ? definedDensity :
@@ -120,10 +139,16 @@ namespace DataDefinitions.Models
         {
             if (MeasuredDensity is ObservableCollection<MeasuredDensity> col && !LinkedToCollectionChangedEH)
             {
-                col.CollectionChanged += Col_CollectionChanged;
-                LinkedToCollectionChangedEH = true;
+                InitEventHandlers(col);
             }
         }
+
+        private void InitEventHandlers(ObservableCollection<MeasuredDensity> col)
+        {
+            col.CollectionChanged += Col_CollectionChanged;
+            LinkedToCollectionChangedEH = true;
+        }
+
         /// <summary>
         /// releases eventhandlers for strong references
         /// </summary>
@@ -141,6 +166,28 @@ namespace DataDefinitions.Models
             }
             UnWatchContained();
         }
+        //public override void EstablishLink(IJsonFilamentDocument document)
+        //{
+        //    base.EstablishLink(document);
+        //    InitEventHandlers(MeasuredDensity);
+        //    foreach (var item in MeasuredDensity)
+        //        item.EstablishLink(document);
+        //}
+        public void LinkChildren<ParentType>(ParentType parent)
+        {
+            if (parent is FilamentDefn defn)
+                FilamentDefn = defn;
+
+        }
+        //protected override void AssignKey(int myId)
+        //{
+        //    if (DensityAliasId == default)
+        //    {
+        //        DensityAliasId = myId;
+        //    }
+        //    else
+        //        throw new ArgumentException(keyInitializedError);
+        //}
         /// <summary>
         /// A debug only routine to allow testing the UI
         /// </summary>
@@ -228,10 +275,19 @@ namespace DataDefinitions.Models
                     NotifyContainer -= handler;
             }
         }
+        //internal override void UpdateContainedItems()
+        //{
+        //    foreach (var measure in MeasuredDensity)
+        //    {
+        //        if (!measure.InDatabase && measure.IsValid)
+        //            measure.AssignKey(Document.Counters.NextID(measure));
+        //    }
+        //}
         /// <summary>
         /// Collection of measurements
         /// </summary>
         /// <remarks>Applies when the DensityType is 'Measured'</remarks>
-        public ICollection<MeasuredDensity> MeasuredDensity { get; set; } = new ObservableCollection<MeasuredDensity>();
+        [JsonPropertyName("Measured")]
+        public ObservableCollection<MeasuredDensity> MeasuredDensity { get; set; } = new ObservableCollection<MeasuredDensity>();
     }
 }

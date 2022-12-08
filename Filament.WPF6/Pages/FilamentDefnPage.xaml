@@ -45,7 +45,7 @@
             VerticalAlignment="Top"
             
             MaxHeight="400"
-            ItemsSource="{Binding Items}" 
+            ItemsSource="{Binding ViewSource.View}" 
             ItemTemplate="{StaticResource DisplayFilaDefnInList}"
             SelectedItem="{Binding SelectedItem}">
 
@@ -174,13 +174,14 @@
                 Orientation="Horizontal"
                 Grid.Row="1"
                 Grid.ColumnSpan="2">
-                <Button Style="{StaticResource FontSymbolCommandButton}"
+                <Button Style="{StaticResource CommandButton}"
                         Content="&#xE105; All"
                         IsEnabled="{Binding HasModifiedItems,Mode=OneWay}"
                         Command="{Binding SaveAllChangesCommand}"/>
                 <Button
-                    Style="{StaticResource FontSymbolCommandButton}"
-                    Content="&#xE105;"
+                    
+                    Content="{StaticResource SaveIcon}"
+                    Style="{StaticResource IconCommandButton}"
                     Command="{Binding UpdateCommand}"
                     IsEnabled="{Binding SelectedItem.IsModified,Mode=OneWay}"/>
                 <Button 

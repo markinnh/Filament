@@ -83,11 +83,11 @@
                 </DataGrid.Columns>
             </DataGrid>
         </DataTemplate>
-        <DataTemplate x:Key="EditPrintSettings" DataType="{x:Type models:VendorSettingsConfig}">
+        <DataTemplate x:Key="EditPrintSettings" DataType="{x:Type models:VendorPrintSettingsConfig}">
             <DataGrid x:Name="EditConfigItems" ItemsSource="{Binding ConfigItems}" AutoGenerateColumns="False" Height="400" Width="500" VerticalAlignment="Top" CanUserDeleteRows="False" SelectedItem="{Binding DataContext.SelectedRow, ElementName=MyPage,Mode=TwoWay}" >
                 <DataGrid.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="Delete Row" Command="{Binding DataContext.DeleteSelectedRow, Source={x:Reference Name=MyPage}}" CommandParameter="{Binding DataContext.SelectedRow, Source={x:Reference Name=MyPage}}"  />
+                        <!--<MenuItem Header="Delete Row" Command="{Binding DataContext.DeleteSelectedRow, Source={x:Reference Name=MyPage}}" CommandParameter="{Binding DataContext.SelectedRow, Source={x:Reference Name=MyPage}}"  />-->
                     </ContextMenu>
                 </DataGrid.ContextMenu>
                 <DataGrid.Columns>
@@ -175,7 +175,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <TreeView Width="200"
-                  VerticalAlignment="Stretch" ItemsSource="{Binding Items}" SelectedItemChanged="TreeView_SelectedItemChanged" Grid.RowSpan="2">
+                  VerticalAlignment="Stretch" ItemsSource="{Binding ViewSource.View}" SelectedItemChanged="TreeView_SelectedItemChanged" Grid.RowSpan="2">
             <TreeView.Resources>
                 <HierarchicalDataTemplate DataType="{x:Type models:VendorDefn}" ItemsSource="{Binding VendorSettings}">
                     <StackPanel Orientation="Horizontal">
@@ -192,7 +192,7 @@
                             </TextBlock>
                     </StackPanel>
                 </HierarchicalDataTemplate>
-                <HierarchicalDataTemplate DataType="{x:Type models:VendorSettingsConfig}">
+                <HierarchicalDataTemplate DataType="{x:Type models:VendorPrintSettingsConfig}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{StaticResource EditIconSymbol}"
                                    Style="{StaticResource FontIcon}"

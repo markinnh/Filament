@@ -1,7 +1,9 @@
 ﻿
+using CommunityToolkit.Mvvm.Input;
+using DataDefinitions.LiteDBSupport;
 using DataDefinitions.Models;
 using Filament.WPF6.Helpers;
-using Microsoft.Toolkit.Mvvm.Input;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,7 +49,7 @@ namespace Filament.WPF6.ViewModels
                 if (NewDepthMeasurement.IsValid)
                 {
                     spool.DepthMeasurements.Add(NewDepthMeasurement);
-                    DAL.Abstraction.UpdateItem(NewDepthMeasurement);
+                    NewDepthMeasurement.UpdateItem(Singleton<LiteDBDal>.Instance);
                 }
             }
         });

@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using System.Xml.Serialization;
+using System.Text.Json.Serialization;
 
 namespace DataDefinitions.Models
 {
@@ -22,13 +24,17 @@ namespace DataDefinitions.Models
                 InDataOpsChanged?.Invoke(EventArgs.Empty);
             }
         }
+        [System.Text.Json.Serialization.JsonIgnore]
         public override bool InDataOperations => InDataOps;
-        public override bool InDatabase => SettingId != default;
+        //public override bool InDatabase => SettingId != default;
+        [XmlAttribute("ID"),JsonPropertyName("ID")]
         public int SettingId { get; set; }
         private string settingName;
+        [XmlAttribute("name")]
         public string Name { get => settingName; set => Set(ref settingName, value); }
 
         private string settingValue;
+        [XmlAttribute("value")]
         public string Value { get => settingValue; set => Set(ref settingValue, value); }
 
         public Setting() { }
@@ -45,6 +51,21 @@ namespace DataDefinitions.Models
     Value = {Value}
 }}";
         }
+        internal override int KeyID { get => SettingId; set => SettingId = value; }
+        //protected override void AssignKey(int myId)
+        //{
+        //    if (SettingId == default)
+        //        SettingId = myId;
+        //    else
+        //        ReportKeyAlreadyInitialized();
+        //}
+        protected override void SaveToJsonDatabase()
+        {
+            //if (Document != null)
+            //{
+            //    Document.Add(this);
+            //}
+        }
         public void SetValue(object value)
         {
             if (value != null)
@@ -54,7 +75,6 @@ namespace DataDefinitions.Models
 #pragma warning restore CS8601 // Possible null reference assignment.
             }
         }
-
         public static implicit operator int(Setting setting)
         {
             if (int.TryParse(setting.Value, out int result))

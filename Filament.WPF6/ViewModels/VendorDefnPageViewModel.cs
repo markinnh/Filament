@@ -5,10 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DataDefinitions.Models;
-using DataContext;
+//using DataContext;
 using System.Windows.Input;
-using Microsoft.Toolkit.Mvvm.Input;
+
 using System.Diagnostics;
+using Filament.WPF6.Helpers;
+using DataDefinitions.JsonSupport;
+using DataDefinitions.LiteDBSupport;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Filament.WPF6.ViewModels
 {
@@ -42,10 +46,10 @@ namespace Filament.WPF6.ViewModels
         {
             // TODO: Define all the data to seed the database with the vendor definitions
             VendorDefn.InDataOps = true;
-            var defns = DAL.Abstraction.GetAllVendors();
-            if (defns != null)
+            //var defns = DAL.Abstraction.GetAllVendors();
+            if (Singleton<LiteDBDal>.Instance.Vendors is ObservableCollection<VendorDefn> defns)
             {
-                VendorDefns = new ObservableCollection<VendorDefn>(defns);
+                VendorDefns = defns;
                 SelectedVendorDefn= VendorDefns.First();
             }
             else

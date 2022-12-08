@@ -39,7 +39,7 @@ namespace DataDefinitions
         public static double ConvertTo(double measurement, SupportedVolume volume, ConvertToVolume convert)
         {
             double result = double.NaN;
-            if (double.IsNaN(measurement))
+            if (!double.IsNaN(measurement))
             {
                 switch (convert)
                 {

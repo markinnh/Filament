@@ -7,14 +7,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using DataContext;
+//using DataContext;
 using DataDefinitions.Models;
-using Microsoft.EntityFrameworkCore;
+//using Microsoft.EntityFrameworkCore;
 using MyLibraryStandard.Attributes;
-using Microsoft.Toolkit.Mvvm.Input;
+//using Microsoft.Toolkit.Mvvm.Input;
 using Filament.WPF6.Helpers;
 using DataDefinitions;
-using DAL;
+//using DAL;
+using DataDefinitions.JsonSupport;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Filament.WPF6.ViewModels
 {
@@ -92,15 +94,16 @@ namespace Filament.WPF6.ViewModels
 
         public FilamentDefnPageViewModel()
         {
-            if (Singleton<DataLayer>.Instance.FilamentList is IEnumerable<FilamentDefn> filaments)
-            {
-                Items = new(filaments);
-                foreach (var filament in filaments)
-                {
-                    filament.InitNotificationHandler();
-                }
-                SelectedItem = Items.First();
-            }
+            
+            //if (Singleton<JsonDAL>.Instance.Document.Filaments is ObservableCollection<FilamentDefn> filaments)
+            //{
+            //    Items = filaments;
+            //    //foreach (var filament in filaments)
+            //    //{
+            //    //    filament.InitNotificationHandler();
+            //    //}
+            //    SelectedItem = Items.First();
+            //}
         }
     }
 }

@@ -11,6 +11,9 @@
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="ByFilamentPage" Name="MyPage" IsEnabled="{Binding Ready,Mode=OneWay}">
+    <Page.DataContext>
+        <vm:ByVendorViewModel/>
+    </Page.DataContext>
     <Page.Resources>
         
         <CollectionViewSource x:Key="DefinedFilaments" Source="{Binding Filaments}"/>
@@ -63,7 +66,7 @@
                           />
 
 
-                <DataGrid ItemsSource="{Binding FilteredInventory}" 
+                <DataGrid ItemsSource="{Binding Inventory}" 
                           Style="{StaticResource StdDataGrid}"
                       AutoGenerateColumns="False"
                       Grid.Row="4"
@@ -103,7 +106,7 @@
                                         <TextBlock Text="{StaticResource EditIconSymbol}"
                                                Style="{StaticResource FontIcon}"
                                                FontSize="12"
-                                               Visibility="{Binding IsModified,Converter={StaticResource VisibilityConverter}}"/>
+                                               Visibility="{Binding IsModified,Mode=OneWay,Converter={StaticResource VisibilityConverter}}"/>
                                     </StackPanel>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
@@ -191,9 +194,7 @@
                                   NoEditorTemplate="{StaticResource NoEditorTemplate}" />
 
     </Page.Resources>
-    <Page.DataContext>
-        <vm:ByVendorViewModel/>
-    </Page.DataContext>
+    
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="{Binding ByVendorColumn1,Source={StaticResource LeakPrfSettings},Mode=TwoWay}"/>
@@ -211,7 +212,7 @@
                           IsChecked="{Binding ExpandTreeNodesOnStartup,Mode=TwoWay}"/>
             </MenuItem>
         </Menu>
-        <TreeView ItemsSource="{Binding Items}"
+        <TreeView ItemsSource="{Binding ViewSource.View}"
                   SelectedItemChanged="TreeView_SelectedItemChanged"
                   Height="{StaticResource StandardListViewHeight}"
                   VerticalAlignment="Top"
@@ -247,7 +248,7 @@
                 </HierarchicalDataTemplate>
                 
                 
-                <HierarchicalDataTemplate DataType="{x:Type model:SpoolDefn}" ItemsSource="{Binding FilteredInventory}">
+                <HierarchicalDataTemplate DataType="{x:Type model:SpoolDefn}" ItemsSource="{Binding Inventory}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{StaticResource EditIconSymbol}"
                                    Style="{StaticResource FontIcon}"
@@ -297,7 +298,7 @@
                                 </TextBlock>
                                 <TextBlock>
                             <Run Text="Inventory #"/>
-                            <Run Text="{Binding InventorySpoolId}"/>
+                            <Run Text="{Binding InventoryCount}"/>
                                 </TextBlock>
                                 <TextBlock>
                                     <Run Text="Date Opened : "/>

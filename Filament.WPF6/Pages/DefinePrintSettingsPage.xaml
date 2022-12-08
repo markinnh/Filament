@@ -16,7 +16,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <DataGrid ItemsSource="{Binding Items}" 
+        <DataGrid ItemsSource="{Binding ViewSource.View}" 
                   AutoGenerateColumns="False" 
                   Height="500" 
                   SelectedItem="{Binding SelectedItem}" 
