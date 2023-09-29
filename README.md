@@ -1,2 +1,3 @@
 # Filament
 3d printer filament and calculations and data that is related to 3d prints.  Right now the main 'working parts' are DataDefinitions, DataContext, Filament.UWP, and Filament.WPF6.  The data is currently setup to use a SQL Server Express database locally, this allows the UWP and WPF programs to both access the same data, Json is not supported but I am working on it.
+9/29/2023 after a lot of work have made data support work with LiteDb, I thought it was a more reasonable solution for data access.  I am currently working on making it work in WinUI3, I ran into a problem using CollectionViewSource in WPF and I don't know if it is my code or the framework, although stepping through my code shows no obvious errors.
