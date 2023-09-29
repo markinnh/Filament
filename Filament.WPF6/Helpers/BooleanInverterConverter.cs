@@ -14,10 +14,10 @@ namespace Filament.WPF6.Helpers
         {
             if (value is bool boolean)
                 return !boolean;
-            else if (value == null)
-                return value;
             else
-                throw new NotSupportedException($"BooleanInverterConverter does not support {value.GetType().Name}.");
+                return value;
+            //else
+            //    throw new NotSupportedException($"BooleanInverterConverter does not support {value.GetType().Name}.");
                 
         }
 

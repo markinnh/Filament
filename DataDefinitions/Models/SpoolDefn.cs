@@ -86,8 +86,8 @@ namespace DataDefinitions.Models
             {
                 if (Set<double>(ref drumDiameter, value))
                 {
-                    spoolDepth = (spoolDiameter - drumDiameter) / 2;
-                    OnPropertyChanged(nameof(SpoolDepth));
+                    SpoolDepth = (spoolDiameter - drumDiameter) / 2;
+                    //OnPropertyChanged(nameof(SpoolDepth));
                 }
             }
         }
@@ -140,7 +140,7 @@ namespace DataDefinitions.Models
             set => Set<int>(ref spoolDefnID, value);
         }
 
-        private bool stopUsing;
+        private bool? stopUsing;
         /// <summary>
         /// Gets or sets a value indicating whether to stop using.
         /// </summary>
@@ -148,10 +148,10 @@ namespace DataDefinitions.Models
         ///   <c>true</c> if [stop using]; otherwise, <c>false</c>.
         /// </value>
         [XmlAttribute("stopUsing")]
-        public bool StopUsing
+        public bool? StopUsing
         {
-            get => stopUsing;
-            set => Set<bool>(ref stopUsing, value);
+            get => stopUsing?? false;
+            set => Set(ref stopUsing, value);
         }
 
 
@@ -169,7 +169,7 @@ namespace DataDefinitions.Models
         //    set => Set<FilamentDefn>(ref filament, value);
         //}
 
-        private double weight = Constants.StandardSpoolLoad;
+        private double weight;
         /// <summary>
         /// Gets or sets the weight.  In Kg, default is 1Kg.
         /// </summary>
@@ -180,10 +180,10 @@ namespace DataDefinitions.Models
         public double Weight
         {
             get => weight;
-            set => Set<double>(ref weight, value);
+            set => Set(ref weight, value);
         }
 
-        private bool verified;
+        private bool? verified;
         /// <summary>
         /// Gets or sets a value indicating whether this <see cref="SpoolDefn"/> has it's dimensions verified.
         /// </summary>
@@ -191,10 +191,10 @@ namespace DataDefinitions.Models
         ///   <c>true</c> if verified; otherwise, <c>false</c>.
         /// </value>
         [XmlAttribute("verified")]
-        public bool Verified
+        public bool? Verified
         {
-            get => verified;
-            set => Set<bool>(ref verified, value);
+            get => verified ?? false;
+            set => Set(ref verified, value);
         }
 
         private int vendorID;
@@ -208,7 +208,7 @@ namespace DataDefinitions.Models
         public int VendorDefnId
         {
             get => vendorID;
-            set => Set<int>(ref vendorID, value);
+            set => Set(ref vendorID, value);
         }
 
         //public VendorDefn Vendor { get; set; }
@@ -244,7 +244,7 @@ namespace DataDefinitions.Models
 
         public virtual ObservableCollection<InventorySpool> Inventory { get; set; }
         [JsonIgnore, BsonIgnore]
-        public IEnumerable<InventorySpool> FilteredInventory => showInUse ? Inventory.Where(inv => !inv.StopUsing) : Inventory;
+        public IEnumerable<InventorySpool> FilteredInventory => showInUse ? Inventory.Where(inv => !inv.StopUsing??false) : Inventory;
         /// <summary>
         /// Gets the name of the spool.
         /// </summary>
@@ -439,6 +439,13 @@ namespace DataDefinitions.Models
         {
             foreach (var inv in Inventory)
                 inv.PrepareToSave(dBDal);
+        }
+        internal override void DeleteMe(DataObject dataObject)
+        {
+            if(dataObject is InventorySpool inventory)
+                Inventory.Remove(inventory);
+            base.DeleteMe(dataObject);
+            Singleton<LiteDBDal>.Instance.Update(Parent);
         }
         //public override void LinkChildren<ParentType>(ParentType parent)
         //{

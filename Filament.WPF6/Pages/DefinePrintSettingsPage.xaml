@@ -63,12 +63,13 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTextColumn Header="Definition" Width="200" Binding="{Binding Definition}"/>
+                <DataGridComboBoxColumn Header="Type" Width="100" ItemsSource="{Binding Source={StaticResource DataFromSupportedSettingValueType}}" SelectedValueBinding="{Binding SettingValueType,Mode=TwoWay}"/>
+                <DataGridTextColumn Header="Items" Width="300" Binding="{Binding Items}"/>
             </DataGrid.Columns>
         </DataGrid>
         <StackPanel Grid.Row="1" Orientation="Horizontal">
             <Button Content="{StaticResource SaveSymbol}"
                     Style="{StaticResource FontSymbolCommandButton}"
-                    IsEnabled="{Binding HasModifiedItems}"
                     Command="{Binding SaveChanges}"/>
         </StackPanel>
     </Grid>

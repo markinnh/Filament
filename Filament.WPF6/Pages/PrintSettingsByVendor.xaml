@@ -6,6 +6,7 @@
       xmlns:local="clr-namespace:Filament.WPF6.Pages"
       xmlns:vm="clr-namespace:Filament.WPF6.ViewModels"
       xmlns:models="clr-namespace:DataDefinitions.Models;assembly=DataDefinitions"
+      xmlns:core="clr-namespace:System;assembly=mscorlib"
       xmlns:helpers="clr-namespace:Filament.WPF6.Helpers"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
@@ -14,6 +15,85 @@
         <vm:PrintSettingsByVendorViewModel/>
     </Page.DataContext>
     <Page.Resources>
+        <ControlTemplate x:Key="roundButtonOnOff" TargetType="ToggleButton">
+            <Grid>
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroup x:Name="CommonStates">
+                        <VisualState x:Name="Normal">
+                            <Storyboard>
+                                <ColorAnimation Storyboard.TargetName="backgroundElement" 
+                            Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)"
+                            To="{TemplateBinding Background}"
+                            Duration="0:0:0.3"/>
+                            </Storyboard>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateManager.VisualStateGroups>
+                <Ellipse x:Name="backgroundElement" Fill="{TemplateBinding Background}" />
+                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Grid>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter Property="Fill" TargetName="backgroundElement" Value="LightBlue"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="FontWeight" Value="Bold"/>
+                    <Setter Property="Content" Value="On"/>
+                </Trigger>
+                <Trigger Property="IsChecked" Value="False">
+                    <Setter Property="Content" Value="Off"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+        <ControlTemplate x:Key="roundButtonYesNo" TargetType="ToggleButton">
+            <Grid>
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroup x:Name="CommonStates">
+                        <VisualState x:Name="Normal">
+                            <Storyboard>
+                                <ColorAnimation Storyboard.TargetName="backgroundElement" 
+                            Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)"
+                            To="{TemplateBinding Background}"
+                            Duration="0:0:0.3"/>
+                            </Storyboard>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateManager.VisualStateGroups>
+                <Ellipse x:Name="backgroundElement" Fill="{TemplateBinding Background}" />
+                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Grid>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter Property="Fill" TargetName="backgroundElement" Value="LightBlue"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="FontWeight" Value="Bold"/>
+                    <Setter Property="Content" Value="Yes"/>
+                </Trigger>
+                <Trigger Property="IsChecked" Value="False">
+                    <Setter Property="Content" Value="No"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
+        <DataTemplate x:Key="BooleanEditor" DataType="models:ConfigItem">
+            <CheckBox IsChecked="{Binding Value,Mode=TwoWay}"/>
+        </DataTemplate>
+        <DataTemplate x:Key="OnOffEditor" DataType="models:ConfigItem">
+            <ToggleButton IsChecked="{Binding Value,Mode=TwoWay}" Template="{StaticResource roundButtonOnOff}"/>
+        </DataTemplate>
+        <DataTemplate x:Key="YesNoEditor" DataType="models:ConfigItem">
+            <ToggleButton IsChecked="{Binding Value,Mode=TwoWay}" Template="{StaticResource roundButtonYesNo}"/>
+        </DataTemplate>
+        <DataTemplate x:Key="Int32Editor" DataType="models:ConfigItem">
+            <TextBox Text="{Binding Value,Mode=TwoWay}"/>
+        </DataTemplate>
+        <DataTemplate x:Key="SingleEditor" DataType="models:ConfigItem">
+            <TextBox Text="{Binding Value,Mode=TwoWay}"/>
+        </DataTemplate>
+        <helpers:SelectConfigItemSettingEditor x:Key="SelectEditor" BooleanDataTemplate="{StaticResource BooleanEditor}"
+                                               IntegerDataTemplate="{StaticResource Int32Editor}" 
+                                               FloatDataTemplate="{StaticResource SingleEditor}"
+                                               YesNoDataTemplate="{StaticResource YesNoEditor}"
+                                               OnOffDataTemplate="{StaticResource OnOffEditor}"/>
         <DataTemplate x:Key="EditSupportedFilaments" DataType="{x:Type models:VendorDefn}">
             <DataGrid ItemsSource="{Binding VendorSettings}" 
                       AutoGenerateColumns="False" 
@@ -84,7 +164,14 @@
             </DataGrid>
         </DataTemplate>
         <DataTemplate x:Key="EditPrintSettings" DataType="{x:Type models:VendorPrintSettingsConfig}">
-            <DataGrid x:Name="EditConfigItems" ItemsSource="{Binding ConfigItems}" AutoGenerateColumns="False" Height="400" Width="500" VerticalAlignment="Top" CanUserDeleteRows="False" SelectedItem="{Binding DataContext.SelectedRow, ElementName=MyPage,Mode=TwoWay}" >
+            <DataGrid x:Name="EditConfigItems" 
+                      ItemsSource="{Binding ConfigItems}" 
+                      AutoGenerateColumns="False" 
+                      Height="250" 
+                      Width="500" 
+                      VerticalAlignment="Top" 
+                      CanUserDeleteRows="False" 
+                      SelectedItem="{Binding DataContext.SelectedRow, ElementName=MyPage,Mode=TwoWay}" >
                 <DataGrid.ContextMenu>
                     <ContextMenu>
                         <!--<MenuItem Header="Delete Row" Command="{Binding DataContext.DeleteSelectedRow, Source={x:Reference Name=MyPage}}" CommandParameter="{Binding DataContext.SelectedRow, Source={x:Reference Name=MyPage}}"  />-->
@@ -144,7 +231,7 @@
                             <DataTemplate>
                                 <TextBlock Text="{Binding PrintSettingDefn.Definition}"/>
                             </DataTemplate>
-                            
+
                         </DataGridTemplateColumn.CellTemplate>
                         <DataGridTemplateColumn.CellEditingTemplate>
                             <DataTemplate>
@@ -162,8 +249,53 @@
                 </DataGrid.Columns>
             </DataGrid>
         </DataTemplate>
+        <DataTemplate x:Key="DisplayDefinitionInList" DataType="{x:Type models:PrintSettingDefn}">
+            <TextBlock Text="{Binding Definition}"/>
+        </DataTemplate>
+        <DataTemplate x:Key="EditConfigItem" DataType="{x:Type models:ConfigItem}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="190"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Label Content="Date Entered"/>
+                <DatePicker SelectedDate="{Binding DateEntered,Mode=TwoWay}" Grid.Column="1"/>
+                <Label Content="Definition" Grid.Row="1"/>
+                <ComboBox Name="SelDefinition" Grid.Row="1" Grid.Column="1" IsEnabled="{Binding ElementName=MyPage,Path=DataContext.InAddNewConfigItem,Mode=OneWay}"
+                          ItemsSource="{Binding ElementName=MyPage,Path=DataContext.PrintSettings,Mode=OneWay}" 
+                          SelectedItem="{Binding PrintSettingDefn,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                          ItemTemplate="{StaticResource DisplayDefinitionInList}"/>
+                <ContentControl Grid.Row="2" Grid.Column="1" Content="{Binding .}" ContentTemplateSelector="{StaticResource SelectEditor}" Visibility="{Binding ElementName=MyPage,Path=DataContext.NotInAddNewConfigItem,Converter={StaticResource VisibilityConverter}}" />
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="NewEditPrintSettings" DataType="{x:Type models:VendorPrintSettingsConfig}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="8"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <ListView x:Name="PrintSettings" ItemsSource="{Binding ConfigItems}">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Date Entered" DisplayMemberBinding="{Binding DateEntered,StringFormat='{}{0:d}'}" Width="100"/>
+                            <GridViewColumn Header="Definition" DisplayMemberBinding="{Binding PrintSettingDefn.Definition}" Width="100"/>
+                            <GridViewColumn Header="Value" DisplayMemberBinding="{Binding TextValue}" Width="100"/>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+                <GridSplitter Grid.Row="1" ResizeDirection="Rows" ResizeBehavior="PreviousAndNext" Background="LightGray" HorizontalAlignment="Stretch" Height="8"/>
+                <ContentControl Grid.Row="2" Content="{Binding ElementName=PrintSettings,Path=SelectedItem,Mode=TwoWay}"
+                              ContentTemplate="{StaticResource EditConfigItem}" />
+            </Grid>
+        </DataTemplate>
         <helpers:PrintSettingsSelector x:Key="PrintSettingsSelect" SupportedFilamentsTemplate="{StaticResource EditSupportedFilaments}" 
-                                       PrintSettingsEditorTemplate="{StaticResource EditPrintSettings}"/>
+                                       PrintSettingsEditorTemplate="{StaticResource NewEditPrintSettings}"/>
     </Page.Resources>
     <Grid>
         <Grid.ColumnDefinitions>

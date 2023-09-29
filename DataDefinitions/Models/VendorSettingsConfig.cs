@@ -17,7 +17,7 @@ namespace DataDefinitions.Models
     /// <summary>
     /// Settings specific to a certain type of filament
     /// </summary>
-    public class VendorPrintSettingsConfig : DataObject
+    public class VendorPrintSettingsConfig : ParentLinkedDataObject<VendorDefn>
     {
         public static event InDataOpsChangedHandler InDataOpsChanged;
 
@@ -159,6 +159,10 @@ namespace DataDefinitions.Models
             foreach (var item in ConfigItems)
                 if (item.PrintSettingDefnId != default)
                     item.PrintSettingDefn = settingDefns.First(sd => sd.PrintSettingDefnId == item.PrintSettingDefnId);
+        }
+        public override void PostDataRetrieveActions()
+        {
+            InitEventHandlers();
         }
         /*
         internal override void UpdateContainedItemEntryState<TContext>(TContext context)

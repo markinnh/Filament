@@ -5,20 +5,51 @@ using DataDefinitions.JsonSupport;
 using DataDefinitions.LiteDBSupport;
 using DataDefinitions.Models;
 using Filament.WPF6.Helpers;
+using MyLibraryStandard.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace Filament.WPF6.ViewModels
 {
-    public class PrintSettingsByVendorViewModel : BaseBrowserViewModel<VendorDefn, DataDefinitions.DatabaseObject>
+    /// <summary>
+    /// ViewModel for PrintSettingsByVendor Page
+    /// </summary>
+    /// <remarks>
+    /// 
+    /// </remarks>
+    public class PrintSettingsByVendorViewModel : BaseBrowserViewModel<VendorDefn, DataDefinitions.DataObject>
     {
+        private IEnumerable<MenuItem> editItems = new MenuItem[] 
+        {
+            new MenuItem(){ Header="Edit Value", ToolTip="Edit setting value"},
+            new MenuItem(){Header="Edit Definition", ToolTip="Edit setting definition"}
+        };
         public IEnumerable<FilamentDefn> Filaments { get => Singleton<LiteDBDal>.Instance.Filaments; }
         public IEnumerable<PrintSettingDefn> PrintSettings { get => Singleton<LiteDBDal>.Instance.PrintSettings; }
+
+        private PrintSettingEditState editState;
+
+        public PrintSettingEditState EditState
+        {
+            get => editState;
+            set => Set(ref editState, value);
+        }
+
         protected override bool SupportsShowAllFiltering => false;
+        private bool inAddNewConfigItem;
+        [Affected(Names =new string[] {nameof(NotInAddNewConfigItem)})]
+        public bool InAddNewConfigItem
+        {
+            get => inAddNewConfigItem;
+            set => Set(ref inAddNewConfigItem, value);
+        }
+
+        public bool NotInAddNewConfigItem => !InAddNewConfigItem;
         protected override void DerivedInitItems()
         {
             ViewSource.Source = Singleton<LiteDBDal>.Instance.Vendors;

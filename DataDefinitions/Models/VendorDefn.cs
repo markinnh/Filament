@@ -117,7 +117,7 @@ namespace DataDefinitions.Models
         }
         [JsonIgnore, XmlIgnore, BsonIgnore]
         public Uri WebUri => !string.IsNullOrEmpty(webUrl) ? new Uri(webUrl, UriKind.Absolute) : new Uri("https://www.google.com");
-        private bool stopUsing;
+        private bool? stopUsing;
         /// <summary>
         /// Gets or sets a value indicating whether to stop using.
         /// </summary>
@@ -125,10 +125,10 @@ namespace DataDefinitions.Models
         ///   <c>true</c> if [stop using]; otherwise, <c>false</c>.
         /// </value>
         [XmlAttribute("notUsed")]
-        public bool StopUsing
+        public bool? StopUsing
         {
-            get => stopUsing;
-            set => Set<bool>(ref stopUsing, value);
+            get => stopUsing ?? false;
+            set => Set<bool?>(ref stopUsing, value);
         }
         [JsonIgnore, BsonIgnore]
         public bool CollectionNotInitialized { get => SpoolDefns == null; }
@@ -172,6 +172,7 @@ namespace DataDefinitions.Models
                     settingDefn.WatchContained();
                     settingDefn.VendorDefnId = vendorID;
                     settingDefn.VendorDefn = this;
+                    settingDefn.Parent = this;
                     //settingDefn.EstablishLink(Document);
                 }
                 if (!InDataOperations)
@@ -364,6 +365,12 @@ namespace DataDefinitions.Models
                 spoolDefn.LinkToParent(this);
                 spoolDefn.PostDataRetrieveActions();
             }
+            // TODO: Add code to initialize VendorPrintSettings
+            foreach(var vendorPrintSettings  in VendorSettings)
+            {
+                vendorPrintSettings.LinkToParent(this);
+                vendorPrintSettings.PostDataRetrieveActions();
+            }
         }
         private void InitEventHandlers()
         {
@@ -404,10 +411,10 @@ namespace DataDefinitions.Models
         {
             public string Name { get; set; }
             public string WebUrl { get; set; }
-            public bool StopUsing { get; set; }
+            public bool? StopUsing { get; set; }
             public bool FoundOnAmazon { get; set; }
 
-            internal BackupData(string name, string webUrl, bool stopUsing, bool foundOnAmazon)
+            internal BackupData(string name, string webUrl, bool? stopUsing, bool foundOnAmazon)
             {
                 Name = name;
                 WebUrl = webUrl;

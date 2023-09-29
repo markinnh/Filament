@@ -19,34 +19,35 @@ namespace Filament.WPF6.Helpers
     //}
     internal class LengthWithUnitsConverter : IValueConverter
     {
-        static string[] shortHandnames = new string[] { "mm", "cm", "m" };
+        //static string[] shortHandnames = new string[] { "mm", "cm", "m" };
 
         //const string regexFindFraction = @"(?<whole>\d+)? (?<numerator>\d+)/(?<denominator>\d+) *(?<units>[a-z\x22]+)?";
         // commented out so only using one pattern to find a number with units
         // do not use this one : const string regexFindNumberAndUnit = @"(?<number>\d*(\.\d+)?) ?(?<units>[a-z\x22]+)";
-        const char space = ' ';
-        const string inchesShorthand = "\"";
+        //const char space = ' ';
+        //const string inchesShorthand = "\"";
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            ConvertToLength convertTo = ConvertToLength.Millimeter;
-            if (parameter is string paraString)
-            {
-                if (value is double d)
-                {
-                    if (!double.IsNaN(d))
-                    {
-                        if (Enum.TryParse(paraString, out ConvertToLength result))
-                            return $"{value:#.###} {shortHandnames[(int)result]}";
-                        else
-                            return $"{value:#.###} {shortHandnames[(int)convertTo]}";
-                    }
-                    else
-                        return value;
-                }
-                else
-                    return value;
-            }
-            return value;
+            return UnitConversion.FormatLengthWithUnits(value, parameter);
+            //ConvertToLength convertTo = ConvertToLength.Millimeter;
+            //if (parameter is string paraString)
+            //{
+            //    if (value is double d)
+            //    {
+            //        if (!double.IsNaN(d))
+            //        {
+            //            if (Enum.TryParse(paraString, out ConvertToLength result))
+            //                return $"{value:#.###} {shortHandnames[(int)result]}";
+            //            else
+            //                return $"{value:#.###} {shortHandnames[(int)convertTo]}";
+            //        }
+            //        else
+            //            return value;
+            //    }
+            //    else
+            //        return value;
+            //}
+            //return value;
 
             //if (value is string str)
             //{
@@ -70,60 +71,61 @@ namespace Filament.WPF6.Helpers
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            ConvertToLength convertTo = ConvertToLength.Millimeter;
-            string defaultUnits;
-            if (parameter is string paraString)
-            {
-                if (Enum.TryParse(paraString, out ConvertToLength result))
-                {
-                    convertTo = result;
-                }
-                defaultUnits = shortHandnames[(int)convertTo];
-            }
-            else
-                defaultUnits = shortHandnames[(int)convertTo];
+            return UnitConversion.ConvertWithUnitsOfLength(value, parameter);
+            //ConvertToLength convertTo = ConvertToLength.Millimeter;
+            //string defaultUnits;
+            //if (parameter is string paraString)
+            //{
+            //    if (Enum.TryParse(paraString, out ConvertToLength result))
+            //    {
+            //        convertTo = result;
+            //    }
+            //    defaultUnits = shortHandnames[(int)convertTo];
+            //}
+            //else
+            //    defaultUnits = shortHandnames[(int)convertTo];
 
-            if (value is string str)
-            {
-                if (CompoundFractionWithUnits.TryParse(str, out CompoundFractionWithUnits compoundFractionWithUnits))
-                {
-                    //var fracMatch = Regex.Match(str, regexFindFraction);
-                    SupportedLength supported = FilamentMath.SupportedLengthAlias(!string.IsNullOrEmpty(compoundFractionWithUnits.Units) ? compoundFractionWithUnits.Units : "in");
-                    return FilamentMath.ConvertLength(compoundFractionWithUnits.Value, supported, convertTo);
-                    //double number;
-                    //double numerator;
-                    //double denominator;
-                    //if (double.TryParse(fracMatch.Groups["numerator"].Value, out numerator) && double.TryParse(fracMatch.Groups["denominator"].Value, out denominator))
-                    //{
-                    //    if (!string.IsNullOrEmpty(fracMatch.Groups["whole"].Value))
-                    //    {
-                    //        if (double.TryParse(fracMatch.Groups["whole"].Value, out number))
-                    //        {
-                    //            return (number + (numerator / denominator)) * ConversionFactor(string.IsNullOrEmpty(fracMatch.Groups["units"].Value) ? "in" : fracMatch.Groups["units"].Value.ToLower(), convertTo);
-                    //        }
-                    //        else
-                    //            return double.NaN;
-                    //    }
-                    //    else
-                    //    {
-                    //        return (numerator / denominator) * ConversionFactor(string.IsNullOrEmpty(fracMatch.Groups["units"].Value) ? "in" : fracMatch.Groups["units"].Value.ToLower(), convertTo);
-                    //    }
+            //if (value is string str)
+            //{
+            //    if (CompoundFractionWithUnits.TryParse(str, out CompoundFractionWithUnits compoundFractionWithUnits))
+            //    {
+            //        //var fracMatch = Regex.Match(str, regexFindFraction);
+            //        SupportedLength supported = FilamentMath.SupportedLengthAlias(!string.IsNullOrEmpty(compoundFractionWithUnits.Units) ? compoundFractionWithUnits.Units : "in");
+            //        return FilamentMath.ConvertLength(compoundFractionWithUnits.Value, supported, convertTo);
+            //        //double number;
+            //        //double numerator;
+            //        //double denominator;
+            //        //if (double.TryParse(fracMatch.Groups["numerator"].Value, out numerator) && double.TryParse(fracMatch.Groups["denominator"].Value, out denominator))
+            //        //{
+            //        //    if (!string.IsNullOrEmpty(fracMatch.Groups["whole"].Value))
+            //        //    {
+            //        //        if (double.TryParse(fracMatch.Groups["whole"].Value, out number))
+            //        //        {
+            //        //            return (number + (numerator / denominator)) * ConversionFactor(string.IsNullOrEmpty(fracMatch.Groups["units"].Value) ? "in" : fracMatch.Groups["units"].Value.ToLower(), convertTo);
+            //        //        }
+            //        //        else
+            //        //            return double.NaN;
+            //        //    }
+            //        //    else
+            //        //    {
+            //        //        return (numerator / denominator) * ConversionFactor(string.IsNullOrEmpty(fracMatch.Groups["units"].Value) ? "in" : fracMatch.Groups["units"].Value.ToLower(), convertTo);
+            //        //    }
                 
-                }
-                else if (ValueWithUnits.TryParse(str, out ValueWithUnits valueWithUnits))
-                {
-                    //var match = Regex.Match(str, WeightWithUnitsConverter.regexFindNumberAndUnit);
-                    SupportedLength supported = FilamentMath.SupportedLengthAlias(string.IsNullOrEmpty(valueWithUnits.Units) ? defaultUnits : valueWithUnits.Units);
+            //    }
+            //    else if (ValueWithUnits.TryParse(str, out ValueWithUnits valueWithUnits))
+            //    {
+            //        //var match = Regex.Match(str, WeightWithUnitsConverter.regexFindNumberAndUnit);
+            //        SupportedLength supported = FilamentMath.SupportedLengthAlias(string.IsNullOrEmpty(valueWithUnits.Units) ? defaultUnits : valueWithUnits.Units);
 
-                    return FilamentMath.ConvertLength(valueWithUnits.Value, supported, convertTo);
+            //        return FilamentMath.ConvertLength(valueWithUnits.Value, supported, convertTo);
 
-                }
+            //    }
                 
-                else
-                    return double.NaN;
-            }
-            else
-                return double.NaN;
+            //    else
+            //        return double.NaN;
+            //}
+            //else
+            //    return double.NaN;
         }
         //protected double ConversionFactor(string units, ConvertToLengthEnum convertTo)
         //{

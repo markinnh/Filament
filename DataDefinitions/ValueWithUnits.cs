@@ -27,16 +27,22 @@ namespace DataDefinitions
         public static bool TryParse(string contents, out ValueWithUnits valueWithUnits)
         {
             ValueWithUnits withUnits = new ValueWithUnits(contents);
-            if (withUnits.ValidEntry)
-            {
-                valueWithUnits = withUnits;
-                return true;
-            }
-            else
-            {
-                valueWithUnits = default;
-                return false;
-            }
+
+            //var success = withUnits.ValidEntry;
+
+            valueWithUnits = withUnits.ValidEntry ? withUnits : default;
+
+            return withUnits.ValidEntry;
+            //if (withUnits.ValidEntry)
+            //{
+            //    valueWithUnits = withUnits;
+            //    return true;
+            //}
+            //else
+            //{
+            //    valueWithUnits = default;
+            //    return false;
+            //}
         }
     }
 }

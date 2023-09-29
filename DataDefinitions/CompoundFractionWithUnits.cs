@@ -44,16 +44,19 @@ namespace DataDefinitions
         }
         public static bool TryParse(string contents, out CompoundFractionWithUnits compoundFractionWithUnits)
         {
-            if (Regex.IsMatch(contents, Constants.regexFindFraction))
-            {
-                compoundFractionWithUnits = new CompoundFractionWithUnits(contents);
-                return true;
-            }
-            else
-            {
-                compoundFractionWithUnits = default;
-                return false;
-            }
+            var success = Regex.IsMatch(contents, Constants.regexFindFraction);
+            compoundFractionWithUnits = success ? new CompoundFractionWithUnits(contents) : default;
+            return success;
+            //if (Regex.IsMatch(contents, Constants.regexFindFraction))
+            //{
+            //    compoundFractionWithUnits = new CompoundFractionWithUnits(contents);
+            //    return true;
+            //}
+            //else
+            //{
+            //    compoundFractionWithUnits = default;
+            //    return false;
+            //}
         }
     }
 }

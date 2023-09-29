@@ -17,7 +17,7 @@ namespace DataDefinitions.Interfaces
         /// Returns an enumerable of distinct tags in a collection
         /// </summary>
         /// <returns>Distinct tag collection</returns>
-        public IEnumerable<TagStat> DistinctTagStats { get; }
+        public IEnumerable<WordWithOccuranceCount> DistinctTagStats { get; }
         Guid Signature { get; }
     }
 }

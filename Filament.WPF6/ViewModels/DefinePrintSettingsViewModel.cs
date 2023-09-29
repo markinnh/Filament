@@ -14,6 +14,7 @@ using DataDefinitions.Interfaces;
 using DataDefinitions.LiteDBSupport;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using DataDefinitions;
 
 namespace Filament.WPF6.ViewModels
 {
@@ -40,18 +41,6 @@ namespace Filament.WPF6.ViewModels
             //throw new NotImplementedException();
         }
 
-        protected override void FinishedDataOperations()
-        {
-            //throw new NotImplementedException();
-        }
-        protected override void ShowAllItems()
-        {
-
-        }
-        protected override void ShowInUseItems()
-        {
-
-        }
         //protected override IEnumerable<PrintSettingDefn>? GetAllItems() => throw new NotImplementedException();
 
 
@@ -118,6 +107,11 @@ namespace Filament.WPF6.ViewModels
                 }
                 //throw new NotImplementedException();
             }
+        }
+
+        protected override void FinishedDataOperations()
+        {
+            //throw new NotImplementedException();
         }
     }
 }

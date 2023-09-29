@@ -1,4 +1,5 @@
-﻿using DataDefinitions.JsonSupport;
+﻿using DataDefinitions;
+using DataDefinitions.JsonSupport;
 using DataDefinitions.LiteDBSupport;
 using Filament.WPF6.Helpers;
 using Filament.WPF6.Properties;
@@ -44,12 +45,13 @@ namespace Filament.WPF6
             //DAL.Abstraction.VerifySeed();
 
             //Singleton<DataDefinitions.JsonSupport.JsonDAL>.Instance.InitializeFromFile(Path.Combine(dataDir, "TestFilamentData.JSON"));
+            Debug.WriteLine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
             Singleton<LiteDBDal>.Instance.Initialize(Path.Combine( dataDir,"TestingFilamentDataLDB.db"));
         }
 
         private void Application_Exit(object sender, ExitEventArgs e)
         {
-            Filament.WPF6.Properties.Settings.Default.Save();
+            Settings.Default.Save();
             try
             {
                 //Singleton<JsonDAL>.Instance.SaveDocument();

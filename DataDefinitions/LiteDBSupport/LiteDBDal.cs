@@ -21,7 +21,7 @@ namespace DataDefinitions.LiteDBSupport
         const string filamentTableName = "filaments";
 
 #if DEBUG
-        static readonly string testingFilename = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "TestPopulate.db");
+        static readonly string testingFilename = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "FilamentDataLiteDb.db");
 #else
         static readonly string testingFilename = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "FilamentDataLiteDb.db");
 #endif

@@ -15,11 +15,13 @@ using DataDefinitions.LiteDBSupport;
 using Filament.WPF6.Pages;
 using DataDefinitions.Interfaces;
 using CommunityToolkit.Mvvm.Messaging;
+using DataDefinitions.Filters;
 
 namespace Filament.WPF6.ViewModels
 {
     public class ByVendorViewModel : BaseTagFilterViewModel<VendorDefn, DataDefinitions.DataObject>
     {
+        public override Guid Signature => Singleton<LiteDBDal>.Instance.Vendors.Signature;
         //private IEnumerable<string> _tags;
         //private bool _tagFilterApplied;
         public ByVendorViewModel() : base()
@@ -77,17 +79,18 @@ namespace Filament.WPF6.ViewModels
             //FinishedDataOperations();
 
         }
-        protected override void InitFilterViewModel()
-        {
-            DistinctTagStats = Singleton<LiteDBDal>.Instance.Vendors.DistinctTagStats;
-            Signature = Singleton<LiteDBDal>.Instance.Vendors.Signature;
-#if DEBUG
-            filters.Add(tagFilterKey,new TagFilter() { Signature= Signature,Owner=this });
-#else
-            filters.Add(tagFilterKey, new TagFilter() { Signature = Signature });
-#endif
-            WeakReferenceMessenger.Default.Register<TagFilterChangedEventArgs>(this, HandleTagFilterMessages);
-        }
+//        protected override void InitFilterViewModel()
+//        {
+//            //DistinctTagStats = Singleton<LiteDBDal>.Instance.Vendors.DistinctTagStats;
+//            //DistinctTagStats = Singleton<WordCollect>.Instance.OrganizeTags(ViewSource.View);
+//            Signature = Singleton<LiteDBDal>.Instance.Vendors.Signature;
+//#if DEBUG
+//            filterSupported[(int)IResolveFilter.Filters.Tag] = filters.TryAdd(IResolveFilter.Filters.Tag, new WindowsFilter(new TagResolve() { Signature = Signature }));
+//#else
+//            filterSupported[(int)IResolveFilter.Filters.Tag] =filters.TryAdd(IResolveFilter.Filters.Tag, new WindowsFilter( new TagResolve() { Signature = Signature }));
+//#endif
+//            WeakReferenceMessenger.Default.Register<TagFilterChangedEventArgs>(this, HandleTagFilterMessages);
+//        }
         //private void HandleFilterMessages(object recipient, FilterChangedEventArgs message)
         //{
         //    _tags = message.SelectedTags;
@@ -125,16 +128,6 @@ namespace Filament.WPF6.ViewModels
             }
         }
 
-
-        protected override void ShowAllItems()
-        {
-            base.ShowAllItems();
-        }
-
-        protected override void ShowInUseItems()
-        {
-            base.ShowInUseItems();
-        }
         //[Obsolete]
         //protected override IEnumerable<VendorDefn>? GetInUseItems() => throw new NotSupportedException();
         //[Obsolete]

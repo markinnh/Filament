@@ -23,7 +23,7 @@ namespace DataDefinitions
         internal override void DeleteMe(DataObject dataObject)
         {
             Assert(this != dataObject, "Can't delete yourself.");
-            dataObject=null;
+            dataObject = null;
         }
     }
 }

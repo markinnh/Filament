@@ -2,6 +2,6 @@
 {
     public interface ITrackUsable
     {
-        bool StopUsing { get; set; }
+        bool? StopUsing { get; set; }
     }
 }

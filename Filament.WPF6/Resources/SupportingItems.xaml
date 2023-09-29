@@ -7,6 +7,7 @@
                     xmlns:local="clr-namespace:Filament.WPF6"
                     xmlns:rsrc="clr-namespace:Filament.WPF6.Properties" 
                     xmlns:vm="clr-namespace:Filament.WPF6.ViewModels"
+                    xmlns:filtr="clr-namespace:DataDefinitions.Filters;assembly=DataDefinitions"
                     >
 
     <SolidColorBrush x:Key="StandardBackground" Color="WhiteSmoke"/>
@@ -85,6 +86,18 @@
             <x:Type TypeName="vm:InventoryDisplayStyle"/>
         </ObjectDataProvider.MethodParameters>
     </ObjectDataProvider>
+    <ObjectDataProvider x:Key="DataFromWhichCompare" MethodName="GetValues"
+                        ObjectType="{x:Type core:Enum}">
+        <ObjectDataProvider.MethodParameters>
+            <x:Type TypeName="filtr:WhichCompare"/>
+        </ObjectDataProvider.MethodParameters>
+    </ObjectDataProvider>
+    <ObjectDataProvider x:Key="DataFromSupportedSettingValueType" MethodName="GetValues"
+                        ObjectType="{x:Type core:Enum}">
+        <ObjectDataProvider.MethodParameters>
+            <x:Type TypeName="model:SupportedSettingValueType"/>
+        </ObjectDataProvider.MethodParameters>
+    </ObjectDataProvider>
     <x:Array x:Key="FilamentDiameters" Type="core:Double">
         <core:Double>1.75</core:Double>
         <core:Double>3.0</core:Double>
@@ -135,6 +148,9 @@
     <helpers:LeakProofSettings x:Key="LeakPrfSettings"/>
     <helpers:HandleNullBoolean x:Key="HandleNullBoolean"/>
     <helpers:MultiBoolCombiner x:Key="MultiBoolConverter"/>
+    <helpers:SplitAtUpperConverter x:Key="SplitAtUpperConverter"/>
+    <helpers:EditStateToBooleanConverter x:Key="EditStateToBoolean"/>
+    <helpers:EditStateToVisibilityConverter x:Key="EditStateToVisibility"/>
     <Style TargetType="CheckBox">
         <Setter Property="FontSize" Value="{StaticResource StdFontSize}"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
@@ -793,7 +809,7 @@
             <StackPanel Orientation="Horizontal" Grid.Column="1"
                        Grid.Row="1">
                 <Rectangle Fill="{Binding ColorName,Converter={StaticResource ColorFromNameConverter}}" Width="50"/>
-                <TextBlock Text="{Binding ColorName}" Margin="3,0,0,0"/>
+                <TextBlock Text="{Binding ColorName,Converter={StaticResource SplitAtUpperConverter}}" Margin="3,0,0,0"/>
             </StackPanel>
             <TextBlock Text="Material"
                        Grid.Row="2"/>

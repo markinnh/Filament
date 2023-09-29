@@ -117,12 +117,12 @@ namespace DataDefinitions.Models
             get => dateOpened;
             set => Set(ref dateOpened, value);
         }
-        private bool stopUsing;
+        private bool? stopUsing;
         [XmlAttribute("notUsed"), JsonPropertyName("Used")]
-        public bool StopUsing
+        public bool? StopUsing
         {
             get => stopUsing;
-            set => Set<bool>(ref stopUsing, value);
+            set => Set(ref stopUsing, value);
         }
 
         [JsonIgnore, BsonIgnore]

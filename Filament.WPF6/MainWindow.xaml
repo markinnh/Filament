@@ -1,16 +1,17 @@
-﻿<Window x:Class="Filament.WPF6.MainWindow"
+﻿<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:Filament.WPF6.ViewModels"        
-        xmlns:helpers="Filament.WPF6.Helpers"
         xmlns:local="clr-namespace:Filament.WPF6"
+        xmlns:helpers1="clr-namespace:Filament.WPF6.Helpers" x:Class="Filament.WPF6.MainWindow"
         mc:Ignorable="d"
-        Title="Filaments" Height="450" Width="800" SizeToContent="WidthAndHeight" Name="Main">
+        Title="Filaments" Height="450" Width="800" SizeToContent="WidthAndHeight" x:Name="Main">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibility"/>
-        <Style x:Key="HeaderTextBlockStyle" TargetType="TextBlock">
+        <helpers1:MultiValueToTuple x:Key="MultiValueToTuple"/>
+        <Style x:Key="HeaderTextBlockStyle" TargetType="{x:Type TextBlock}">
             <Setter Property="Margin" Value="0,0,4,0"/>
         </Style>
         <StackPanel x:Key="InventoryHeader" Orientation="Horizontal">
@@ -26,26 +27,36 @@
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="Page">
                 <MenuItem Header="Inventory" IsCheckable="False">
-                    <MenuItem Name="IntuitivePage" Header="Intuitive" Tag="Pages\ByVendorPage.xaml" Click="SelectPage_Click"/>
-                    <MenuItem Name="SimplePage" Header="Simple" Tag="Pages\SimpleInventoryPage.xaml" Click="SelectPage_Click"/>
+                    <MenuItem x:Name="IntuitivePage" Header="Intuitive" Tag="Pages\ByVendorPage.xaml" Click="SelectPage_Click"/>
+                    <MenuItem x:Name="SimplePage" Header="Simple" Tag="Pages\SimpleInventoryPage.xaml" Click="SelectPage_Click"/>
                 </MenuItem>
                 <Separator/>
                 <MenuItem Header="Define" IsCheckable="False">
-                    <MenuItem Name="FilamentPage" Header="Filament" Tag="Pages\FilamentDefnPage.xaml" Click="SelectPage_Click" />
-                    <MenuItem Name="VendorPage" Header="Vendor" Tag="Pages\VendorDefnPage.xaml" Click="SelectPage_Click"/>
-                    <MenuItem Name="PrintSettingPage" Header="Print Setting" Tag="Pages\DefinePrintSettingsPage.xaml" Click="SelectPage_Click"/>
+                    <MenuItem x:Name="FilamentPage" Header="Filament" Tag="Pages\FilamentDefnPage.xaml" Click="SelectPage_Click" />
+                    <MenuItem x:Name="VendorPage" Header="Vendor" Tag="Pages\VendorDefnPage.xaml" Click="SelectPage_Click"/>
+                    <MenuItem x:Name="PrintSettingPage" Header="Print Setting" Tag="Pages\DefinePrintSettingsPage.xaml" Click="SelectPage_Click"/>
                 </MenuItem>
-                <MenuItem Name="PrintSettingByVendorPage" Header="Print Settings by Vendor" Tag="Pages\PrintSettingsByVendor.xaml" Click="SelectPage_Click"/>
-                <MenuItem Name="NotePage" Header="Notes" Tag="Pages\NotePage.xaml" Click="SelectPage_Click"/>
-                <MenuItem Name="SettingsPage"  Header="Settings" Tag="Pages\SettingsPage.xaml" Click="SelectPage_Click"/>
+                <MenuItem x:Name="PrintSettingByVendorPage" Header="Print Settings by Vendor" Tag="Pages\PrintSettingsByVendor.xaml" Click="SelectPage_Click"/>
+                <MenuItem x:Name="NotePage" Header="Notes" Tag="Pages\NotePage.xaml" Click="SelectPage_Click"/>
+                <MenuItem x:Name="SettingsPage"  Header="Settings" Tag="Pages\SettingsPage.xaml" Click="SelectPage_Click"/>
             </MenuItem>
-            <MenuItem Header="Show">
-                <MenuItem Name="ShowAll" IsCheckable="True"  Header="All" Click="ShowState_Click"/>
-                <MenuItem Name="ShowInUse" IsCheckable="True" Header="In Use" Click="ShowState_Click"/>
+            <MenuItem Header="Filter">
+                <!--<MenuItem Header="Tag" 
+                          IsCheckable="True" 
+                          IsChecked="{Binding TagMenuChecked,Mode=TwoWay}"/>
+                <MenuItem Header="Keyword" 
+                          IsCheckable="True" 
+                          IsChecked="{Binding KeywordMenuChecked,Mode=TwoWay}"/>-->
+                <MenuItem Header="Show">
+                    <MenuItem x:Name="ShowAll" IsCheckable="True"  Header="All" Click="ShowState_Click"/>
+                    <MenuItem x:Name="ShowInUse" IsCheckable="True" Header="In Use" Click="ShowState_Click"/>
+                </MenuItem>
+                
             </MenuItem>
+            <MenuItem Header="Edit" Visibility="{Binding HasEdits,Converter={StaticResource BooleanToVisibility}}" />
         </Menu>
-        <ToolBar DockPanel.Dock="Top">
-            <ToolBarPanel Orientation="Horizontal">
+        <ToolBar DockPanel.Dock="Left">
+            <ToolBarPanel Orientation="Vertical">
                 <!--<ComboBox Name="SelectShowFlag"
                           Width="100"  
                           SelectionChanged="ComboBox_SelectionChanged"
@@ -58,44 +69,143 @@
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>-->
-                <ComboBox Name="TagBrowse" 
+                <StackPanel Orientation="Horizontal" 
+                            Visibility="{Binding TagFilterSupported,Mode=OneWay,Converter={StaticResource VisibilityConverter}}">
+                <ComboBox x:Name="TagBrowse" 
                           ItemsSource="{Binding CheckableTagStats}"
                           Width="75"
-                          Height="26">
+                          Height="26"
+                          >
                     <ComboBox.ItemTemplate>
-                        <DataTemplate DataType="{x:Type local:CheckableTagStat}">
-                            <CheckBox IsChecked="{Binding IsChecked,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
-                                      Command="{Binding ElementName=Main,Path=DataContext.ListChangeCommand}">
-                                <CheckBox.Content>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding Item.Tag}"/>
-                                        <TextBlock Text="{Binding Item.Count,StringFormat=' -({0})'}" Margin="3,0,0,0"/>
-                                    </StackPanel>
-                                </CheckBox.Content>
+                        <DataTemplate DataType="{x:Type local:CheckableWordStat}">
+                            <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      Command="{Binding DataContext.ListChangeCommand, ElementName=Main}"
+                                      CommandParameter="Tag">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Item.Word}"/>
+                                    <TextBlock Text="{Binding Item.OccuranceCount, StringFormat=' -(\{0\})'}" Margin="3,0,0,0"/>
+                                </StackPanel>
                             </CheckBox>
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
+                    <ToggleButton Name="TagToggle" Width="32" Height="32" 
+                                   Tag="Tag"
+                                  Command="{Binding ToggleFilterCommand, Mode=OneWay}" >
+                        <ToggleButton.CommandParameter>
+                            <MultiBinding Converter="{StaticResource MultiValueToTuple}">
+                                <Binding Path="IsChecked" ElementName="TagToggle"/>
+                                <Binding Path="Tag" ElementName="TagToggle"/>
+                            </MultiBinding>
+                        </ToggleButton.CommandParameter>
+                        <ToggleButton.Content>
+                            <Canvas Name="svg2" Width="23.885444" Height="23.900038">
+                                <Canvas.RenderTransform>
+                                    <TranslateTransform X="0" Y="0"/>
+                                </Canvas.RenderTransform>
+                                <Canvas.Resources/>
+                                <!--Unknown tag: sodipodi:namedview-->
+                                <Canvas Name="g8">
+                                    <Canvas.RenderTransform>
+                                        <TranslateTransform X="-16.080256" Y="-16.061175"/>
+                                    </Canvas.RenderTransform>
+                                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="path170" Fill="#FF000000" StrokeThickness="0.0498226">
+                                        <Path.Data>
+                                            <PathGeometry Figures="m 37.998223 39.929365 c -0.428608 -0.141037 -0.640347 -0.333554 -3.478826 -3.163013 -1.598226 -1.593148 -2.937833 -2.957174 -2.976903 -3.03117 -0.123772 -0.234411 -0.08677 -0.332169 0.262761 -0.694221 l 0.333798 -0.345755 -0.691474 -0.6928 -0.691474 -0.6928 -0.19356 0.159048 c -0.411642 0.338242 -1.109138 0.825303 -1.412957 0.986665 l -0.317891 0.168835 -3.99e-4 2.157094 -3.99e-4 2.157094 -0.122292 0.122292 -0.122335 0.122292 H 24.845044 21.103816 L 20.981524 37.060634 20.859232 36.938342 V 34.77802 32.617698 l -0.186835 -0.08902 c -0.102759 -0.04896 -0.377406 -0.213203 -0.610327 -0.364977 -2.732845 -1.780752 -4.282398 -5.020527 -3.933035 -8.223103 0.123868 -1.13548 0.37355 -1.979995 0.894277 -3.024763 0.458174 -0.919265 0.886435 -1.510015 1.643537 -2.267117 0.757102 -0.757101 1.347852 -1.185363 2.267117 -1.643537 1.044768 -0.520726 1.889283 -0.770409 3.024762 -0.894276 3.885738 -0.423889 7.644505 1.89761 9.076668 5.605953 0.387184 1.002546 0.549999 1.923212 0.549999 3.110055 0 0.922335 -0.05106 1.359088 -0.253326 2.166841 -0.310447 1.239784 -0.936856 2.445109 -1.84528 3.550659 l -0.159048 0.19356 0.6928 0.691474 0.6928 0.691475 0.345755 -0.333798 c 0.362113 -0.34959 0.45992 -0.386588 0.694221 -0.262607 0.074 0.03916 1.438222 1.378762 3.031613 2.976904 3.283619 3.293406 3.179416 3.166379 3.180589 3.877253 5.98e-4 0.363085 -0.01905 0.463721 -0.137797 0.705515 -0.160892 0.32763 -0.450414 0.608176 -0.777125 0.753036 -0.248856 0.11034 -0.839826 0.162085 -1.052374 0.09214 z m 0.7139 -0.821492 c 0.341653 -0.142752 0.530899 -0.520473 0.458951 -0.916038 -0.02968 -0.163186 -0.28096 -0.434367 -1.985181 -2.142409 l -1.951198 -1.955573 -0.561606 0.560013 -0.561606 0.560013 1.906003 1.911144 c 1.048302 1.05113 1.973264 1.941692 2.055472 1.979027 0.193244 0.08776 0.434809 0.08921 0.639165 0.0038 z M 28.033694 34.691794 c 0 -0.931684 -0.0056 -1.693958 -0.01245 -1.693945 -0.0069 1.3e-5 -0.127794 0.04386 -0.268762 0.09744 -0.334174 0.127013 -1.133924 0.326337 -1.636954 0.407982 -0.598157 0.09708 -2.080438 0.08173 -2.690423 -0.02787 -0.443473 -0.07968 -1.449103 -0.348947 -1.681515 -0.450238 -0.08208 -0.03578 -0.08719 0.06166 -0.08719 1.661301 v 1.699301 h 3.18865 3.18865 z m -5.457845 0.774516 c -0.07709 -0.07709 -0.122292 -0.179217 -0.122292 -0.276289 0 -0.09707 0.0452 -0.199203 0.122292 -0.27629 0.1213 -0.1213 0.130008 -0.122292 1.073452 -0.122292 0.943443 0 0.952151 9.73e-4 1.073451 0.122292 0.07709 0.07709 0.122292 0.179216 0.122292 0.27629 0 0.09707 -0.04521 0.199201 -0.122292 0.276289 -0.1213 0.121299 -0.130008 0.122292 -1.073451 0.122292 -0.943444 0 -0.952152 -9.73e-4 -1.073452 -0.122292 z m 3.188649 0 c -0.07709 -0.07709 -0.122292 -0.179217 -0.122292 -0.276289 0 -0.09707 0.0452 -0.199203 0.122292 -0.27629 0.115139 -0.115139 0.154612 -0.122292 0.674871 -0.122292 0.520258 0 0.559731 0.0072 0.67487 0.122292 0.07709 0.07709 0.122292 0.179216 0.122292 0.27629 0 0.09707 -0.0452 0.199201 -0.122292 0.276289 -0.115139 0.115138 -0.154612 0.122292 -0.67487 0.122292 -0.520259 0 -0.559732 -0.0072 -0.674871 -0.122292 z m 8.372756 -1.372675 0.546636 -0.548336 -0.559941 -0.559941 -0.559941 -0.559941 -0.559941 0.559941 -0.559942 0.559941 0.546636 0.548336 c 0.30065 0.301585 0.55861 0.548336 0.573247 0.548336 0.01464 0 0.272596 -0.246751 0.573246 -0.548336 z m -7.779103 -1.442848 c 3.214405 -0.636678 5.668168 -3.099562 6.319053 -6.342544 0.16105 -0.802422 0.16105 -2.160245 0 -2.962668 -0.653411 -3.255565 -3.09379 -5.697421 -6.346075 -6.349917 -0.807435 -0.161993 -2.162762 -0.162408 -2.967419 -8.98e-4 -3.254458 0.653189 -5.697643 3.094896 -6.349917 6.346076 -0.161993 0.807434 -0.162408 2.162762 -8.98e-4 2.967418 0.575395 2.866855 2.560057 5.14043 5.300796 6.072444 0.429097 0.145918 1.226186 0.323722 1.734201 0.386842 0.443868 0.05515 1.784447 -0.01259 2.310269 -0.116742 z m -2.185713 -0.678723 c -1.054218 -0.151493 -1.697375 -0.333775 -2.433105 -0.689584 -2.070082 -1.001122 -3.524427 -2.910072 -3.950292 -5.185093 -0.127786 -0.682647 -0.127786 -1.858308 0 -2.540956 0.27477 -1.467852 0.93942 -2.726741 1.999102 -3.786424 1.059579 -1.059578 2.317763 -1.723903 3.786423 -1.999243 0.660844 -0.123891 1.903338 -0.125079 2.540956 -0.0024 1.485505 0.28575 2.722022 0.939554 3.785694 2.001672 1.059475 1.057927 1.72448 2.316939 1.999972 3.786424 0.124715 0.665229 0.12523 1.905539 10e-4 2.540955 -0.360466 1.844554 -1.301335 3.361786 -2.767272 4.462465 -0.853705 0.640992 -1.849547 1.087654 -2.893125 1.297642 -0.456014 0.09176 -1.735287 0.162585 -2.069408 0.114571 z m 1.612842 -0.84563 c 0.600262 -0.08816 1.373875 -0.330053 1.895177 -0.592577 l 0.353237 -0.177886 v -3.084873 -3.084874 l -1.569282 -1.386083 c -0.863105 -0.762346 -1.591033 -1.386083 -1.617619 -1.386083 -0.02658 0 -0.755301 0.623754 -1.619368 1.38612 l -1.571031 1.38612 v 3.084837 3.084836 l 0.336303 0.169276 c 1.149782 0.578737 2.494318 0.791868 3.792583 0.601187 z m -2.412268 -1.240261 c -0.07709 -0.07709 -0.122293 -0.179216 -0.122293 -0.27629 0 -0.09707 0.0452 -0.199201 0.122293 -0.276289 l 0.122291 -0.122292 h 1.349741 1.349741 l 0.122292 0.122292 c 0.07709 0.07709 0.122292 0.179217 0.122292 0.276289 0 0.09707 -0.0452 0.199203 -0.122292 0.27629 l -0.122292 0.122292 h -1.349741 -1.349741 z m 0 -1.594326 c -0.07709 -0.07709 -0.122293 -0.179215 -0.122293 -0.276288 0 -0.09707 0.0452 -0.199202 0.122293 -0.276289 l 0.122291 -0.122292 h 1.349741 1.349741 l 0.122292 0.122292 c 0.07709 0.07709 0.122292 0.179216 0.122292 0.276289 0 0.09707 -0.0452 0.199202 -0.122292 0.276288 l -0.122292 0.122293 h -1.349741 -1.349741 z m 0.995946 -2.78604 c -0.415633 -0.193541 -0.719657 -0.636589 -0.719657 -1.048741 0 -0.842799 0.879989 -1.448817 1.633259 -1.12477 0.842411 0.362395 1.003821 1.412157 0.308626 2.007217 -0.347528 0.297472 -0.806435 0.35991 -1.222228 0.166294 z m 0.752375 -0.80119 c 0.24713 -0.24713 0.07201 -0.674871 -0.276289 -0.674871 -0.09707 0 -0.199202 0.0452 -0.276289 0.122293 -0.07709 0.07709 -0.122292 0.179216 -0.122292 0.276289 0 0.09707 0.0452 0.199202 0.122292 0.276289 0.07709 0.07709 0.179216 0.122292 0.276289 0.122292 0.09707 0 0.199202 -0.0452 0.276289 -0.122292 z m -4.262101 2.144185 c 0 -1.600803 0.01395 -2.946906 0.031 -2.99134 0.01705 -0.04443 0.881155 -0.830975 1.920232 -1.747868 1.568298 -1.383885 1.914135 -1.667078 2.035842 -1.667078 0.120257 0 0.37741 0.203291 1.430343 1.130749 2.165014 1.907014 2.492154 2.203283 2.523733 2.285576 0.01676 0.04368 0.03048 1.389158 0.03048 2.989961 0 1.600802 0.01903 2.91055 0.04229 2.91055 0.02326 0 0.254299 -0.218597 0.51341 -0.485771 0.742082 -0.765174 1.185198 -1.489359 1.511775 -2.470699 0.856974 -2.57515 -0.06438 -5.471742 -2.257764 -7.098034 -0.71901 -0.533114 -1.639701 -0.9429 -2.565325 -1.141787 -0.567686 -0.121977 -1.892722 -0.121977 -2.460408 0 -2.580862 0.554545 -4.471781 2.445467 -5.029825 5.029832 -0.125278 0.580177 -0.124037 1.893339 0.0023 2.479582 0.181644 0.84259 0.519526 1.63929 0.993106 2.341665 0.241625 0.358358 1.148704 1.345212 1.23647 1.345212 0.02326 0 0.04229 -1.309748 0.04229 -2.91055 z" FillRule="NonZero"/>
+                                        </Path.Data>
+                                    </Path>
+                                </Canvas>
+                            </Canvas>
+                        </ToggleButton.Content>
+                    </ToggleButton>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Visibility="{Binding KeywordFilterSupported,Mode=OneWay,Converter={StaticResource VisibilityConverter}}">
+                    <ComboBox Width="75" Height="26" ItemsSource="{Binding CheckableKeywords}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate DataType="{x:Type local:CheckableWordStat}">
+                                <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      Command="{Binding DataContext.ListChangeCommand, ElementName=Main}"
+                                          CommandParameter="Keyword">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Item.Word}"/>
+                                        <TextBlock Text="{Binding Item.OccuranceCount, StringFormat=' -(\{0\})'}" Margin="3,0,0,0"/>
+                                    </StackPanel>
+                                </CheckBox>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
 
-                <ToggleButton x:Name="ApplyFilter"
-                              Content="{StaticResource FilterBtn}"
-                              Height="32"
-                              Width="32"
-                              Margin="5,0,0,0"
-                              CommandParameter="{Binding RelativeSource={RelativeSource Self},Path=IsChecked}"
-                              Command="{Binding ApplyFilterCommand}"/>
+                    </ComboBox>
+                    <ToggleButton Name="KeywordToggle" Width="32" 
+                                  Height="32"
+                                  IsChecked="{Binding KeywordFilterApplied,Mode=TwoWay}"
+                                  Tag="Keyword"
+                                  Command="{Binding ToggleFilterCommand, Mode=OneWay}" >
+                        <ToggleButton.CommandParameter>
+                            <MultiBinding Converter="{StaticResource MultiValueToTuple}">
+                                <Binding Path="IsChecked" ElementName="KeywordToggle"/>
+                                <Binding Path="Tag" ElementName="KeywordToggle"/>
+                            </MultiBinding>
+                        </ToggleButton.CommandParameter>
+                        <ToggleButton.Content>
+                            <Canvas Name="svg170" Width="23.673206" Height="23.692581">
+                                <Canvas.RenderTransform>
+                                    <TranslateTransform X="0" Y="0"/>
+                                </Canvas.RenderTransform>
+                                <Canvas.Resources/>
+                                <!--Unknown tag: sodipodi:namedview-->
+                                <Canvas Name="g176">
+                                    <Canvas.RenderTransform>
+                                        <TranslateTransform X="-0.18377512" Y="-0.19407402"/>
+                                    </Canvas.RenderTransform>
+                                    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="path180" Fill="#FF000000" StrokeThickness="0.0463018">
+                                        <Path.Data>
+                                            <PathGeometry Figures="M 1.7547274 23.818417 C 0.69641559 23.533801 0.03319992 22.526564 0.21314734 21.477191 0.33030157 20.794 0.33106865 20.793085 3.1042054 18.026217 5.2513968 15.88388 5.6562934 15.500159 5.8953842 15.381014 6.4113717 15.123886 6.9891813 15.080489 7.5158728 15.259305 l 0.2208511 0.07498 0.7205889 -0.72059 0.7205897 -0.72059 -0.102351 -0.128676 C 8.7737886 13.385056 8.2548426 12.557418 8.0513222 12.130947 7.0948827 10.126757 6.9639195 7.8819562 7.6819462 5.7996002 8.1380745 4.4767795 9.0165994 3.1640193 10.038675 2.2779949 c 3.35723 -2.91034019 8.277363 -2.7554074 11.391483 0.3587126 1.208197 1.2081971 2.012645 2.7458896 2.321076 4.4367103 0.140997 0.7729492 0.140997 2.119032 0 2.8919815 -0.484496 2.6560057 -2.222406 4.9273677 -4.648774 6.0757137 -2.646181 1.252379 -5.762867 1.022308 -8.16203 -0.602513 -0.280126 -0.189714 -0.567224 -0.390993 -0.637996 -0.447286 l -0.128676 -0.102351 -0.7205895 0.72059 -0.7205897 0.720589 0.078174 0.227067 c 0.1110054 0.322435 0.1373161 0.710007 0.07111 1.047509 -0.1240987 0.63263 -0.088088 0.590079 -2.8222053 3.334801 -2.2006198 2.209154 -2.563708 2.554885 -2.8271614 2.692003 -0.49691 0.258624 -0.982632 0.320054 -1.4777687 0.186895 z m 0.7996184 -1.385835 c 0.081091 -0.03848 1.2234427 -1.147987 2.5385591 -2.46557 2.5845298 -2.589378 2.5020027 -2.490458 2.4241199 -2.905608 -0.0398 -0.212156 -0.2994076 -0.471763 -0.5115633 -0.511563 -0.4151496 -0.07788 -0.3162305 -0.16041 -2.9056082 2.424119 -1.337397 1.334894 -2.4288443 2.461166 -2.4708526 2.549692 -0.2703358 0.569691 0.3520093 1.180995 0.9253451 0.90893 z M 16.890209 15.326776 c 2.812329 -0.571409 4.965209 -2.758615 5.492794 -5.5803702 0.11955 -0.6394078 0.11955 -1.8145869 0 -2.4539946 C 21.739228 3.8492193 18.679985 1.413117 15.223344 1.5911111 13.306451 1.6898184 11.658646 2.481895 10.348383 3.9344366 9.5518161 4.8175001 9.0051856 5.9160552 8.7350864 7.1766568 8.584958 7.8773274 8.5848669 9.160662 8.7349011 9.8621603 9.034116 11.261229 9.6098899 12.34484 10.588456 13.350564 c 1.120324 1.151415 2.55172 1.866473 4.136216 2.066256 0.53552 0.06752 1.609919 0.02285 2.165544 -0.09004 z m -3.740634 -2.738559 c -0.109201 -0.05405 -0.228293 -0.155801 -0.264649 -0.226106 -0.13508 -0.261216 -2.199156 -5.8259898 -2.199156 -5.9289515 0 -0.3283486 0.363111 -0.6918579 0.6911 -0.6918579 0.185678 0 0.478353 0.148087 0.566663 0.2867187 0.03743 0.058766 0.389497 0.9663233 0.782363 2.0167951 0.392866 1.0504712 0.72497 1.9099481 0.73801 1.9099481 0.01304 0 0.313429 -0.7761335 0.667532 -1.724741 0.839438 -2.2487707 0.850388 -2.2729036 1.08573 -2.392966 0.103231 -0.052665 0.253092 -0.095755 0.333022 -0.095755 0.207567 0 0.457372 0.1318781 0.555523 0.2932732 0.04637 0.076246 0.403206 0.9894792 0.792975 2.0294082 0.389768 1.0399296 0.719339 1.8907805 0.732378 1.8907805 0.01304 0 0.313087 -0.7761335 0.666772 -1.724741 0.80161 -2.1499724 0.848642 -2.2534041 1.085066 -2.3862823 0.226258 -0.1271637 0.420504 -0.1298872 0.657047 -0.00921 0.202434 0.1032738 0.369192 0.370836 0.369192 0.5923641 0 0.1271262 -2.029942 5.6079968 -2.195855 5.9288378 -0.08459 0.16357 -0.377185 0.328805 -0.582251 0.328805 -0.222029 0 -0.498333 -0.165006 -0.591646 -0.353325 -0.04827 -0.09741 -0.396971 -1.005335 -0.774896 -2.017608 -0.377927 -1.0122725 -0.699206 -1.8404953 -0.713957 -1.8404953 -0.01475 0 -0.316539 0.7761335 -0.670642 1.7247413 -0.852542 2.283874 -0.852319 2.28339 -1.101127 2.396309 -0.256167 0.116259 -0.384772 0.115046 -0.629194 -0.0059 z" FillRule="NonZero"/>
+                                        </Path.Data>
+                                    </Path>
+                                </Canvas>
+                            </Canvas>
+                        </ToggleButton.Content>
+                    </ToggleButton>
+                </StackPanel>
+                <StackPanel HorizontalAlignment="Left" Visibility="{Binding DateFilterSupported,Mode=OneWay,Converter={StaticResource VisibilityConverter}}">
+                    <ComboBox Width="75" 
+                              ItemsSource="{Binding Mode=OneWay, Source={StaticResource DataFromWhichCompare}}" 
+                              SelectedItem="{Binding WhichCompare,Mode=TwoWay}" 
+                              HorizontalAlignment="Left" 
+                              Margin="0,3,0,0"/>
+                    <DatePicker Width="100" SelectedDate="{Binding FilterDateTime,Mode=TwoWay}" Margin="0,3,0,0"/>
+                    <DatePicker Width="100" 
+                                DisplayDateStart="{Binding EndFilterStartDate,Mode=OneWay}" 
+                                SelectedDate="{Binding FilterEndDate,Mode=TwoWay}" Margin="0,3,0,0"/>
+                    <ToggleButton x:Name="DateToggle" 
+                                  Width="32" 
+                                  Height="32"
+                                  Tag="Date"
+                                  ToolTip="Date Filter"
+                                  Command="{Binding ToggleFilterCommand,Mode=OneWay}">
+                        <ToggleButton.CommandParameter>
+                            <MultiBinding Converter="{StaticResource MultiValueToTuple}">
+                                <Binding Path="IsChecked" ElementName="DateToggle"/>
+                                <Binding Path="Tag" ElementName="DateToggle"/>
+                            </MultiBinding>
+                        </ToggleButton.CommandParameter>
+                        <ToggleButton.Content>
+                            <Image Source="/Filter.png" Width="16" Height="16"/>
+                        </ToggleButton.Content></ToggleButton>
+                   
+                </StackPanel>
             </ToolBarPanel>
         </ToolBar>
-        <Frame Name="ViewFrame" NavigationUIVisibility="Hidden" Navigated="ViewFrame_Navigated" />
+        <Frame x:Name="ViewFrame" NavigationUIVisibility="Hidden" Navigated="ViewFrame_Navigated" />
 
 
         <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <!--<TabControl 
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <!--<TabControl 
             HorizontalAlignment="Stretch" 
             VerticalAlignment="Stretch"
             Grid.Row="1" SelectedIndex="{Binding SelectedTabIndex,Mode=TwoWay}">
@@ -104,7 +214,9 @@
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Inventory" Style="{StaticResource HeaderTextBlockStyle}"/>
-                        --><!--<Image Source="/shelf.png" Style="{StaticResource GlyphStyle}" />--><!--
+                        -->
+            <!--<Image Source="/shelf.png" Style="{StaticResource GlyphStyle}" />-->
+            <!--
                         <Path Stroke="Black" StrokeThickness="1" Width="16" Height="16" Data="{StaticResource ShelfGlyph}" />
                     </StackPanel>
 
@@ -116,7 +228,9 @@
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Inventory" Style="{StaticResource HeaderTextBlockStyle}"/>
-                        --><!--<Image Source="/shelf.png" Style="{StaticResource GlyphStyle}" />--><!--
+                        -->
+            <!--<Image Source="/shelf.png" Style="{StaticResource GlyphStyle}" />-->
+            <!--
                         <Path Stroke="Black" Width="16" Height="16" StrokeThickness="1" Data="M0,0 V16 H1 V0 M2,4 H14 M2,9 H14 M2,14 H14 M15,0 V16 H16 V0 M3,2.5 H7 M3,1.5 H6 M3,7.5 H7 M3,6.5 H6 M9,7.5 H13 M10,6.5 H13 M3,12.5 H7 M3,11.5 H6 M9,12.5 H13 M10,11.5 H13"/>
                     </StackPanel>
                 </TabItem.Header>
@@ -129,9 +243,11 @@
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Filament" Style="{StaticResource HeaderTextBlockStyle}"/>
-                        --><!--<Image Source="/3d-printing-filament.png" Style="{StaticResource GlyphStyle}"/>-->
-                        <!--<Path Width="16" Height="16" Stroke="Black" Data="M0,0 H16 M3,1.6 H13 M3,3 H13 M3,4.6 H13 M3,6 H13 M3,7.6 H13 M3,9 H11.6 M0,10.5 H10 M12,10.5 H16 M11,9.5 V16"/>-->
-                        <!--<Path Width="16" Height="16" Stroke="Black" Data="{StaticResource FilamentPathData}"/>--><!--
+                        -->
+            <!--<Image Source="/3d-printing-filament.png" Style="{StaticResource GlyphStyle}"/>-->
+            <!--<Path Width="16" Height="16" Stroke="Black" Data="M0,0 H16 M3,1.6 H13 M3,3 H13 M3,4.6 H13 M3,6 H13 M3,7.6 H13 M3,9 H11.6 M0,10.5 H10 M12,10.5 H16 M11,9.5 V16"/>-->
+            <!--<Path Width="16" Height="16" Stroke="Black" Data="{StaticResource FilamentPathData}"/>-->
+            <!--
                         <Image Width="16" Height="16" >
                             <Image.Source>
                                 <DrawingImage>
@@ -150,21 +266,25 @@
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Vendor" Style="{StaticResource HeaderTextBlockStyle}"/>
-                        --><!--<Image Source="/vendor.png" Style="{StaticResource GlyphStyle}"/>-->
-                        <!--<Canvas Width="16" Height="16">
+                        -->
+            <!--<Image Source="/vendor.png" Style="{StaticResource GlyphStyle}"/>-->
+            <!--<Canvas Width="16" Height="16">
                             <Ellipse Canvas.Left="6" Canvas.Top="4" Width="4" Height="6" StrokeThickness="1" Fill="BlanchedAlmond" Stroke="Black"/>
                             <Path Width="16" Height="16" Stroke="Black"  Data="M 1,1 H15 M 15,3 H1 M2,1 V3 M4,1 V3 M6,1 V3 M8,1 V3 M10,1 V3 M12,1 V3 M14,1 V3 M3,3 V12 M13,3 V12 M1,12 H15 M1,12 V16 M15,12 V16 M4,16 V14 H12 V16 M7,9 L6,12 M9,9 L10,12"/>
-                        </Canvas>--><!--
+                        </Canvas>-->
+            <!--
                         <Image Width="16" Height="16">
                             <Image.Source>
                                 <DrawingImage >
                                     <DrawingImage.Drawing>
                                         <GeometryDrawing  Brush="Black" Geometry="m 60.767502 181.23842 c -0.09257 -0.0459 -0.147747 -0.10151 -0.192953 -0.19495 -0.06109 -0.12624 -0.06332 -0.18191 -0.06332 -1.58047 v -1.44968 l -0.112918 -0.0608 c -0.122955 -0.0662 -0.224847 -0.24505 -0.22601 -0.39668 -10e-4 -0.13129 0.114446 -0.31229 0.246427 -0.38647 0.09608 -0.054 0.168032 -0.0654 0.413142 -0.0654 h 0.296803 l -1.14e-4 -4.0829 -1.14e-4 -4.0829 -0.198473 -0.10265 c -0.340004 -0.17579 -0.61021 -0.53675 -0.692737 -0.9254 -0.02134 -0.10053 -0.03473 -0.52217 -0.03473 -1.09395 0 -0.87629 0.0037 -0.93798 0.06361 -1.06173 0.04617 -0.0953 0.09959 -0.14885 0.194982 -0.19497 l 0.131382 -0.0636 h 7.482544 7.482543 l 0.131382 0.0636 c 0.0954 0.0462 0.148805 0.0996 0.194982 0.19497 0.05992 0.1238 0.06361 0.18544 0.06361 1.06173 0 0.57178 -0.01334 0.9934 -0.03473 1.09395 -0.08162 0.3844 -0.355484 0.75102 -0.690337 0.92417 l -0.200871 0.10395 -1.14e-4 4.08289 -1.14e-4 4.08291 h 0.296803 c 0.247942 0 0.316556 0.0114 0.416778 0.0675 0.130292 0.0732 0.243468 0.26224 0.243468 0.40662 0 0.10998 -0.10706 0.31767 -0.185337 0.35956 -0.06029 0.0322 -0.06164 0.0654 -0.06164 1.50404 0 1.42227 -0.0021 1.47541 -0.06361 1.60244 -0.06717 0.13876 -0.2523 0.25858 -0.399489 0.25858 -0.134359 0 -0.324628 -0.11713 -0.39566 -0.24347 -0.06667 -0.1186 -0.06743 -0.13633 -0.06743 -1.5745 v -1.45452 h -6.683913 -6.683915 v 1.44126 c 0 1.39218 -0.0021 1.44574 -0.06361 1.57265 -0.04619 0.0953 -0.09959 0.14885 -0.194984 0.19497 -0.165452 0.08 -0.248519 0.08 -0.411326 -5.8e-4 z m 3.794732 -5.20726 c 0.0109 -1.06884 0.01123 -1.07375 0.09396 -1.31981 0.04565 -0.13584 0.135449 -0.33707 0.199559 -0.44718 0.14926 -0.25635 0.493575 -0.60067 0.749924 -0.74993 0.196415 -0.11436 0.623411 -0.26933 0.742061 -0.26933 0.06223 0 0.0831 -0.0748 0.03003 -0.10753 -0.06084 -0.0376 -0.244709 -0.40834 -0.314122 -0.63336 -0.106264 -0.34449 -0.100278 -0.87571 0.01383 -1.21946 0.110314 -0.33256 0.271879 -0.59519 0.51871 -0.84325 0.245338 -0.24654 0.510869 -0.41025 0.846015 -0.5216 0.214536 -0.0713 0.297679 -0.082 0.632888 -0.082 0.335211 0 0.418354 0.0114 0.632889 0.082 0.332705 0.11062 0.595287 0.2721 0.843242 0.51884 0.592961 0.59005 0.775852 1.45467 0.472794 2.23513 -0.04781 0.12315 -0.13078 0.28888 -0.184374 0.36827 -0.113276 0.16783 -0.119734 0.20302 -0.03727 0.20302 0.118644 0 0.545646 0.15504 0.742062 0.26934 0.256349 0.14918 0.600668 0.49357 0.749922 0.74993 0.06411 0.11014 0.153914 0.31134 0.199559 0.44718 0.08269 0.24606 0.08303 0.25097 0.09396 1.3198 l 0.0109 1.07283 h 1.248198 1.248198 v -4.08491 -4.08489 l -0.11578 -0.0543 c -0.06367 -0.0299 -0.168374 -0.0903 -0.232666 -0.13421 l -0.116887 -0.0799 -0.08528 0.0631 c -0.16799 0.12413 -0.407533 0.22514 -0.621282 0.26179 -0.353681 0.0607 -0.738923 -0.0337 -1.058644 -0.2592 -0.08403 -0.0592 -0.08578 -0.0592 -0.169801 0 -0.176622 0.12461 -0.41401 0.22321 -0.623911 0.2592 -0.35368 0.0607 -0.738922 -0.0337 -1.058644 -0.2592 -0.08402 -0.0592 -0.08578 -0.0592 -0.1698 0 -0.519677 0.36657 -1.162876 0.36657 -1.682555 0 -0.08403 -0.0592 -0.08578 -0.0592 -0.169799 0 -0.319721 0.22552 -0.704963 0.31985 -1.058644 0.2592 -0.2099 -0.036 -0.447289 -0.1347 -0.623911 -0.2592 -0.08403 -0.0592 -0.08578 -0.0592 -0.169801 0 -0.319721 0.22552 -0.704963 0.31985 -1.058643 0.2592 -0.209901 -0.036 -0.447289 -0.1347 -0.623912 -0.2592 -0.08403 -0.0592 -0.08578 -0.0592 -0.1698 0 -0.520329 0.36704 -1.16287 0.36663 -1.684048 -0.001 l -0.08638 -0.061 -0.114284 0.0781 c -0.06286 0.043 -0.166378 0.10249 -0.230051 0.13242 l -0.115781 0.0543 v 4.08489 4.08489 h 1.248197 1.248199 z m 6.100252 0.0464 -0.0096 -1.0265 -0.0953 -0.20067 c -0.108639 -0.22881 -0.317799 -0.45933 -0.502002 -0.5533 -0.06917 -0.0353 -0.133252 -0.0641 -0.142428 -0.0641 -0.0091 0 -0.01666 0.34988 -0.01666 0.7775 0 0.72197 -0.0046 0.78689 -0.06361 0.90889 -0.04617 0.0953 -0.09959 0.14885 -0.19498 0.19497 -0.126876 0.0615 -0.18056 0.0636 -1.5629 0.0636 -1.368442 0 -1.437138 -0.003 -1.55907 -0.0618 -0.08129 -0.0394 -0.15201 -0.10525 -0.194985 -0.18171 -0.06444 -0.1147 -0.06743 -0.15488 -0.06743 -0.91075 0 -0.43491 -0.0075 -0.79076 -0.01666 -0.79076 -0.0091 0 -0.06961 0.027 -0.134326 0.06 -0.190789 0.0973 -0.399943 0.3244 -0.507041 0.55048 l -0.09834 0.20762 -0.0096 1.0265 -0.0096 1.02653 h 2.597077 2.597075 z m -1.692162 -1.38154 v -0.5557 h -0.895306 -0.895305 v 0.5557 0.55571 h 0.895305 0.895306 z m -0.387272 -1.72589 c 0.2344 -0.11534 0.453712 -0.34097 0.56663 -0.58282 0.07114 -0.15244 0.08241 -0.21666 0.08241 -0.46983 0 -0.25315 -0.01122 -0.31744 -0.08241 -0.46981 -0.114967 -0.24623 -0.331803 -0.46722 -0.576811 -0.58783 -0.186301 -0.0918 -0.227797 -0.10005 -0.497205 -0.0997 -0.253453 2.4e-4 -0.318252 0.0114 -0.470469 0.0828 -0.246238 0.11501 -0.467216 0.3318 -0.587834 0.57682 -0.09172 0.18629 -0.100033 0.22779 -0.09974 0.4972 2.34e-4 0.25345 0.01171 0.31824 0.08274 0.47046 0.150059 0.3214 0.468861 0.5887 0.8055 0.67538 0.05465 0.0146 0.208435 0.0203 0.34174 0.0146 0.193233 -0.01 0.281523 -0.0308 0.435458 -0.10656 z m -6.721173 -4.96794 c 0.175753 -0.12511 0.192986 -0.20807 0.192986 -0.92864 v -0.65138 h -0.464731 -0.46473 l 0.0094 0.68691 c 0.0089 0.65216 0.01285 0.69177 0.07784 0.78292 0.143485 0.20116 0.448761 0.25297 0.649274 0.11014 z m 1.852355 0 c 0.175754 -0.12511 0.192986 -0.20807 0.192986 -0.92864 v -0.65138 h -0.464731 -0.46473 l 0.0094 0.68691 c 0.0089 0.65216 0.01285 0.69177 0.07784 0.78292 0.143485 0.20116 0.448759 0.25297 0.649274 0.11014 z m 1.852356 0 c 0.175752 -0.12511 0.192984 -0.20807 0.192984 -0.92864 v -0.65138 h -0.46473 -0.464731 l 0.0094 0.68691 c 0.009 0.65216 0.01285 0.69177 0.07784 0.78292 0.143485 0.20116 0.448761 0.25297 0.649274 0.11014 z m 1.798841 0.0299 c 0.05917 -0.0316 0.138605 -0.11144 0.176527 -0.17752 0.06537 -0.11404 0.06898 -0.15438 0.06947 -0.77632 l 4.68e-4 -0.65604 H 67.147161 66.68243 l 0.0094 0.6869 c 0.0089 0.65216 0.01285 0.69177 0.07784 0.78293 0.134424 0.18845 0.391308 0.24883 0.595762 0.14006 z m 1.852355 0 c 0.05917 -0.0316 0.138605 -0.11144 0.176527 -0.17752 0.06537 -0.11404 0.06898 -0.15438 0.06947 -0.77632 l 4.68e-4 -0.65604 h -0.46473 -0.464731 l 0.0094 0.6869 c 0.0089 0.65216 0.01285 0.69177 0.07784 0.78293 0.134424 0.18845 0.391307 0.24883 0.59576 0.14006 z m 1.852355 0 c 0.05917 -0.0316 0.138606 -0.11144 0.176528 -0.17752 0.06536 -0.11404 0.06898 -0.15438 0.06947 -0.77632 l 4.68e-4 -0.65604 h -0.464731 -0.46473 l 0.0094 0.6869 c 0.0089 0.65216 0.01285 0.69177 0.07784 0.78293 0.134423 0.18845 0.391308 0.24883 0.595762 0.14006 z m 1.852356 0 c 0.05917 -0.0316 0.138604 -0.11144 0.176526 -0.17752 0.06536 -0.11404 0.06898 -0.15438 0.06946 -0.77632 l 4.68e-4 -0.65604 H 72.704222 72.23949 l 0.0094 0.6869 c 0.0089 0.65216 0.01285 0.69177 0.07784 0.78293 0.134424 0.18845 0.391308 0.24883 0.595762 0.14006 z m 1.852355 0 c 0.05917 -0.0316 0.138604 -0.11144 0.176526 -0.17752 0.06537 -0.11404 0.06898 -0.15438 0.06946 -0.77632 l 4.68e-4 -0.65604 h -0.46473 -0.464732 l 0.0094 0.6869 c 0.0089 0.65216 0.01285 0.69177 0.07784 0.78293 0.134425 0.18845 0.391307 0.24883 0.595762 0.14006 z m -11.568416 13.20648 c -0.19992 -0.0989 -0.256266 -0.24388 -0.256266 -0.65911 0 -0.28235 0.0099 -0.35116 0.06538 -0.4497 0.07688 -0.13682 0.255599 -0.2469 0.401907 -0.24762 0.232007 -0.001 0.458884 -0.22753 0.458884 -0.4579 0 -0.15764 0.114057 -0.3342 0.262413 -0.40602 0.125476 -0.0607 0.190593 -0.0618 3.982569 -0.0618 3.778121 0 3.857531 0.001 3.981208 0.0612 0.15297 0.074 0.226962 0.19126 0.263866 0.41801 0.01529 0.094 0.05601 0.21054 0.09043 0.25891 0.07565 0.10623 0.238065 0.18815 0.373017 0.18815 0.152986 0 0.329908 0.11583 0.400878 0.26243 0.09 0.18589 0.08891 0.71165 -0.0018 0.89914 -0.06717 0.13877 -0.252299 0.25858 -0.399488 0.25858 -0.224288 0 -0.463089 -0.24163 -0.463089 -0.46859 0 -0.097 -0.0135 -0.11176 -0.171824 -0.18939 -0.236957 -0.11616 -0.452692 -0.32779 -0.574546 -0.56347 l -0.10262 -0.19847 h -3.395981 -3.395985 l -0.10262 0.19847 c -0.121865 0.23568 -0.337591 0.44725 -0.574546 0.56347 -0.151148 0.0742 -0.171827 0.0953 -0.171827 0.17613 0 0.16451 -0.113438 0.34798 -0.258582 0.41824 -0.165453 0.08 -0.248521 0.08 -0.411328 -5.8e-4 z">
-                                            --><!--<Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="path179" Fill="#FF000000" StrokeThickness="0.0308726">
+                                            -->
+            <!--<Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="path179" Fill="#FF000000" StrokeThickness="0.0308726">
                                                 <Path.Data>
                                                     <PathGeometry Figures="m 60.767502 181.23842 c -0.09257 -0.0459 -0.147747 -0.10151 -0.192953 -0.19495 -0.06109 -0.12624 -0.06332 -0.18191 -0.06332 -1.58047 v -1.44968 l -0.112918 -0.0608 c -0.122955 -0.0662 -0.224847 -0.24505 -0.22601 -0.39668 -10e-4 -0.13129 0.114446 -0.31229 0.246427 -0.38647 0.09608 -0.054 0.168032 -0.0654 0.413142 -0.0654 h 0.296803 l -1.14e-4 -4.0829 -1.14e-4 -4.0829 -0.198473 -0.10265 c -0.340004 -0.17579 -0.61021 -0.53675 -0.692737 -0.9254 -0.02134 -0.10053 -0.03473 -0.52217 -0.03473 -1.09395 0 -0.87629 0.0037 -0.93798 0.06361 -1.06173 0.04617 -0.0953 0.09959 -0.14885 0.194982 -0.19497 l 0.131382 -0.0636 h 7.482544 7.482543 l 0.131382 0.0636 c 0.0954 0.0462 0.148805 0.0996 0.194982 0.19497 0.05992 0.1238 0.06361 0.18544 0.06361 1.06173 0 0.57178 -0.01334 0.9934 -0.03473 1.09395 -0.08162 0.3844 -0.355484 0.75102 -0.690337 0.92417 l -0.200871 0.10395 -1.14e-4 4.08289 -1.14e-4 4.08291 h 0.296803 c 0.247942 0 0.316556 0.0114 0.416778 0.0675 0.130292 0.0732 0.243468 0.26224 0.243468 0.40662 0 0.10998 -0.10706 0.31767 -0.185337 0.35956 -0.06029 0.0322 -0.06164 0.0654 -0.06164 1.50404 0 1.42227 -0.0021 1.47541 -0.06361 1.60244 -0.06717 0.13876 -0.2523 0.25858 -0.399489 0.25858 -0.134359 0 -0.324628 -0.11713 -0.39566 -0.24347 -0.06667 -0.1186 -0.06743 -0.13633 -0.06743 -1.5745 v -1.45452 h -6.683913 -6.683915 v 1.44126 c 0 1.39218 -0.0021 1.44574 -0.06361 1.57265 -0.04619 0.0953 -0.09959 0.14885 -0.194984 0.19497 -0.165452 0.08 -0.248519 0.08 -0.411326 -5.8e-4 z m 3.794732 -5.20726 c 0.0109 -1.06884 0.01123 -1.07375 0.09396 -1.31981 0.04565 -0.13584 0.135449 -0.33707 0.199559 -0.44718 0.14926 -0.25635 0.493575 -0.60067 0.749924 -0.74993 0.196415 -0.11436 0.623411 -0.26933 0.742061 -0.26933 0.06223 0 0.0831 -0.0748 0.03003 -0.10753 -0.06084 -0.0376 -0.244709 -0.40834 -0.314122 -0.63336 -0.106264 -0.34449 -0.100278 -0.87571 0.01383 -1.21946 0.110314 -0.33256 0.271879 -0.59519 0.51871 -0.84325 0.245338 -0.24654 0.510869 -0.41025 0.846015 -0.5216 0.214536 -0.0713 0.297679 -0.082 0.632888 -0.082 0.335211 0 0.418354 0.0114 0.632889 0.082 0.332705 0.11062 0.595287 0.2721 0.843242 0.51884 0.592961 0.59005 0.775852 1.45467 0.472794 2.23513 -0.04781 0.12315 -0.13078 0.28888 -0.184374 0.36827 -0.113276 0.16783 -0.119734 0.20302 -0.03727 0.20302 0.118644 0 0.545646 0.15504 0.742062 0.26934 0.256349 0.14918 0.600668 0.49357 0.749922 0.74993 0.06411 0.11014 0.153914 0.31134 0.199559 0.44718 0.08269 0.24606 0.08303 0.25097 0.09396 1.3198 l 0.0109 1.07283 h 1.248198 1.248198 v -4.08491 -4.08489 l -0.11578 -0.0543 c -0.06367 -0.0299 -0.168374 -0.0903 -0.232666 -0.13421 l -0.116887 -0.0799 -0.08528 0.0631 c -0.16799 0.12413 -0.407533 0.22514 -0.621282 0.26179 -0.353681 0.0607 -0.738923 -0.0337 -1.058644 -0.2592 -0.08403 -0.0592 -0.08578 -0.0592 -0.169801 0 -0.176622 0.12461 -0.41401 0.22321 -0.623911 0.2592 -0.35368 0.0607 -0.738922 -0.0337 -1.058644 -0.2592 -0.08402 -0.0592 -0.08578 -0.0592 -0.1698 0 -0.519677 0.36657 -1.162876 0.36657 -1.682555 0 -0.08403 -0.0592 -0.08578 -0.0592 -0.169799 0 -0.319721 0.22552 -0.704963 0.31985 -1.058644 0.2592 -0.2099 -0.036 -0.447289 -0.1347 -0.623911 -0.2592 -0.08403 -0.0592 -0.08578 -0.0592 -0.169801 0 -0.319721 0.22552 -0.704963 0.31985 -1.058643 0.2592 -0.209901 -0.036 -0.447289 -0.1347 -0.623912 -0.2592 -0.08403 -0.0592 -0.08578 -0.0592 -0.1698 0 -0.520329 0.36704 -1.16287 0.36663 -1.684048 -0.001 l -0.08638 -0.061 -0.114284 0.0781 c -0.06286 0.043 -0.166378 0.10249 -0.230051 0.13242 l -0.115781 0.0543 v 4.08489 4.08489 h 1.248197 1.248199 z m 6.100252 0.0464 -0.0096 -1.0265 -0.0953 -0.20067 c -0.108639 -0.22881 -0.317799 -0.45933 -0.502002 -0.5533 -0.06917 -0.0353 -0.133252 -0.0641 -0.142428 -0.0641 -0.0091 0 -0.01666 0.34988 -0.01666 0.7775 0 0.72197 -0.0046 0.78689 -0.06361 0.90889 -0.04617 0.0953 -0.09959 0.14885 -0.19498 0.19497 -0.126876 0.0615 -0.18056 0.0636 -1.5629 0.0636 -1.368442 0 -1.437138 -0.003 -1.55907 -0.0618 -0.08129 -0.0394 -0.15201 -0.10525 -0.194985 -0.18171 -0.06444 -0.1147 -0.06743 -0.15488 -0.06743 -0.91075 0 -0.43491 -0.0075 -0.79076 -0.01666 -0.79076 -0.0091 0 -0.06961 0.027 -0.134326 0.06 -0.190789 0.0973 -0.399943 0.3244 -0.507041 0.55048 l -0.09834 0.20762 -0.0096 1.0265 -0.0096 1.02653 h 2.597077 2.597075 z m -1.692162 -1.38154 v -0.5557 h -0.895306 -0.895305 v 0.5557 0.55571 h 0.895305 0.895306 z m -0.387272 -1.72589 c 0.2344 -0.11534 0.453712 -0.34097 0.56663 -0.58282 0.07114 -0.15244 0.08241 -0.21666 0.08241 -0.46983 0 -0.25315 -0.01122 -0.31744 -0.08241 -0.46981 -0.114967 -0.24623 -0.331803 -0.46722 -0.576811 -0.58783 -0.186301 -0.0918 -0.227797 -0.10005 -0.497205 -0.0997 -0.253453 2.4e-4 -0.318252 0.0114 -0.470469 0.0828 -0.246238 0.11501 -0.467216 0.3318 -0.587834 0.57682 -0.09172 0.18629 -0.100033 0.22779 -0.09974 0.4972 2.34e-4 0.25345 0.01171 0.31824 0.08274 0.47046 0.150059 0.3214 0.468861 0.5887 0.8055 0.67538 0.05465 0.0146 0.208435 0.0203 0.34174 0.0146 0.193233 -0.01 0.281523 -0.0308 0.435458 -0.10656 z m -6.721173 -4.96794 c 0.175753 -0.12511 0.192986 -0.20807 0.192986 -0.92864 v -0.65138 h -0.464731 -0.46473 l 0.0094 0.68691 c 0.0089 0.65216 0.01285 0.69177 0.07784 0.78292 0.143485 0.20116 0.448761 0.25297 0.649274 0.11014 z m 1.852355 0 c 0.175754 -0.12511 0.192986 -0.20807 0.192986 -0.92864 v -0.65138 h -0.464731 -0.46473 l 0.0094 0.68691 c 0.0089 0.65216 0.01285 0.69177 0.07784 0.78292 0.143485 0.20116 0.448759 0.25297 0.649274 0.11014 z m 1.852356 0 c 0.175752 -0.12511 0.192984 -0.20807 0.192984 -0.92864 v -0.65138 h -0.46473 -0.464731 l 0.0094 0.68691 c 0.009 0.65216 0.01285 0.69177 0.07784 0.78292 0.143485 0.20116 0.448761 0.25297 0.649274 0.11014 z m 1.798841 0.0299 c 0.05917 -0.0316 0.138605 -0.11144 0.176527 -0.17752 0.06537 -0.11404 0.06898 -0.15438 0.06947 -0.77632 l 4.68e-4 -0.65604 H 67.147161 66.68243 l 0.0094 0.6869 c 0.0089 0.65216 0.01285 0.69177 0.07784 0.78293 0.134424 0.18845 0.391308 0.24883 0.595762 0.14006 z m 1.852355 0 c 0.05917 -0.0316 0.138605 -0.11144 0.176527 -0.17752 0.06537 -0.11404 0.06898 -0.15438 0.06947 -0.77632 l 4.68e-4 -0.65604 h -0.46473 -0.464731 l 0.0094 0.6869 c 0.0089 0.65216 0.01285 0.69177 0.07784 0.78293 0.134424 0.18845 0.391307 0.24883 0.59576 0.14006 z m 1.852355 0 c 0.05917 -0.0316 0.138606 -0.11144 0.176528 -0.17752 0.06536 -0.11404 0.06898 -0.15438 0.06947 -0.77632 l 4.68e-4 -0.65604 h -0.464731 -0.46473 l 0.0094 0.6869 c 0.0089 0.65216 0.01285 0.69177 0.07784 0.78293 0.134423 0.18845 0.391308 0.24883 0.595762 0.14006 z m 1.852356 0 c 0.05917 -0.0316 0.138604 -0.11144 0.176526 -0.17752 0.06536 -0.11404 0.06898 -0.15438 0.06946 -0.77632 l 4.68e-4 -0.65604 H 72.704222 72.23949 l 0.0094 0.6869 c 0.0089 0.65216 0.01285 0.69177 0.07784 0.78293 0.134424 0.18845 0.391308 0.24883 0.595762 0.14006 z m 1.852355 0 c 0.05917 -0.0316 0.138604 -0.11144 0.176526 -0.17752 0.06537 -0.11404 0.06898 -0.15438 0.06946 -0.77632 l 4.68e-4 -0.65604 h -0.46473 -0.464732 l 0.0094 0.6869 c 0.0089 0.65216 0.01285 0.69177 0.07784 0.78293 0.134425 0.18845 0.391307 0.24883 0.595762 0.14006 z m -11.568416 13.20648 c -0.19992 -0.0989 -0.256266 -0.24388 -0.256266 -0.65911 0 -0.28235 0.0099 -0.35116 0.06538 -0.4497 0.07688 -0.13682 0.255599 -0.2469 0.401907 -0.24762 0.232007 -0.001 0.458884 -0.22753 0.458884 -0.4579 0 -0.15764 0.114057 -0.3342 0.262413 -0.40602 0.125476 -0.0607 0.190593 -0.0618 3.982569 -0.0618 3.778121 0 3.857531 0.001 3.981208 0.0612 0.15297 0.074 0.226962 0.19126 0.263866 0.41801 0.01529 0.094 0.05601 0.21054 0.09043 0.25891 0.07565 0.10623 0.238065 0.18815 0.373017 0.18815 0.152986 0 0.329908 0.11583 0.400878 0.26243 0.09 0.18589 0.08891 0.71165 -0.0018 0.89914 -0.06717 0.13877 -0.252299 0.25858 -0.399488 0.25858 -0.224288 0 -0.463089 -0.24163 -0.463089 -0.46859 0 -0.097 -0.0135 -0.11176 -0.171824 -0.18939 -0.236957 -0.11616 -0.452692 -0.32779 -0.574546 -0.56347 l -0.10262 -0.19847 h -3.395981 -3.395985 l -0.10262 0.19847 c -0.121865 0.23568 -0.337591 0.44725 -0.574546 0.56347 -0.151148 0.0742 -0.171827 0.0953 -0.171827 0.17613 0 0.16451 -0.113438 0.34798 -0.258582 0.41824 -0.165453 0.08 -0.248521 0.08 -0.411328 -5.8e-4 z" FillRule="NonZero"/>
                                                 </Path.Data>
-                                            </Path>--><!--
+                                            </Path>-->
+            <!--
                                         </GeometryDrawing>
                                     </DrawingImage.Drawing>
                                 </DrawingImage>
@@ -179,7 +299,9 @@
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Print Settings" Style="{StaticResource HeaderTextBlockStyle}"/>
-                        --><!--<Image Source="/3d-printer.png" Style="{StaticResource GlyphStyle}"/>--><!--
+                        -->
+            <!--<Image Source="/3d-printer.png" Style="{StaticResource GlyphStyle}"/>-->
+            <!--
                         <Canvas Width="16" Height="16" ClipToBounds="True">
                             <Path Width="16" Height="16" Stroke="Black" Data="M0,2 H5 M5,0 H11 V4 H5 V0 M11,2 H16 M6,4 V6 H10 V4"/>
                             <TextBlock Canvas.Top="5" Canvas.Left="2.8"  Text="{StaticResource SettingsSymbol}" Style="{StaticResource FontIcon}">
@@ -195,7 +317,9 @@
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Definitions" Style="{StaticResource HeaderTextBlockStyle}"/>
-                        --><!--<Image Source="/writing.png" Style="{StaticResource GlyphStyle}"/>--><!--
+                        -->
+            <!--<Image Source="/writing.png" Style="{StaticResource GlyphStyle}"/>-->
+            <!--
                         <TextBlock Text="{StaticResource EditIconSymbol}" Style="{StaticResource FontIcon}"/>
                     </StackPanel>
                 </TabItem.Header>
@@ -215,7 +339,9 @@
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Settings" Style="{StaticResource HeaderTextBlockStyle}"/>
-                        --><!--<Image Source="/control.png" Style="{StaticResource GlyphStyle}"/>--><!--
+                        -->
+            <!--<Image Source="/control.png" Style="{StaticResource GlyphStyle}"/>-->
+            <!--
                         <TextBlock Text="{StaticResource SettingsSymbol}" Style="{StaticResource FontIcon}"/>
                     </StackPanel>
                 </TabItem.Header>

@@ -19,10 +19,12 @@ using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Input;
 using DataDefinitions.Interfaces;
 using DataDefinitions.LiteDBSupport;
+using System.Collections.Concurrent;
+using DataDefinitions.Filters;
 
 namespace Filament.WPF6.ViewModels
 {
-    public abstract class BaseBrowserViewModel<TBrowse, TSelect> : Observable where TBrowse : DataDefinitions.DataObject, new()
+    public abstract class BaseBrowserViewModel<TBrowse, TSelect> : Observable,IUIProvider, DataDefinitions.Interfaces.IFilterStatus where TBrowse : DataDefinitions.DataObject, new()
         where TSelect : DataDefinitions.DataObject, new()
     {
 #if DEBUG
@@ -33,8 +35,8 @@ namespace Filament.WPF6.ViewModels
         protected const string showAllFilterKey = "ShowAll";
         protected const string tagFilterKey = "Tags";
 
-        protected Dictionary<string, IFilter> filters = new Dictionary<string, IFilter>();
-
+        protected ConcurrentDictionary<IResolveFilter.Filters, IWindowsFilter> filters = new();
+        protected ConcurrentDictionary<string,IEnumerable> menus = new();
         protected static bool ready = true;
         protected virtual bool SupportsShowAllFiltering { get; } = true;
 
@@ -43,8 +45,25 @@ namespace Filament.WPF6.ViewModels
             get { return ready; }
             set { Set(ref ready, value); }
         }
+        protected bool[] filterSupported = new bool[Enum.GetNames<IResolveFilter.Filters>().Length];
+        public bool IsFilterSupported(IResolveFilter.Filters filter)
+        {
+            return filterSupported[(int)filter];
+        }
+        //protected bool _keywordFilteringSupported = false;
+        //public bool KeywordFilteringSupported { get => _keywordFilteringSupported; protected set => Set(ref _keywordFilteringSupported, value); }
+        //protected bool _tagFilteringSupported = false;
+        //public bool TagFilteringSupported { get => _tagFilteringSupported; protected set => Set(ref _tagFilteringSupported, value); }
+        //private bool dateFilteringSupported=false;
 
-        private ObservableCollection<TBrowse>? _browse;
+        //public bool DateFilteringSupported
+        //{
+        //    get => dateFilteringSupported;
+        //    set => Set<bool>(ref dateFilteringSupported, value);
+        //}
+
+
+        //private ObservableCollection<TBrowse>? _browse;
         //public ObservableCollection<TBrowse>? Items { get => _browse; set => Set(ref _browse, value); }
         public CollectionViewSource ViewSource { get; set; }
         private TSelect? selectedItem;
@@ -77,9 +96,10 @@ namespace Filament.WPF6.ViewModels
                 //            ShowInUseItems();
                 //    }
                 //}
-                filters.Add(showAllFilterKey, new ShowAllFilter());
+                filters.TryAdd(IResolveFilter.Filters.ShowAll, new WindowsFilter(new ShowAllResolve()));
                 WeakReferenceMessenger.Default.Register<ShowAllFlagChanged>(this, HandleShowAllFlagChanged);
             }
+            WeakReferenceMessenger.Default.Register<FilterChangedEventArgs>(this, HandleFilterChanged);
             DerivedInitItems();
             var showState = Enum.Parse<ShowAllFlag>(Properties.Settings.Default.ShowStateFlag);
 
@@ -91,24 +111,42 @@ namespace Filament.WPF6.ViewModels
             UpdateEventLinks();
 
         }
+
+        private void HandleFilterChanged(object recipient, FilterChangedEventArgs message)
+        {
+            if (filters.TryGetValue(message.Filter, out var filter))
+            {
+                if (filter.Applied && message.Actions.HasFlag(FilterAction.Remove))
+                {
+                    filter.Applied = false;
+                    ViewSource.Filter -= new FilterEventHandler(filter.Filter);
+                }
+                else if (!filter.Applied && message.Actions.HasFlag(FilterAction.Apply))
+                {
+                    filter.Applied = true;
+                    ViewSource.Filter += new FilterEventHandler(filter.Filter);
+                }
+                ViewSource.View.Refresh();
+            }
+            //throw new NotImplementedException();
+        }
+
         ~BaseBrowserViewModel()
         {
             if (SupportsShowAllFiltering)
                 WeakReferenceMessenger.Default.Unregister<ShowAllFlagChanged>(this);
             if (filters.Values.Count > 0)
-                foreach (var filter in filters.Values.Where(f => f.Applied
-#if DEBUG
-                && f.Owner == this
-#endif
-                ))
+                foreach (var filter in filters.Values.Where(f => f.Applied))
+                {
                     try
                     {
-                        ViewSource.Filter -= filter.Filter;
+                        ViewSource.Filter -= new FilterEventHandler(filter.Filter);
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        WriteLine("Unable to release a filter, will probably result in a memory leak.");
+                        WriteLine($"Unable to release a filter in {this.GetType().Name}, will probably result in a memory leak.  {ex.Message}");
                     }
+                }
         }
         protected virtual void UpdateEventLinks()
         {
@@ -118,11 +156,11 @@ namespace Filament.WPF6.ViewModels
         }
         protected virtual void ShowAllItems()
         {
-            if (filters.TryGetValue(showAllFilterKey, out var filter))
+            if (filters.TryGetValue(IResolveFilter.Filters.ShowAll, out var filter))
                 if (filter.Applied)
                 {
-                    ViewSource.Filter -= filter.Filter;
                     filter.Applied = false;
+                    ViewSource.Filter -= new FilterEventHandler(filter.Filter);
                 }
 
             //ViewSource.Filter -= FilterForITrackUsage;
@@ -130,10 +168,13 @@ namespace Filament.WPF6.ViewModels
         protected virtual void ShowInUseItems()
         {
             //ViewSource.Filter += FilterForITrackUsage;
-            if (filters.TryGetValue(showAllFilterKey, out var filter))
+            if (filters.TryGetValue(IResolveFilter.Filters.ShowAll, out var filter))
                 if (!filter.Applied)
                 {
-                    ViewSource.Filter += filter.Filter;
+                    if (filter.Resolve is ICriteriaFilter criteria)
+                        criteria.UpdateCriteria(false);
+
+                    ViewSource.Filter += new FilterEventHandler(filter.Filter);
                     filter.Applied = true;
                 }
         }
@@ -142,7 +183,7 @@ namespace Filament.WPF6.ViewModels
         {
             if (e.Item is ITrackUsable track)
             {
-                e.Accepted = !track.StopUsing;
+                e.Accepted = !track.StopUsing ?? true;
             }
         }
 
@@ -154,7 +195,7 @@ namespace Filament.WPF6.ViewModels
                 ShowInUseItems();
 
             //SelectedItem = Items?.FirstOrDefault();
-            System.Diagnostics.Debug.WriteLine($"Show all flag changed to : {message.Value} in {this.GetType().Name}");
+            WriteLine($"Show all flag changed to : {message.Value} in {this.GetType().Name}");
         }
 
         protected bool InAddNew { get; set; }
@@ -276,7 +317,7 @@ namespace Filament.WPF6.ViewModels
                     SelectedItem.UpdateItem(Singleton<LiteDBDal>.Instance);
                     if (SelectedItem is ITag)
                         //TODO: Develop a notification that the tag list has changed
-                        WeakReferenceMessenger.Default.Send(new TagInteractionNotification(TagInteraction.TagUpdated));
+                        WeakReferenceMessenger.Default.Send(new TagInteractionNotification(ContentInteraction.ContentUpdated));
                     //if (needsAdd)
                     //{
                     //    //Singleton<JsonDAL>.Instance.Document.Add(SelectedItem);
@@ -358,6 +399,42 @@ namespace Filament.WPF6.ViewModels
                         observable.PropertyChanged -= Def_PropertyChanged;
                 }
             }
+        }
+
+        public bool IsFilterApplied(IResolveFilter.Filters whichFilter)
+        {
+            if (filters.TryGetValue(whichFilter, out var filter))
+                return filter.Applied;
+            else
+                return false;
+            //throw new NotImplementedException();
+        }
+        /// <summary>
+        /// Retrieve any UIElements specific to this view
+        /// </summary>
+        /// <param name="Key"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException">currently not implemented in base view</exception>
+        public virtual IEnumerable GetMenuElements(string Key)
+        {
+            throw new NotImplementedException();
+        }
+        public bool TryGetElements<T>(string Key, out T Value)
+        {
+            try
+            {
+                if(GetMenuElements(Key) is T result)
+                {
+                    Value= result;
+                    return true;
+                }
+            }
+            catch (NotImplementedException)
+            {
+                Value = default;
+                return false;
+            }
+            throw new NotImplementedException ();
         }
     }
 }

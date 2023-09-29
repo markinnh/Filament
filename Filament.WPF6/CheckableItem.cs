@@ -38,8 +38,8 @@ namespace Filament.WPF6
 			Item = item;
 		}
 	}
-	public class CheckableTagStat : CheckableItem<TagStat>
+	public class CheckableWordStat : CheckableItem<WordWithOccuranceCount>
 	{
-		public CheckableTagStat(bool isChecked,TagStat tagStat) : base(isChecked, tagStat) { }
+		public CheckableWordStat(bool isChecked,WordWithOccuranceCount tagStat) : base(isChecked, tagStat) { }
 	}
 }

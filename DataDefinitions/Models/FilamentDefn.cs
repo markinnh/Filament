@@ -83,7 +83,7 @@ namespace DataDefinitions.Models
             set => Set<double>(ref diameter, value);
         }
 
-        private bool stopUsing;
+        private bool? stopUsing;
         /// <summary>
         /// Gets or sets a value indicating whether to stop using.
         /// </summary>
@@ -91,10 +91,10 @@ namespace DataDefinitions.Models
         ///   <c>true</c> if [stop using]; otherwise, <c>false</c>.
         /// </value>
         [XmlAttribute("notUsed")]
-        public bool StopUsing
+        public bool? StopUsing
         {
-            get => stopUsing;
-            set => Set<bool>(ref stopUsing, value);
+            get => stopUsing ?? false;
+            set => Set(ref stopUsing, value);
         }
         [JsonIgnore]
         //public bool EventsMapped => (InDataOpsChanged?.GetInvocationList().Cast<InDataOpsChangedHandler>().Contains(FilamentDefn_InDataOpsChanged) ?? false) && (DensityAlias?.IsLinkedToNotifyContainer ?? false);

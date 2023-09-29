@@ -17,11 +17,15 @@ using DataDefinitions.JsonSupport;
 using System.Collections.ObjectModel;
 using DataDefinitions.LiteDBSupport;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using DataDefinitions.Filters;
+using DataDefinitions.Interfaces;
 
 namespace Filament.WPF6.ViewModels
 {
-    public class TVendorDefnViewModel : BaseBrowserViewModel<VendorDefn, VendorDefn>
+    public class TVendorDefnViewModel : BaseTagFilterViewModel<VendorDefn,VendorDefn> //BaseBrowserViewModel<VendorDefn, VendorDefn>
     {
+        public override Guid Signature => Singleton<LiteDBDal>.Instance.Vendors.Signature;
         DataGridLengthConverter dglConvert = new DataGridLengthConverter();
         private ICommand? webNavigate;
         public ICommand WebNavigate { get => webNavigate ??= new RelayCommand<object>(HandleWebNavigate); }
@@ -114,5 +118,16 @@ namespace Filament.WPF6.ViewModels
             //}
             //throw new NotImplementedException();
         }
+
+//        protected override void InitFilterViewModel()
+//        {
+//            Signature = Singleton<LiteDBDal>.Instance.Vendors.Signature;
+//#if DEBUG
+//            filterSupported[(int)IResolveFilter.Filters.Tag] = filters.TryAdd(IResolveFilter.Filters.Tag, new WindowsFilter(new TagResolve() { Signature = Signature }));
+//#else
+//            filterSupported[(int)IResolveFilter.Filters.Tag] =filters.TryAdd(IResolveFilter.Filters.Tag, new WindowsFilter( new TagResolve() { Signature = Signature }));
+//#endif
+//            WeakReferenceMessenger.Default.Register<TagFilterChangedEventArgs>(this, HandleTagFilterMessages);
+//        }
     }
 }

@@ -15,8 +15,11 @@
     <None Remove="3d-printing.png" />
     <None Remove="control.png" />
     <None Remove="Filter.png" />
+    <None Remove="FilterTag.png" />
+    <None Remove="keyword 16x16.png" />
     <None Remove="Resources\vendor.png" />
     <None Remove="shelf.png" />
+    <None Remove="tag 16x16.png" />
     <None Remove="vendor.png" />
     <None Remove="writing.png" />
   </ItemGroup>
@@ -27,6 +30,7 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.0.0" />
+    <PackageReference Include="syncfusion.ui.wpf.net" Version="20.2.0.36" />
   </ItemGroup>
 
   <ItemGroup>
@@ -44,11 +48,15 @@
     <Resource Include="3d-printing-filament.png" />
     <Resource Include="3d-printing.png" />
     <Resource Include="control.png" />
+    <Resource Include="Filter.png" />
+    <Resource Include="FilterTag.png" />
+    <Resource Include="keyword 16x16.png" />
     <Resource Include="Resources\Filter.png" />
     <Resource Include="Resources\vendor.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
     <Resource Include="shelf.png" />
+    <Resource Include="tag 16x16.png" />
     <Resource Include="vendor.png" />
     <Resource Include="writing.png" />
   </ItemGroup>

@@ -28,8 +28,8 @@ namespace Filament.WPF6.Pages
 
         private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            if(e.NewValue is DatabaseObject databaseObject && DataContext is ViewModels.PrintSettingsByVendorViewModel ps)
-                ps.SelectedItem=databaseObject;
+            if(e.NewValue is DataDefinitions.DataObject dataObject && DataContext is ViewModels.PrintSettingsByVendorViewModel ps)
+                ps.SelectedItem=dataObject;
         }
     }
 }

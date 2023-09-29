@@ -39,22 +39,22 @@ namespace DataDefinitions
         {
 
         }
-        protected override bool Set<T>(ref T target, T value, bool blockUpdate = false, [CallerMemberName] string propertyName = null)
-        {
-            if (base.Set(ref target, value, blockUpdate, propertyName) && !InDataOperations && propertyName != nameof(IsModified) && !blockUpdate)
-            {
-                IsModified = true;
-                return true;
-            }
-            return false;
-        }
+        //protected override bool Set<T>(ref T target, T value, bool blockUpdate = false, [CallerMemberName] string propertyName = null)
+        //{
+        //    if (base.Set(ref target, value, blockUpdate, propertyName) && !InDataOperations && propertyName != nameof(IsModified) && !blockUpdate)
+        //    {
+        //        IsModified = true;
+        //        return true;
+        //    }
+        //    return false;
+        //}
         /// <summary>
         /// This method is overidden in the DatabaseObject and ParentLinkedDataObject.
         /// </summary>
         /// <param name="dal">the dataaccesslayer</param>
         public virtual void UpdateItem(LiteDBDal dal)
         {
-            Assert(false, "This method should not be called, the dataobject is a base object");
+            //Assert(false, "This method should not be called, the dataobject is a base object");
         }
         /// <summary>
         /// Only supported in ParentLinkedDataObject

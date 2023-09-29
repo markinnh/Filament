@@ -9,14 +9,6 @@ using System.Xml.Serialization;
 
 namespace DataDefinitions.Models
 {
-    public enum SupportedSettingValueType
-    {
-        Integer = 0x100,
-        @Boolean,
-        Float,
-        [Description("Yes or No")]
-        YesNo
-    }
     [Flags]
     public enum SettingAppliesTo
     {
@@ -65,6 +57,13 @@ namespace DataDefinitions.Models
         {
             get => settingValueType;
             set => Set<SupportedSettingValueType>(ref settingValueType, value);
+        }
+        private string? items;
+
+        public string? Items
+        {
+            get => items;
+            set => Set(ref items, value);
         }
 
         public static void SetDataOperationsState(bool state)

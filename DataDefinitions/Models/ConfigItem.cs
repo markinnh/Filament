@@ -15,7 +15,7 @@ namespace DataDefinitions.Models
     /// <summary>
     /// Individual settings for the configuration.
     /// </summary>
-    public class ConfigItem : DataObject,ITrackModified
+    public class ConfigItem : DataObject, ITrackModified
     {
         public static event InDataOpsChangedHandler InDataOpsChanged;
 
@@ -31,13 +31,13 @@ namespace DataDefinitions.Models
                 InDataOpsChanged?.Invoke(EventArgs.Empty);
             }
         }
-        
-        
-        
-        
 
-        [JsonIgnore,BsonIgnore]
-        public override  bool InDataOperations => InDataOps;
+
+
+
+
+        [JsonIgnore, BsonIgnore]
+        public override bool InDataOperations => InDataOps;
         private int configItemId;
         //[Affected(Names = new string[] { nameof(InDatabase) })]
         [BsonIgnore]
@@ -80,7 +80,7 @@ namespace DataDefinitions.Models
                 Set<string>(ref myTextValue, value);
             }
         }
-        [System.Text.Json.Serialization.JsonIgnore,BsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore, BsonIgnore]
         public object Value
         {
             get
@@ -94,11 +94,8 @@ namespace DataDefinitions.Models
                             else
                                 throw new ArgumentOutOfRangeException($"Unable to convert {myTextValue} to an integer");
                             break;
+                        case SupportedSettingValueType.OnOff:
                         case SupportedSettingValueType.YesNo:
-                            var ynResult =myTextValue.ToLower()=="yes";
-                            return ynResult;
-                            break;
-
                         case SupportedSettingValueType.Boolean:
                             if (bool.TryParse(myTextValue, out bool result))
                                 return result;
@@ -106,8 +103,10 @@ namespace DataDefinitions.Models
                                 throw new ArgumentOutOfRangeException($"unable to convert {myTextValue} to a boolean(true/false)");
                             break;
                         case SupportedSettingValueType.Float:
-
-                            return Convert.ToSingle(TextValue);
+                            if (float.TryParse(myTextValue, out float fltResult))
+                                return fltResult;
+                            else
+                                throw new ArgumentOutOfRangeException($"unable to convert {myTextValue} to a floating point number");
                             break;
 
                         default:
@@ -136,7 +135,7 @@ namespace DataDefinitions.Models
         //    else
         //        ReportKeyAlreadyInitialized();
         //}
-        [JsonIgnore,BsonIgnore]
+        [JsonIgnore, BsonIgnore]
         public override bool IsValid => PrintSettingDefnId != default && !string.IsNullOrEmpty(myTextValue);
     }
 }

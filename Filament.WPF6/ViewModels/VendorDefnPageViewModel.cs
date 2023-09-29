@@ -13,6 +13,7 @@ using Filament.WPF6.Helpers;
 using DataDefinitions.JsonSupport;
 using DataDefinitions.LiteDBSupport;
 using CommunityToolkit.Mvvm.Input;
+using DataDefinitions;
 
 namespace Filament.WPF6.ViewModels
 {

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
+using DataDefinitions;
 using DataDefinitions.JsonSupport;
 using DataDefinitions.LiteDBSupport;
 using DataDefinitions.Models;

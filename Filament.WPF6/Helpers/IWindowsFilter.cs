@@ -1,14 +1,22 @@
-﻿using System.Linq;
+﻿using DataDefinitions.Interfaces;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Filament.WPF6.Helpers
 {
-    public interface IFilter
+    /// <summary>
+    /// Probably can be eliminated, reduced the complexity of the WindowsFilter to a single class, all the complexity is in the IResolveFilter interface
+    /// </summary>
+    /// <seealso cref="IResolveFilter"/>
+    public interface IWindowsFilter
     {
-#if DEBUG
-        object Owner { get; }
-#endif
+        //public enum Filters : short
+        //{
+        //    ShowAll=0x1000,
+        //    Tag,
+        //    Keyword
+        //}
         /// <summary>
         /// Determines if the Filter is applied
         /// </summary>
@@ -20,6 +28,6 @@ namespace Filament.WPF6.Helpers
         /// <returns>criteria satified</returns>
         //bool Accepted(object item);
         void Filter(object sender, System.Windows.Data.FilterEventArgs e);
-
+        IResolveFilter Resolve { get; set; }
     }
 }

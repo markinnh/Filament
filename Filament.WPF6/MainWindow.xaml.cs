@@ -23,12 +23,13 @@ using Filament.WPF6.Pages;
 using System.Collections.ObjectModel;
 using Filament.WPF6.ViewModels;
 using DataDefinitions.Interfaces;
+using IFilterStatus = DataDefinitions.Interfaces.IFilterStatus;
 
 namespace Filament.WPF6
 {
-    public enum TagInteraction
+    public enum ContentInteraction
     {
-        TagUpdated
+        ContentUpdated
     }
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -62,18 +63,36 @@ namespace Filament.WPF6
                 if (menuItem1.Tag is string str)
                     ViewFrame.Navigate(new Uri(str, UriKind.RelativeOrAbsolute));
             }
+            else if (FindName("IntuitivePage") is MenuItem menu) // select a default page if the settings are not working, or on a new build
+            {
+                menu.IsChecked = true;
+                lastPageSelected = menu;
+                if (menu.Tag is string str)
+                    ViewFrame.Navigate(new Uri(str, UriKind.RelativeOrAbsolute));
+            }
             WeakReferenceMessenger.Default.Register<TagInteractionNotification>(this, HandleTagMessage);
+            WeakReferenceMessenger.Default.Register<KeywordInteractionNotification>(this, HandleKeywordInteractionMessage);
         }
 
         private void HandleTagMessage(object recipient, TagInteractionNotification message)
         {
             Debug.WriteLine($"Tag interaction received, notification - {message.Value}");
-            if (message.Value== TagInteraction.TagUpdated && ViewFrame.Content is Page page && page.DataContext is ITagCollate tagCollate && DataContext is MainWindowViewModel main)
+            if (message.Value == ContentInteraction.ContentUpdated && ViewFrame.Content is Page page && page.DataContext is ITagCollate tagCollate && DataContext is MainWindowViewModel main)
                 main.UpdateTagList(tagCollate);
             //throw new NotImplementedException();
         }
 
-        
+        private void HandleKeywordInteractionMessage(object recipient, KeywordInteractionNotification message)
+        {
+            Debug.WriteLine($"Keyword interaction received - {message.Value}");
+            if(message.Value==ContentInteraction.ContentUpdated && 
+                ViewFrame.Content is Page page && 
+                page.DataContext is NoteViewModel model && 
+                DataContext is MainWindowViewModel main)
+            {
+                main.UpdateKeywordList(model);
+            }
+        }
 
         private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -148,7 +167,17 @@ namespace Filament.WPF6
             //this all has to go to the MainWindowViewModel
             // if DataContext is MainWindowViewModel then set child page member, handle all the other issues in the MainWindowViewModel
             if (e.Content is Page page && page.DataContext is ITagCollate tagCollation && DataContext is MainWindowViewModel main)
+            {
+                // TODO: 2-3-2023 Add code to initialize the Keywords List
                 main.SetTagList(tagCollation);
+                if (tagCollation is IFilterStatus filterStatus)
+                    main.UpdateUI(filterStatus);
+                if (page.DataContext is NoteViewModel noteViewModel)
+                {
+                    main.SetKeywordList(noteViewModel);
+                }
+            }
+
             //{
             //    Debug.WriteLine($"tag collation count {tagCollation.TagStats.Count()}");
             //    if (tagCollation.TagStats != null)

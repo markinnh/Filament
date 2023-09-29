@@ -252,7 +252,7 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{StaticResource EditIconSymbol}"
                                    Style="{StaticResource FontIcon}"
-                                   Visibility="{Binding IsModified,Converter={StaticResource VisibilityConverter}}"/>
+                                   Visibility="{Binding IsModified,Mode=OneWay,Converter={StaticResource VisibilityConverter}}"/>
                         <TextBlock>
                         <Run Text="{Binding Weight,Converter={StaticResource ConvertToMetricWeight},ConverterParameter='Kilograms'}"/>
                         </TextBlock>
@@ -271,7 +271,7 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{StaticResource EditIconSymbol}"
                                    Style="{StaticResource FontIcon}"
-                                   Visibility="{Binding IsModified,Converter={StaticResource VisibilityConverter}}"/>
+                                   Visibility="{Binding IsModified,Mode=OneWay,Converter={StaticResource VisibilityConverter}}"/>
                         <!--<Border  BorderThickness="3" CornerRadius="3" BorderBrush="{Binding ColorName}">-->
                             <!--<Rectangle Fill="{Binding ColorName,Converter={StaticResource ColorFromNameConverter}}"
                                    Width="30"
@@ -294,7 +294,7 @@
                                 <TextBlock>
                                     <Run Text="Color"/>
                                     <Run Text=":"/>
-                                    <Run Text="{Binding ColorName}"/>
+                                    <Run Text="{Binding ColorName,Converter={StaticResource SplitAtUpperConverter}}"/>
                                 </TextBlock>
                                 <TextBlock>
                             <Run Text="Inventory #"/>

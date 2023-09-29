@@ -1,13 +1,18 @@
-﻿using DataDefinitions;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using DataDefinitions;
+using DataDefinitions.Filters;
 using DataDefinitions.Interfaces;
+using DataDefinitions.LiteDBSupport;
 using DataDefinitions.Models;
 using Filament.WPF6.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Data;
 
 namespace Filament.WPF6.ViewModels
 {
@@ -16,11 +21,13 @@ namespace Filament.WPF6.ViewModels
     {
         //private IEnumerable<string>? _tags;
         //private bool _filterApplied;
-        public Guid Signature { get; set; }
-        public IEnumerable<TagStat>? DistinctTagStats { get; set; }
+
+        public abstract Guid Signature { get;  }
+        public IEnumerable<WordWithOccuranceCount>? DistinctTagStats { get=> Singleton<WordCollect>.Instance.OrganizeTags(ViewSource.View);  }
 
         public BaseTagFilterViewModel()
         {
+            //DistinctTagStats = GetFilteredTags();
             InitFilterViewModel();
             //ViewSource.Filter += ViewSource_Filter;
         }
@@ -29,31 +36,83 @@ namespace Filament.WPF6.ViewModels
         //{
         //    throw new NotImplementedException();
         //}
+        protected IEnumerable<WordWithOccuranceCount>? GetFilteredTags()
+        {
+            ViewSource.View.Refresh();
+            return Singleton<WordCollect>.Instance.OrganizeTags(ViewSource.View);
+        }
+        /// <summary>
+        /// default initialization is for filtering tags
+        /// </summary>
+        protected virtual void InitFilterViewModel()
+        {
+            //Signature = Singleton<LiteDBDal>.Instance.Vendors.Signature;
+#if DEBUG
+            filterSupported[(int)IResolveFilter.Filters.Tag] = filters.TryAdd(IResolveFilter.Filters.Tag, new WindowsFilter(new TagResolve() { Signature = Signature }));
+#else
+            filterSupported[(int)IResolveFilter.Filters.Tag] =filters.TryAdd(IResolveFilter.Filters.Tag, new WindowsFilter( new TagResolve() { Signature = Signature }));
+#endif
+            WeakReferenceMessenger.Default.Register<TagFilterChangedEventArgs>(this, HandleTagFilterMessages);
 
-        protected abstract void InitFilterViewModel();
+        }
         protected void HandleTagFilterMessages(object recipient, TagFilterChangedEventArgs message)
         {
-            if (filters.TryGetValue(tagFilterKey, out var filter))
+            if (filters.TryGetValue(IResolveFilter.Filters.Tag, out var filter) && filter.Resolve is ICriteriaFilter criteria)
             {
-                if (filter is IKeywordFilter kwFilter)
+                if (message.TagGuid != criteria.Signature) return;
+
+                if (message.Actions.HasFlag(FilterAction.Update))
                 {
-                    if (message.TagGuid != kwFilter.Signature) return;
+                    if (criteria.CriteriaSet)
+                        criteria.UpdateCriteria(message);
+                    else
+                        criteria.SetCriteria(message);
+                }
 
-                    kwFilter.Keywords = message.SelectedTags;
+                //iKeywwordFilter.Keywords = message.SelectedTags;
 
-                    if (message.FilterState == FilterState.FilterApplied && !kwFilter.Applied)
+                try
+                {
+                    if (message.Actions.HasFlag(FilterAction.Apply) && !filter.Applied)
                     {
-                        ViewSource.Filter += kwFilter.Filter;
-                        kwFilter.Applied = true;
+                        try
+                        {
+                            ViewSource.Filter += new FilterEventHandler(filter.Filter);
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"Unable to apply a filter in {GetType().Name}, message {ex.Message}");
+                        }
+                        filter.Applied = true;
                     }
-                    else if (message.FilterState == FilterState.FilterRemoved && kwFilter.Applied)
+                    else if (message.Actions.HasFlag(FilterAction.Remove) && filter.Applied)
                     {
-                        ViewSource.Filter -= kwFilter.Filter;
-                        kwFilter.Applied = false;
+                        try
+                        {
+                            ViewSource.Filter -= new FilterEventHandler(filter.Filter);
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"Unable to remove a filter in {GetType().Name}, message {ex.Message}");
+                        }
+                        filter.Applied = false;
                     }
+
+
+                }
+                catch
+                {
+                    Debug.WriteLine("Error during filter operations.");
                 }
             }
-            ViewSource.View.Refresh();
+            try
+            {
+                ViewSource?.View?.Refresh();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Problem refreshing the View on the {GetType().Name} view, {ex.Message}");
+            }
 
             //var tagFilter = filters[tagFilterKey];
 

@@ -26,6 +26,8 @@ namespace Filament.WPF6.Helpers
                     {
                         return member.GetCustomAttribute<DescriptionAttribute>()?.Description ?? value.ToString();
                     }
+                    else
+                        return value;
                 }
             }
             return value;
