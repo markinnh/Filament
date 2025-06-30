@@ -22,10 +22,10 @@ namespace DataDefinitions.Interfaces
         ///// </summary>
         //bool Applied { get; set; }
         /// <summary>
-        /// Checks if the item is accepted
+        /// Checks if the item satisfies the filter criteria
         /// </summary>
         /// <param name="item">item to examine</param>
         /// <returns>criteria satified</returns>
-        bool Accepted(object item);
+        bool SatisfiedCriteria(object item);
     }
 }

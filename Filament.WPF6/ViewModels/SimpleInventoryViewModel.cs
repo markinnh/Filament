@@ -26,10 +26,7 @@ namespace Filament.WPF6.ViewModels
             ViewSource.GroupDescriptions.Add(new PropertyGroupDescription("VendorName"));
             ViewSource.GroupDescriptions.Add(new PropertyGroupDescription("SpoolDescription"));
         }
-        public IEnumerable<InventorySpool>? Inventory
-        {
-            get => GetInventory();
-        }
+        public IEnumerable<InventorySpool>? Inventory => GetInventory();
 
 
         private IEnumerable<InventorySpool> GetInventory()

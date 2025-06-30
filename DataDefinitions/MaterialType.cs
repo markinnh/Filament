@@ -1,57 +1,56 @@
 ﻿using System.ComponentModel;
 
-namespace DataDefinitions
+namespace DataDefinitions;
+
+public enum MaterialType
 {
-    public enum MaterialType
-    {
-        /// <summary>
-        /// Polylactic acid
-        /// </summary>
-        [Description("Polylactic acid")]
-        PLA = 0x8000,
-        /// <summary>
-        /// acrylonitrile-butadiene-styrene
-        /// </summary>
-        [Description("acrylonitrile-butadiene-styrene")]
-        ABS,
-        /// <summary>
-        /// Polyethylene Terephthalate Glycol
-        /// </summary>
-        [Description("Polyethylene Terephthalate Glycol")]
-        PETG,
-        Nylon,
-        /// <summary>
-        /// Thermoplastic Elastomer
-        /// </summary>
-        [Description("Thermoplastic Elastomer")]
-        TPE,
-        /// <summary>
-        /// Polycarbonate
-        /// </summary>
-        [Description("Polycarbonate")]
-        PC,
-        [Description("Poly vinyl alcohol")]
-        PVA,
-        Wood,
-        Metal,
-        Bio,
-        Conductive,
-        /// <summary>
-        /// Glow In The Dark
-        /// </summary>
-        [Description("Glow In The Dark (PLA)")]
-        GID_PLA,
-        Magnetic,
-        [Description("Color changing, usually PLA")]
-        ColorChanging,
-        ClayCeramic,
-        [Description("Polystyrene")]
-        HIPS,
-        [Description("Pla +")]
-        PLAPLUS,
-        [Description("Pla Silk")]
-        PLASILK,
-        [Description("Pla Enhanced")]
-        PLAENH
-    }
+    /// <summary>
+    /// Polylactic acid
+    /// </summary>
+    [Description("Polylactic acid")]
+    PLA = 0x8000,
+    /// <summary>
+    /// acrylonitrile-butadiene-styrene
+    /// </summary>
+    [Description("acrylonitrile-butadiene-styrene")]
+    ABS,
+    /// <summary>
+    /// Polyethylene Terephthalate Glycol
+    /// </summary>
+    [Description("Polyethylene Terephthalate Glycol")]
+    PETG,
+    Nylon,
+    /// <summary>
+    /// Thermoplastic Elastomer
+    /// </summary>
+    [Description("Thermoplastic Elastomer")]
+    TPE,
+    /// <summary>
+    /// Polycarbonate
+    /// </summary>
+    [Description("Polycarbonate")]
+    PC,
+    [Description("Poly vinyl alcohol")]
+    PVA,
+    Wood,
+    Metal,
+    Bio,
+    Conductive,
+    /// <summary>
+    /// Glow In The Dark
+    /// </summary>
+    [Description("Glow In The Dark (PLA)")]
+    GID_PLA,
+    Magnetic,
+    [Description("Color changing, usually PLA")]
+    ColorChanging,
+    ClayCeramic,
+    [Description("Polystyrene")]
+    HIPS,
+    [Description("Pla +")]
+    PLAPLUS,
+    [Description("Pla Silk")]
+    PLASILK,
+    [Description("Pla Enhanced")]
+    PLAENH
 }

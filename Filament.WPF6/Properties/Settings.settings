@@ -3,7 +3,7 @@
   <Profiles />
   <Settings>
     <Setting Name="SupportedColors" Type="System.String" Scope="User">
-      <Value Profile="(Default)">Black,White,Cyan,Yellow,Silver,Gray,Red,Lime,Blue,Teal,Purple,Olive,Maroon,Green,Navy,Orange,Gold,RoyalBlue,MediumBlue</Value>
+      <Value Profile="(Default)">Black,White,Cyan,Aquamarine,LightBlue,Yellow,Silver,Gray,Red,Lime,Blue,Teal,Purple,Olive,Magenta,Maroon,Green,Navy,Orange,Gold,RoyalBlue,MediumBlue,Transparent</Value>
     </Setting>
     <Setting Name="DataAccessSelector" Type="System.String" Scope="User">
       <Value Profile="(Default)">SqlServer</Value>
@@ -91,6 +91,30 @@
     </Setting>
     <Setting Name="LastPageVisited" Type="System.String" Scope="User">
       <Value Profile="(Default)">IntuitivePage</Value>
+    </Setting>
+    <Setting Name="AcceptTermsOfUse" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="SetDataDirectory" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="SetDataFile" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="UseMyDocumentsDirectory" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="DataFile" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="EnableDebugToFile" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="ListenerIndex" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">-1</Value>
+    </Setting>
+    <Setting Name="RemainingWeightUnits" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Kilogram</Value>
     </Setting>
   </Settings>
 </SettingsFile>

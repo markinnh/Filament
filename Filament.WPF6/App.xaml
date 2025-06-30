@@ -7,6 +7,7 @@
         <ResourceDictionary Source="/Glyphs.xaml">
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Resources/SupportingItems.xaml"/>
+                <ResourceDictionary Source="/Resources/SupportingItems2.xaml"/>
                 <ResourceDictionary Source="/Glyphs.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

@@ -42,7 +42,7 @@ namespace DataDefinitions.Filters
         {
             return !(left == right);
         }
-        public bool Accepted(object item)
+        public bool SatisfiedCriteria(object item)
         {
             bool result = true;
             if (item is IDate date)

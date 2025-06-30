@@ -1,0 +1,121 @@
+﻿<ResourceDictionary
+    x:Class="FilamentWinUI3.Test"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:models="using:DataDefinitions.Models"
+    xmlns:help="using:FilamentWinUI3.Helpers"
+    xmlns:winui="using:CommunityToolkit.WinUI.UI.Converters"
+    xmlns:sf="using:Syncfusion.UI.Xaml.DataGrid">
+    <help:EnumToDescriptionConverter x:Key="EnumToDescription"/>
+    <winui:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
+    <help:StringFormatConverter x:Key="StringFormat"/>
+    <help:LengthWithUnitsConverter x:Key="LengthWithUnits"/>
+    <help:WeightWithUnitsConverter x:Key="WeightWithUnits"/>
+    <help:BooleanAsConverter x:Key="BooleanAs"/>
+    <Style x:Key="ListViewTextBlock" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+    <DataTemplate x:Key="TestVendorDefnEdit" x:DataType="models:VendorDefn">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="45"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock Text="Vendor" FontSize="35"/>
+            <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding Name,Mode=TwoWay}" Header="Name" Width="200" HorizontalAlignment="Left"/>
+            <CheckBox Grid.Row="2" Content="Found On Amazon" IsChecked="{Binding FoundOnAmazon,Mode=TwoWay}"/>
+            <TextBox Grid.Row="3" Grid.Column="0" Text="{Binding WebUrl,Mode=TwoWay}" Header="Web Link" Width="300" HorizontalAlignment="Left"/>
+            <TextBox Grid.Row="4" Grid.Column="0" HorizontalAlignment="Left" Text="{Binding Tags,Mode=TwoWay}" Width="300" Header="Tags" Height="100"/>
+            <TabView Grid.Row="5" Height="400" Grid.ColumnSpan="2" IsAddTabButtonVisible="False">
+                <TabViewItem Header="Spool Definition" IsClosable="False">
+                    <sf:SfDataGrid ItemsSource="{Binding SpoolDefns,Mode=OneWay}" AutoGenerateColumns="False" AddNewRowPosition="Bottom" >
+                        <sf:SfDataGrid.Columns>
+                            <sf:Columns >
+                                <sf:GridTextColumn AllowEditing="True" >
+                                    <sf:GridTextColumn.ValueBinding>
+                                        <Binding Path="SpoolWidth" Converter="{StaticResource LengthWithUnits}" ConverterParameter="Millimeter"/>
+                                    </sf:GridTextColumn.ValueBinding>
+                                    <sf:GridTextColumn.HeaderTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <TextBlock >
+                                                    <Run Text="Width"/>
+                                                    <Run Text="in mm" FontSize="8"/>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </sf:GridTextColumn.HeaderTemplate>
+                                </sf:GridTextColumn>
+                                <sf:GridTextColumn AllowEditing="True" >
+                                    <sf:GridTextColumn.ValueBinding>
+                                        <Binding Path="DrumDiameter" Converter="{StaticResource LengthWithUnits}" ConverterParameter="Millimeter"/>
+                                    </sf:GridTextColumn.ValueBinding>
+                                    <sf:GridTextColumn.HeaderTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <TextBlock >
+                                                    <Run Text="Drum Diameter"/>
+                                                    <Run Text="in mm" FontSize="8"/>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </sf:GridTextColumn.HeaderTemplate>
+                                </sf:GridTextColumn>
+                                <sf:GridTextColumn AllowEditing="True">
+                                    <sf:GridTextColumn.ValueBinding>
+                                        <Binding Path="Weight" Converter="{StaticResource WeightWithUnits}" ConverterParameter="Kilogram"/>
+                                    </sf:GridTextColumn.ValueBinding>
+                                    <sf:GridTextColumn.HeaderTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <TextBlock >
+                                                    <Run Text="Weight"/>
+                                                    <Run Text="in Kg" FontSize="8"/>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </sf:GridTextColumn.HeaderTemplate>
+                                </sf:GridTextColumn>
+                                <sf:GridCheckBoxColumn HeaderText="Verified" AllowEditing="True" MappingName="Verified"/>
+                            </sf:Columns>
+                        </sf:SfDataGrid.Columns>
+                    </sf:SfDataGrid>
+                </TabViewItem>
+            </TabView>
+        </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="FilamentDefnEdit" x:DataType="models:FilamentDefn">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock Visibility="{Binding IsIntrinsic,Converter={StaticResource BoolToVisibility}}" Text="Intrinsic" FontWeight="Bold" FontSize="24"/>
+            <ComboBox Grid.Row="1" IsEnabled="{Binding CanEdit,Mode=OneWay}" ItemsSource="{Binding ElementName=MnPage, Path=ViewModel.MaterialTypes}" SelectedItem="{Binding MaterialType,Mode=TwoWay}" Header="Material Type">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding Converter={StaticResource EnumToDescription}}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <ComboBox Grid.Row="2" IsEnabled="{Binding CanEdit,Mode=OneWay}" ItemsSource="{Binding ElementName=MnPage,Path=ViewModel.SupportedDiameters}" SelectedItem="{Binding Diameter,Mode=TwoWay}" Header="Diameter"/>
+            <TextBox Grid.Row="3" IsEnabled="{Binding CanEdit,Mode=OneWay}" Header="Density" Text="{Binding DensityAlias.DefinedDensity,Mode=TwoWay}"/>
+
+        </Grid>
+    </DataTemplate>
+</ResourceDictionary>

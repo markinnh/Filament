@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Window
+    x:Class="FilamentWinUI3.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:FilamentWinUI3"
+    xmlns:models="using:DataDefinitions.Models"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d" x:Name="Main">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <NavigationView Header="3d Printing" ItemInvoked="NavigationView_ItemInvoked">
+            <NavigationView.MenuItems>
+                <NavigationViewItem Icon="Page" Content="Inventory"/>
+                <NavigationViewItem Icon="Page" Content="Vendor"/>
+                <NavigationViewItem  Icon="Page" Content="Filament"/>
+            </NavigationView.MenuItems>
+            <StackPanel Orientation="Horizontal">
+                <Expander Header="Tag Filter" Visibility="{Binding ElementName=Main, Path=ViewModel.SupportTagFilter,Converter={StaticResource BoolToVisibility},Mode=OneWay}">
+                    <ComboBox />
+                </Expander>
+                <TextBlock Text="{Binding ElementName=Main, Path=ViewModel.SupportTagFilter,Mode=OneWay}" Visibility="{Binding ElementName=Main, Path=ViewModel.SupportTagFilter,Converter={StaticResource BoolToVisibility},Mode=OneWay}"/>
+                <Frame x:Name="ContentFrame" Navigated="ContentFrame_Navigated" />
+            </StackPanel>
+        </NavigationView>
+
+    </Grid>
+
+</Window>

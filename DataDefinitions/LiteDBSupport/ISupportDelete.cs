@@ -3,10 +3,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataDefinitions.LiteDBSupport
+namespace DataDefinitions.LiteDBSupport;
+
+public interface ISupportDelete
 {
-    public interface ISupportDelete
-    {
-        void Delete();
-    }
+    void Delete(ILiteDBDAL lite);
 }

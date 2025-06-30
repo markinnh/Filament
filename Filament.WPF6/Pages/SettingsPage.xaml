@@ -25,6 +25,7 @@
                   SelectedItem="{Binding InventoryDisplayStyle,Mode=TwoWay}" 
                   Width="100"
                   HorizontalAlignment="Left"/>
+        <TextBlock Text="{Binding BuildMode,Mode=OneTime,StringFormat='Type of Build :{0}'}" Grid.Row="2"/>
         <TextBlock Grid.Row="3">
             <Run Text="The vendor and filament images were inspired by "/>
             <Hyperlink Command="{Binding HandleFlatIconsClick}"><TextBlock Text="FlatIcon.com"/></Hyperlink>

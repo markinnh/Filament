@@ -6,39 +6,47 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Data;
+using DataDefinitions.Models;
 
-namespace Filament.WPF6.Helpers
+namespace Filament.WPF6.Helpers;
+
+public class SplitAtUpperConverter:IValueConverter
 {
-    public class SplitAtUpperConverter:IValueConverter
+    const string splitPattern = @"(?<!^)(?=[A-Z])";
+
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        const string splitPattern = @"(?<!^)(?=[A-Z])";
-
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        if (value is string str)
         {
-            if(value is string str)
+            return SplitAtUpperCase(str);
+        }
+        else if (value is MaterialModifier materialModifier)
+        {
+            return SplitAtUpperCase(materialModifier.ToString());
+        }
+        return value;
+        //throw new NotImplementedException();
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+    private string SplitAtUpperCase(string str)
+    {
+        var words = Regex.Split(str, splitPattern);
+        if (words.Length > 0)
+        {
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < words.Length; i++)
             {
-                var words = Regex.Split(str, splitPattern);
-                if (words.Length > 0)
-                {
-                    StringBuilder builder = new StringBuilder();
-                    for (int i = 0; i < words.Length; i++)
-                    {
-                        builder.Append(words[i]);
-                        if (i + 1 < words.Length)
-                            builder.Append(" ");
-                    }
-                    return builder.ToString();
-                }
-                else
-                    return str;
+                builder.Append(words[i]);
+                if (i + 1 < words.Length)
+                    builder.Append(" ");
             }
-            return value;
-            //throw new NotImplementedException();
+            return builder.ToString();
         }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
+        else
+            return str;
     }
 }

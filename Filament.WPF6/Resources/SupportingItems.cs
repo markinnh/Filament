@@ -6,16 +6,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace Filament.WPF6.Resources
+namespace Filament.WPF6.Resources;
+
+public class SupportingItems:ResourceDictionary
 {
-    public class SupportingItems:ResourceDictionary
+    public string Stuck => "Stuck In Class";
+    public SupportingItems()
     {
-        public string Stuck => "Stuck In Class";
-        public SupportingItems()
-        {
-            System.Diagnostics.Debug.WriteLine("Initializing SupportingItems");
-            BeginInit();
-            EndInit();
-        }
+        System.Diagnostics.Debug.WriteLine("Initializing SupportingItems");
+        BeginInit();
+        EndInit();
     }
 }

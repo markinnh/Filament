@@ -54,10 +54,10 @@ namespace Filament.WPF6.ViewModels
         //    throw new NotImplementedException();
         //}
 
-        protected override void PrepareForDataOperations()
-        {
-            //throw new NotImplementedException();
-        }
+        //protected override void PrepareForDataOperations()
+        //{
+        //    //throw new NotImplementedException();
+        //}
 
         private DataDefinitions.DatabaseObject? selectedRow;
 
@@ -109,9 +109,9 @@ namespace Filament.WPF6.ViewModels
             }
         }
 
-        protected override void FinishedDataOperations()
-        {
-            //throw new NotImplementedException();
-        }
+        //protected override void FinishedDataOperations()
+        //{
+        //    //throw new NotImplementedException();
+        //}
     }
 }

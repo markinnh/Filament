@@ -17,24 +17,24 @@ namespace DataDefinitions.Filters
 
         private string _regexKeywordFilter;
         private IEnumerable<string> _keywords;
-        public bool Accepted(object item)
+        public bool SatisfiedCriteria(object item)
         {
-            bool result = true;
+            bool result = false;
             if (CriteriaSet)
             {
                 if (item is NoteDefn note)
                 {
-                    result= Regex.IsMatch(note.Note, _regexKeywordFilter);
+                    result = !string.IsNullOrEmpty(note.Note) ? Regex.IsMatch(note.Note, _regexKeywordFilter) : false;
                 }
             }
-            
+
             return result;
             //throw new NotImplementedException();
         }
 
         public void SetCriteria(object criteria)
         {
-            if(criteria is KeywordFilterChangedEventArgs keyword)
+            if (criteria is KeywordFilterChangedEventArgs keyword)
             {
                 _keywords = keyword.Payload;
                 BuildRegexFilter(_keywords);

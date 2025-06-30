@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace DataDefinitions
+namespace DataDefinitions;
+
+public class UIHintsAttribute:Attribute
 {
-    public class UIHintsAttribute:Attribute
-    {
-        public string AddType { get; set; }
-    }
+    public string AddType { get; set; }
+    public UIHintsAttribute(string addType)=>AddType = addType;
 }

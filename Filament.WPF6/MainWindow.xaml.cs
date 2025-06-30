@@ -24,178 +24,227 @@ using System.Collections.ObjectModel;
 using Filament.WPF6.ViewModels;
 using DataDefinitions.Interfaces;
 using IFilterStatus = DataDefinitions.Interfaces.IFilterStatus;
+using DataDefinitions;
+using System.Net.WebSockets;
+using System.IO;
 
-namespace Filament.WPF6
+namespace Filament.WPF6;
+
+public enum ContentInteraction
 {
-    public enum ContentInteraction
+    ContentUpdated
+}
+/// <summary>
+/// Interaction logic for MainWindow.xaml
+/// </summary>
+public partial class MainWindow : Window
+{
+    private MenuItem? lastShowStateChecked;
+    private MenuItem? lastPageSelected;
+    public MainWindow()
     {
-        ContentUpdated
+        InitializeComponent();
+        // TODO : Figure out a way to initialize the JsonFilamentDocument
+        //var showFlagSetting = Singleton<>.Instance.GetSingleSetting(s => s.Name == nameof(SelectShowFlag));
+
+        //if (showFlagSetting != null)
+        //    SelectShowFlag.SelectedItem = Enum.Parse<ShowAllFlag>(showFlagSetting.Value);
+        //else
+        //    SelectShowFlag.SelectedItem = ShowAllFlag.ShowAll;
+        //SelectShowFlag.SelectedItem = Enum.Parse<ShowAllFlag>(Settings.Default.ShowStateFlag);
+        TraceMenuItem.IsChecked = Settings.Default.EnableDebugToFile;
+        var nWidth = SystemParameters.PrimaryScreenWidth;
+        var nHeight = SystemParameters.PrimaryScreenHeight;
+
+        LayoutTransform = new ScaleTransform(nWidth / 1920, nHeight / 1080);
+        //Singleton<CacheItems>.Instance.LayoutTransform = LayoutTransform;
+
+        if (FindName(Settings.Default.ShowStateFlag) is MenuItem menuItem)
+        {
+            menuItem.IsChecked = true;
+            lastShowStateChecked = menuItem;
+            SetFilter(Settings.Default.ShowStateFlag);
+        }
+        if (FindName(Settings.Default.LastPageVisited) is MenuItem menuItem1)
+        {
+
+            menuItem1.IsChecked = true;
+            lastPageSelected = menuItem1;
+            if (menuItem1.Tag is string str)
+                ViewFrame.Navigate(new Uri(str, UriKind.RelativeOrAbsolute));
+        }
+        else if (FindName("IntuitivePage") is MenuItem menu) // select a default page if the settings are not working, or on a new build
+        {
+            menu.IsChecked = true;
+            lastPageSelected = menu;
+            if (menu.Tag is string str)
+                ViewFrame.Navigate(new Uri(str, UriKind.RelativeOrAbsolute));
+        }
+        WeakReferenceMessenger.Default.Register<TagInteractionNotification>(this, HandleTagMessage);
+        WeakReferenceMessenger.Default.Register<KeywordInteractionNotification>(this, HandleKeywordInteractionMessage);
     }
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow : Window
+
+    private void HandleTagMessage(object recipient, TagInteractionNotification message)
     {
-        private MenuItem? lastShowStateChecked;
-        private MenuItem? lastPageSelected;
-        public MainWindow()
+        Trace.WriteLine($"Tag interaction received in {GetType().Name}, notification - {message.Value}", "Information");
+        if (message.Value == ContentInteraction.ContentUpdated && ViewFrame.Content is Page page && page.DataContext is IViewModelTagCollate tagCollate && DataContext is MainWindowViewModel main)
         {
-            InitializeComponent();
-            // TODO : Figure out a way to initialize the JsonFilamentDocument
-            //var showFlagSetting = Singleton<>.Instance.GetSingleSetting(s => s.Name == nameof(SelectShowFlag));
-
-            //if (showFlagSetting != null)
-            //    SelectShowFlag.SelectedItem = Enum.Parse<ShowAllFlag>(showFlagSetting.Value);
-            //else
-            //    SelectShowFlag.SelectedItem = ShowAllFlag.ShowAll;
-            //SelectShowFlag.SelectedItem = Enum.Parse<ShowAllFlag>(Settings.Default.ShowStateFlag);
-            if (FindName(Settings.Default.ShowStateFlag) is MenuItem menuItem)
+            main.UpdateTagList(tagCollate);
+            if (page.DataContext is NoteViewModel noteViewModel)
             {
-                menuItem.IsChecked = true;
-                lastShowStateChecked = menuItem;
-                SetFilter(Settings.Default.ShowStateFlag);
-            }
-            if (FindName(Settings.Default.LastPageVisited) is MenuItem menuItem1)
-            {
-
-                menuItem1.IsChecked = true;
-                lastPageSelected = menuItem1;
-                if (menuItem1.Tag is string str)
-                    ViewFrame.Navigate(new Uri(str, UriKind.RelativeOrAbsolute));
-            }
-            else if (FindName("IntuitivePage") is MenuItem menu) // select a default page if the settings are not working, or on a new build
-            {
-                menu.IsChecked = true;
-                lastPageSelected = menu;
-                if (menu.Tag is string str)
-                    ViewFrame.Navigate(new Uri(str, UriKind.RelativeOrAbsolute));
-            }
-            WeakReferenceMessenger.Default.Register<TagInteractionNotification>(this, HandleTagMessage);
-            WeakReferenceMessenger.Default.Register<KeywordInteractionNotification>(this, HandleKeywordInteractionMessage);
-        }
-
-        private void HandleTagMessage(object recipient, TagInteractionNotification message)
-        {
-            Debug.WriteLine($"Tag interaction received, notification - {message.Value}");
-            if (message.Value == ContentInteraction.ContentUpdated && ViewFrame.Content is Page page && page.DataContext is ITagCollate tagCollate && DataContext is MainWindowViewModel main)
-                main.UpdateTagList(tagCollate);
-            //throw new NotImplementedException();
-        }
-
-        private void HandleKeywordInteractionMessage(object recipient, KeywordInteractionNotification message)
-        {
-            Debug.WriteLine($"Keyword interaction received - {message.Value}");
-            if(message.Value==ContentInteraction.ContentUpdated && 
-                ViewFrame.Content is Page page && 
-                page.DataContext is NoteViewModel model && 
-                DataContext is MainWindowViewModel main)
-            {
-                main.UpdateKeywordList(model);
+                main.UpdateKeywordList(noteViewModel);
             }
         }
+        //throw new NotImplementedException();
+    }
 
-        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    private void HandleKeywordInteractionMessage(object recipient, KeywordInteractionNotification message)
+    {
+        Trace.WriteLine($"Keyword interaction received in {GetType().Name}, message: {message.Value}", "Information");
+        if (message.Value == ContentInteraction.ContentUpdated &&
+            ViewFrame.Content is Page page &&
+            page.DataContext is NoteViewModel model &&
+            DataContext is MainWindowViewModel main)
         {
-            if (sender is ComboBox cmb)
+            main.UpdateKeywordList(model);
+        }
+    }
+
+    private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (sender is ComboBox cmb)
+        {
+            if (cmb.SelectedItem is ShowAllFlag flag)
             {
-                if (cmb.SelectedItem is ShowAllFlag flag)
+
+                WeakReferenceMessenger.Default.Send(new ShowAllFlagChanged(flag));
+                if (Settings.Default.ShowStateFlag != flag.ToString())
+                    Settings.Default.ShowStateFlag = flag.ToString();
+
+                //if (Singleton<JsonDAL>.Instance.Document.Settings.FirstOrDefault(s => s.Name == nameof(SelectShowFlag)) is Setting setting)
+                //{
+                //    setting.SetValue(flag);
+                //    setting.UpdateItem();
+                //}
+                //else
+                //{
+                //    var createSetting = new Setting(nameof(SelectShowFlag), flag);
+                //    //createSetting.EstablishLink(Singleton<JsonDAL>.Instance.Document);
+                //    createSetting.UpdateItem();
+                //    //DAL.Abstraction.UpdateItem(createSetting);
+                //    //Singleton<DAL.DataLayer>.Instance.Add(createSetting);
+                //}
+            }
+        }
+    }
+
+    private void ShowState_Click(object sender, RoutedEventArgs e)
+    {
+        if (lastShowStateChecked is MenuItem item)
+            item.IsChecked = false;
+        if (sender is MenuItem sentMenu)
+        {
+            sentMenu.IsChecked = true;
+            lastShowStateChecked = sentMenu;
+            SetFilter(sentMenu.Name);
+        }
+
+    }
+    private void SetFilter(string state)
+    {
+        var flag = Enum.Parse<ShowAllFlag>(state);
+        WeakReferenceMessenger.Default.Send(new ShowAllFlagChanged(flag));
+        if (Settings.Default.ShowStateFlag != state)
+            Settings.Default.ShowStateFlag = state;
+    }
+
+    private void SelectPage_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem menu)
+        {
+            Trace.WriteLine($"Menu selected - {menu.Name}", "Information");
+            if (lastPageSelected != null)
+                lastPageSelected.IsChecked = false;
+
+            lastPageSelected = menu;
+            menu.IsChecked = true;
+            if (menu.Tag is string str && ViewFrame.Content is Page page)
+            {
+
+                Trace.WriteLine($"Navigate to : {str}", "Information");
+                if (ViewFrame.Navigate(new Uri(str, UriKind.RelativeOrAbsolute)))
                 {
-
-                    WeakReferenceMessenger.Default.Send(new ShowAllFlagChanged(flag));
-                    if (Settings.Default.ShowStateFlag != flag.ToString())
-                        Settings.Default.ShowStateFlag = flag.ToString();
-
-                    //if (Singleton<JsonDAL>.Instance.Document.Settings.FirstOrDefault(s => s.Name == nameof(SelectShowFlag)) is Setting setting)
-                    //{
-                    //    setting.SetValue(flag);
-                    //    setting.UpdateItem();
-                    //}
-                    //else
-                    //{
-                    //    var createSetting = new Setting(nameof(SelectShowFlag), flag);
-                    //    //createSetting.EstablishLink(Singleton<JsonDAL>.Instance.Document);
-                    //    createSetting.UpdateItem();
-                    //    //DAL.Abstraction.UpdateItem(createSetting);
-                    //    //Singleton<DAL.DataLayer>.Instance.Add(createSetting);
-                    //}
-                }
-            }
-        }
-
-        private void ShowState_Click(object sender, RoutedEventArgs e)
-        {
-            if (lastShowStateChecked is MenuItem item)
-                item.IsChecked = false;
-            if (sender is MenuItem sentMenu)
-            {
-                sentMenu.IsChecked = true;
-                lastShowStateChecked = sentMenu;
-                SetFilter(sentMenu.Name);
-            }
-
-        }
-        private void SetFilter(string state)
-        {
-            var flag = Enum.Parse<ShowAllFlag>(state);
-            WeakReferenceMessenger.Default.Send(new ShowAllFlagChanged(flag));
-            if (Settings.Default.ShowStateFlag != state)
-                Settings.Default.ShowStateFlag = state;
-        }
-
-        private void SelectPage_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is MenuItem menu)
-            {
-                Debug.WriteLine($"Menu selected - {menu.Name}");
-                if (lastPageSelected != null)
-                    lastPageSelected.IsChecked = false;
-
-                lastPageSelected = menu;
-                menu.IsChecked = true;
-                if (menu.Tag is string str)
-                {
-                    Debug.WriteLine($"Navigate to : {str}");
-                    ViewFrame.Navigate(new Uri(str, UriKind.RelativeOrAbsolute));
                     Settings.Default.LastPageVisited = menu.Name;
+                    if (page.DataContext is IViewModel viewModel)
+                        viewModel.ReleaseEventHandlers();
                 }
             }
         }
+    }
 
-        private void ViewFrame_Navigated(object sender, NavigationEventArgs e)
+    private void ViewFrame_Navigated(object sender, NavigationEventArgs e)
+    {
+        Trace.WriteLine($"Navigated to {e.Content.GetType().Name}", "Information");
+        //this all has to go to the MainWindowViewModel
+        // if DataContext is MainWindowViewModel then set child page member, handle all the other issues in the MainWindowViewModel
+        if (e.Content is Page page && page.DataContext is IViewModelTagCollate tagCollation && DataContext is MainWindowViewModel main)
         {
-            Debug.WriteLine($"Navigated to {e.Content.GetType().Name}");
-            //this all has to go to the MainWindowViewModel
-            // if DataContext is MainWindowViewModel then set child page member, handle all the other issues in the MainWindowViewModel
-            if (e.Content is Page page && page.DataContext is ITagCollate tagCollation && DataContext is MainWindowViewModel main)
+            // TODO: 2-3-2023 Add code to initialize the Keywords List
+            main.SetTagList(tagCollation);
+            if (tagCollation is IFilterStatus filterStatus)
+                main.UpdateUI(filterStatus);
+            if (page.DataContext is NoteViewModel noteViewModel)
             {
-                // TODO: 2-3-2023 Add code to initialize the Keywords List
-                main.SetTagList(tagCollation);
-                if (tagCollation is IFilterStatus filterStatus)
-                    main.UpdateUI(filterStatus);
-                if (page.DataContext is NoteViewModel noteViewModel)
-                {
-                    main.SetKeywordList(noteViewModel);
-                }
+                main.SetKeywordList(noteViewModel);
             }
-
-            //{
-            //    Debug.WriteLine($"tag collation count {tagCollation.TagStats.Count()}");
-            //    if (tagCollation.TagStats != null)
-            //    {
-            //        CheckableTags.Clear();
-            //        foreach (var ele in from t in tagCollation.TagStats select new CheckableTagStat(false, t))
-            //            CheckableTags.Add(ele);
-            //    }
-
-            //}
-            //else
-            //    CheckableTags.Clear();
         }
 
-        private void ViewFrame_Navigating(object sender, NavigatingCancelEventArgs e)
+        //{
+        //    Debug.WriteLine($"tag collation count {tagCollation.TagStats.Count()}");
+        //    if (tagCollation.TagStats != null)
+        //    {
+        //        CheckableTags.Clear();
+        //        foreach (var ele in from t in tagCollation.TagStats select new CheckableTagStat(false, t))
+        //            CheckableTags.Add(ele);
+        //    }
+
+        //}
+        //else
+        //    CheckableTags.Clear();
+        while (ViewFrame.CanGoBack)
+        {
+            var entry = ViewFrame.RemoveBackEntry();
+            Trace.WriteLine($"releasing {entry?.GetType().Name}", "Information");
+        }
+    }
+
+    private void ViewFrame_Navigating(object sender, NavigatingCancelEventArgs e)
+    {
+
+    }
+
+    private void Trace_Click(object sender, RoutedEventArgs e)
+    {
+        if (Settings.Default.EnableDebugToFile )
+        {
+            Trace.WriteLine($"Listening to file disabled {DateTime.Now:g}", "Information");
+            Singleton<TraceToFileSupport>.Instance.StopListening();
+        }
+
+        Settings.Default.EnableDebugToFile = !Settings.Default.EnableDebugToFile;
+        TraceMenuItem.IsChecked = Settings.Default.EnableDebugToFile;
+
+        if (Settings.Default.EnableDebugToFile)
         {
 
+            Singleton<TraceToFileSupport>.Instance.StartListening();
+            Trace.WriteLine($"Listening Enabled {DateTime.Now:g}", "Information");
+
         }
+    }
+
+    private void GenCodeMenuItem_Click(object sender, RoutedEventArgs e)
+    {
 
     }
 }

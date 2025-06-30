@@ -1,16 +1,15 @@
-﻿namespace DataDefinitions.LiteDBSupport
-{
-    public enum RemovalResult { RecordRemoved,HasReferences};
-    public interface ISupportRemoval
-    {
-        /// <summary>
-        /// Removes item from a database, normally a 'root' object
-        /// </summary>
-        /// <param name="dBDal">Data access layer</param>
-        /// <remarks>
-        /// used sparingly
-        /// </remarks>
-        (RemovalResult,object) Remove(LiteDBDal dBDal);
+﻿namespace DataDefinitions.LiteDBSupport;
 
-    }
+public enum RemovalResult { RecordRemoved=0x20,HasReferences};
+public interface ISupportRemoval
+{
+    /// <summary>
+    /// Removes item from a database, normally a 'root' object
+    /// </summary>
+    /// <param name="dBDal">Data access layer</param>
+    /// <remarks>
+    /// used sparingly
+    /// </remarks>
+    (RemovalResult,object) Remove(LiteDBDal dBDal);
+
 }

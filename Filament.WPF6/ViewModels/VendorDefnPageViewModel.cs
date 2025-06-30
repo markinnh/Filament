@@ -15,47 +15,46 @@ using DataDefinitions.LiteDBSupport;
 using CommunityToolkit.Mvvm.Input;
 using DataDefinitions;
 
-namespace Filament.WPF6.ViewModels
+namespace Filament.WPF6.ViewModels;
+
+internal class VendorDefnPageViewModel : DataDefinitions.Observable
 {
-    internal class VendorDefnPageViewModel : DataDefinitions.Observable
+    public ObservableCollection<VendorDefn>? VendorDefns { get; set; }
+    private VendorDefn? selectedVendorDefn;
+
+    public VendorDefn? SelectedVendorDefn
     {
-        public ObservableCollection<VendorDefn>? VendorDefns { get; set; }
-        private VendorDefn selectedVendorDefn;
+        get => selectedVendorDefn;
+        set => Set<VendorDefn>(ref selectedVendorDefn, value);
+    }
 
-        public VendorDefn SelectedVendorDefn
+
+    private ICommand? webNavigate;
+    public ICommand WebNavigate => webNavigate ??= new RelayCommand<object>(HandleWebNavigate);
+
+    private void HandleWebNavigate(object? obj)
+    {
+        if (obj is Uri uri)
         {
-            get => selectedVendorDefn;
-            set => Set<VendorDefn>(ref selectedVendorDefn, value);
+
+            //var processStartInfo = new ProcessStartInfo("msedge.exe",uri.AbsoluteUri);
+            Process.Start(new ProcessStartInfo("cmd", $"/c start {uri.AbsoluteUri}") { CreateNoWindow = true });
         }
-
-
-        private ICommand? webNavigate;
-        public ICommand WebNavigate { get => webNavigate ??= new RelayCommand<object>(HandleWebNavigate); }
-
-        private void HandleWebNavigate(object? obj)
+        //throw new NotImplementedException();
+    }
+   
+    public VendorDefnPageViewModel()
+    {
+        // TODO: Define all the data to seed the database with the vendor definitions
+        VendorDefn.InDataOps = true;
+        //var defns = DAL.Abstraction.GetAllVendors();
+        if (Singleton<LiteDBDal>.Instance.Vendors is ObservableCollection<VendorDefn> defns)
         {
-            if (obj is Uri uri)
-            {
-
-                //var processStartInfo = new ProcessStartInfo("msedge.exe",uri.AbsoluteUri);
-                Process.Start(new ProcessStartInfo("cmd", $"/c start {uri.AbsoluteUri}") { CreateNoWindow = true });
-            }
-            //throw new NotImplementedException();
+            VendorDefns = defns;
+            SelectedVendorDefn= VendorDefns.First();
         }
-       
-        public VendorDefnPageViewModel()
-        {
-            // TODO: Define all the data to seed the database with the vendor definitions
-            VendorDefn.InDataOps = true;
-            //var defns = DAL.Abstraction.GetAllVendors();
-            if (Singleton<LiteDBDal>.Instance.Vendors is ObservableCollection<VendorDefn> defns)
-            {
-                VendorDefns = defns;
-                SelectedVendorDefn= VendorDefns.First();
-            }
-            else
-                VendorDefns = new ObservableCollection<VendorDefn>();
-            VendorDefn.InDataOps = false;
-        }
+        else
+            VendorDefns = new ObservableCollection<VendorDefn>();
+        VendorDefn.InDataOps = false;
     }
 }

@@ -9,7 +9,7 @@
       xmlns:core="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800" 
-      Title="FilamentDefnPage" IsEnabled="{Binding Ready,Mode=OneWay}" >
+      Title="FilamentDefnPage" x:Name="Main" IsEnabled="{Binding Ready,Mode=OneWay}" >
     <Page.DataContext>
         <vm:FilamentDefnViewModel/>
     </Page.DataContext>
@@ -174,25 +174,25 @@
                 Orientation="Horizontal"
                 Grid.Row="1"
                 Grid.ColumnSpan="2">
-                <Button Style="{StaticResource CommandButton}"
-                        Content="&#xE105; All"
-                        IsEnabled="{Binding HasModifiedItems,Mode=OneWay}"
+                <Button Style="{StaticResource RoundedCommandButton}"
+                        Content="{StaticResource SaveAll}"
+                        IsEnabled="{Binding HasModifiedItems}"
                         Command="{Binding SaveAllChangesCommand}"/>
                 <Button
                     
                     Content="{StaticResource SaveIcon}"
-                    Style="{StaticResource IconCommandButton}"
+                    Style="{StaticResource RoundedCommandButton}"
                     Command="{Binding UpdateCommand}"
                     IsEnabled="{Binding SelectedItem.IsModified,Mode=OneWay}"/>
                 <Button 
-                    Style="{StaticResource FontSymbolCommandButton}"
-                    Content="&#xE109;"
+                    Style="{StaticResource RoundedCommandButton}"
+                    Content="{StaticResource AddIcon}"
                     Command="{Binding NewItemCommand}"
                     IsEnabled="{Binding CanAdd}"/>
-                <Button Style="{StaticResource CommandButton}"
+                <!--<Button Style="{StaticResource CommandButton}"
                         Content="Prepopulate"
                         Command="{Binding Prepopulate}"
-                        Visibility="{Binding IsDebug,Converter={StaticResource VisibilityConverter}}"/>
+                        Visibility="{Binding IsDebug,Converter={StaticResource VisibilityConverter}}"/>-->
             </StackPanel>
         </Grid>
     </Grid>

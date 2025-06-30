@@ -13,16 +13,15 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Filament.WPF6.Pages
+namespace Filament.WPF6.Pages;
+
+/// <summary>
+/// Interaction logic for FilamentDefnPage.xaml
+/// </summary>
+public partial class FilamentDefnPage : Page
 {
-    /// <summary>
-    /// Interaction logic for FilamentDefnPage.xaml
-    /// </summary>
-    public partial class FilamentDefnPage : Page
+    public FilamentDefnPage()
     {
-        public FilamentDefnPage()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

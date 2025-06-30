@@ -7,14 +7,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataDefinitions.LiteDBSupport
+namespace DataDefinitions.LiteDBSupport;
+
+public interface ILiteDBDAL:IStandardCrudActions
 {
-    public interface ILiteDBDAL:IStandardCrudActions
-    {
-        ObservableCollection<FilamentDefn> Filaments { get; }
-        CollateTagsCollection<VendorDefn> Vendors { get; }
-        CollateTagsCollection<NoteDefn> Notes { get; }
-        List<Setting> Settings { get; }
-        ObservableCollection<PrintSettingDefn> PrintSettings { get; }
-    }
+    ObservableCollection<FilamentDefn> Filaments { get; }
+    CollateTagsCollection<VendorDefn> Vendors { get; }
+    CollateTagsCollection<NoteDefn> Notes { get; }
+    List<Setting> Settings { get; }
+    ObservableCollection<PrintSettingDefn> PrintSettings { get; }
+    void SmartAdd(DataObject databaseObject);
 }

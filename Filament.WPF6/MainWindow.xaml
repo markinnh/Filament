@@ -9,6 +9,7 @@
         mc:Ignorable="d"
         Title="Filaments" Height="450" Width="800" SizeToContent="WidthAndHeight" x:Name="Main">
     <Window.Resources>
+
         <BooleanToVisibilityConverter x:Key="BooleanToVisibility"/>
         <helpers1:MultiValueToTuple x:Key="MultiValueToTuple"/>
         <Style x:Key="HeaderTextBlockStyle" TargetType="{x:Type TextBlock}">
@@ -27,16 +28,18 @@
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="Page">
                 <MenuItem Header="Inventory" IsCheckable="False">
-                    <MenuItem x:Name="IntuitivePage" Header="Intuitive" Tag="Pages\ByVendorPage.xaml" Click="SelectPage_Click"/>
+                    <MenuItem x:Name="IntuitivePage" Header="Intuitive" Tag="Pages\ByVendorPage.xaml" Click="SelectPage_Click" />
                     <MenuItem x:Name="SimplePage" Header="Simple" Tag="Pages\SimpleInventoryPage.xaml" Click="SelectPage_Click"/>
                 </MenuItem>
                 <Separator/>
                 <MenuItem Header="Define" IsCheckable="False">
                     <MenuItem x:Name="FilamentPage" Header="Filament" Tag="Pages\FilamentDefnPage.xaml" Click="SelectPage_Click" />
                     <MenuItem x:Name="VendorPage" Header="Vendor" Tag="Pages\VendorDefnPage.xaml" Click="SelectPage_Click"/>
-                    <MenuItem x:Name="PrintSettingPage" Header="Print Setting" Tag="Pages\DefinePrintSettingsPage.xaml" Click="SelectPage_Click"/>
+                    <MenuItem x:Name="FilamentColors" Header="Filament Colors" Tag="Pages\FilamentColors.xaml" Click="SelectPage_Click"/>
+                    <MenuItem x:Name="Material" Header="Material Type" Tag="Pages\Materials.xaml" Click="SelectPage_Click"/>
+                    <!--<MenuItem x:Name="PrintSettingPage" Header="Print Setting" Tag="Pages\DefinePrintSettingsPage.xaml" Click="SelectPage_Click"/>-->
                 </MenuItem>
-                <MenuItem x:Name="PrintSettingByVendorPage" Header="Print Settings by Vendor" Tag="Pages\PrintSettingsByVendor.xaml" Click="SelectPage_Click"/>
+                <!--<MenuItem x:Name="PrintSettingByVendorPage" Header="Print Settings by Vendor" Tag="Pages\PrintSettingsByVendor.xaml" Click="SelectPage_Click"/>-->
                 <MenuItem x:Name="NotePage" Header="Notes" Tag="Pages\NotePage.xaml" Click="SelectPage_Click"/>
                 <MenuItem x:Name="SettingsPage"  Header="Settings" Tag="Pages\SettingsPage.xaml" Click="SelectPage_Click"/>
             </MenuItem>
@@ -54,6 +57,10 @@
                 
             </MenuItem>
             <MenuItem Header="Edit" Visibility="{Binding HasEdits,Converter={StaticResource BooleanToVisibility}}" />
+            <MenuItem Header="Window">
+                <MenuItem x:Name="TraceMenuItem" Header="Enable Trace" Click="Trace_Click" IsCheckable="True"/>
+                <MenuItem x:Name="GenCodeMenuItem" Header="Generate Code" ToolTip="Generate Code for predefined items" Click="GenCodeMenuItem_Click" />
+            </MenuItem>
         </Menu>
         <ToolBar DockPanel.Dock="Left">
             <ToolBarPanel Orientation="Vertical">
@@ -81,10 +88,11 @@
                             <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       Command="{Binding DataContext.ListChangeCommand, ElementName=Main}"
                                       CommandParameter="Tag">
+                                    <CheckBox.Content>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="{Binding Item.Word}"/>
-                                    <TextBlock Text="{Binding Item.OccuranceCount, StringFormat=' -(\{0\})'}" Margin="3,0,0,0"/>
-                                </StackPanel>
+                                    <TextBlock Text="{Binding Item.OccuranceCount, StringFormat=' -({0})'}" Margin="3,0,0,0"/>
+                                </StackPanel></CheckBox.Content>
                             </CheckBox>
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
@@ -196,9 +204,12 @@
                 </StackPanel>
             </ToolBarPanel>
         </ToolBar>
-        <Frame x:Name="ViewFrame" NavigationUIVisibility="Hidden" Navigated="ViewFrame_Navigated" />
-
-
+        <Frame x:Name="ViewFrame" NavigationUIVisibility="Hidden" Navigated="ViewFrame_Navigated"  Navigating="ViewFrame_Navigating" >
+            <Frame.LayoutTransform>
+                <Binding ElementName="Main" Path="LayoutTransform"/>
+            </Frame.LayoutTransform>
+        </Frame>
+        <TextBox Name="TraceTextBox" DockPanel.Dock="Right" Width="300"  VerticalScrollBarVisibility="Auto" AcceptsReturn="True" TextWrapping="Wrap" Height="{StaticResource StandardListViewHeight}" Visibility="Collapsed"/>
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>

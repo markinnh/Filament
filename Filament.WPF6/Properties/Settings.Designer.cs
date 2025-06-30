@@ -12,7 +12,7 @@ namespace Filament.WPF6.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.4.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.13.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -25,8 +25,8 @@ namespace Filament.WPF6.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Black,White,Cyan,Yellow,Silver,Gray,Red,Lime,Blue,Teal,Purple,Olive,Maroon,Green," +
-            "Navy,Orange,Gold,RoyalBlue,MediumBlue")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Black,White,Cyan,Aquamarine,LightBlue,Yellow,Silver,Gray,Red,Lime,Blue,Teal,Purpl" +
+            "e,Olive,Magenta,Maroon,Green,Navy,Orange,Gold,RoyalBlue,MediumBlue,Transparent")]
         public string SupportedColors {
             get {
                 return ((string)(this["SupportedColors"]));
@@ -381,6 +381,102 @@ namespace Filament.WPF6.Properties {
             }
             set {
                 this["LastPageVisited"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AcceptTermsOfUse {
+            get {
+                return ((bool)(this["AcceptTermsOfUse"]));
+            }
+            set {
+                this["AcceptTermsOfUse"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool SetDataDirectory {
+            get {
+                return ((bool)(this["SetDataDirectory"]));
+            }
+            set {
+                this["SetDataDirectory"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool SetDataFile {
+            get {
+                return ((bool)(this["SetDataFile"]));
+            }
+            set {
+                this["SetDataFile"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool UseMyDocumentsDirectory {
+            get {
+                return ((bool)(this["UseMyDocumentsDirectory"]));
+            }
+            set {
+                this["UseMyDocumentsDirectory"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string DataFile {
+            get {
+                return ((string)(this["DataFile"]));
+            }
+            set {
+                this["DataFile"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool EnableDebugToFile {
+            get {
+                return ((bool)(this["EnableDebugToFile"]));
+            }
+            set {
+                this["EnableDebugToFile"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
+        public int ListenerIndex {
+            get {
+                return ((int)(this["ListenerIndex"]));
+            }
+            set {
+                this["ListenerIndex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Kilogram")]
+        public string RemainingWeightUnits {
+            get {
+                return ((string)(this["RemainingWeightUnits"]));
+            }
+            set {
+                this["RemainingWeightUnits"] = value;
             }
         }
     }

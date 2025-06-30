@@ -6,24 +6,23 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
 
-namespace Filament.WPF6.Helpers
+namespace Filament.WPF6.Helpers;
+
+public class WindowsFilter : IWindowsFilter
 {
-    internal class WindowsFilter : IWindowsFilter
+    private bool _applied;
+    public bool Applied { get => _applied; set => _applied = value; }
+
+    public IResolveFilter Resolve { get; set; }
+
+    public WindowsFilter(IResolveFilter resolve) => Resolve = resolve;
+    public void Filter(object sender, FilterEventArgs e)
     {
-        private bool _applied;
-        public bool Applied { get => _applied; set => _applied = value; }
-
-        public IResolveFilter Resolve { get; set; }
-
-        internal WindowsFilter(IResolveFilter resolve) => Resolve = resolve;
-        public void Filter(object sender, FilterEventArgs e)
+        if (Resolve != null)
         {
-            if (Resolve != null)
-            {
-                e.Accepted = Resolve?.Accepted(e.Item) ?? true;
-            }
-            else
-                e.Accepted = true;
+            e.Accepted = Resolve?.SatisfiedCriteria(e.Item) ?? true;
         }
+        else
+            e.Accepted = true;
     }
 }

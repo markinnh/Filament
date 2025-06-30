@@ -15,22 +15,21 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Filament.WPF6.Pages
-{
-    /// <summary>
-    /// Interaction logic for ByFilamentPage.xaml
-    /// </summary>
-    public partial class ByFilamentPage : Page
-    {
-        public ByFilamentPage()
-        {
-            InitializeComponent();
-        }
+namespace Filament.WPF6.Pages;
 
-        private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
-        {
-            if (DataContext is ByVendorViewModel viewModel && e.NewValue is DataDefinitions.DataObject databaseObject)
-                viewModel.SelectedItem = databaseObject;
-        }
+/// <summary>
+/// Interaction logic for ByVendorPage.xaml
+/// </summary>
+public partial class ByVendorPage : Page
+{
+    public ByVendorPage()
+    {
+        InitializeComponent();
+    }
+
+    private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+    {
+        if (DataContext is ByVendorViewModel viewModel && e.NewValue is DataDefinitions.DataObject dataObject)
+            viewModel.SelectedItem = dataObject;
     }
 }

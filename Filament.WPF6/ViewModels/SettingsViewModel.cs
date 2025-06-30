@@ -10,56 +10,64 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using DataDefinitions;
 
-namespace Filament.WPF6.ViewModels
+namespace Filament.WPF6.ViewModels;
+public enum BuildMode
 {
-    public class SettingsViewModel : Observable
+    Debug=0xf0,
+    Release
+}
+public class SettingsViewModel : Observable
+{
+    //private InventoryDisplayStyle inventoryDisplayStyle;
+#if DEBUG
+    public BuildMode BuildMode=>BuildMode.Debug;
+#else
+    public BuildMode BuildMode=>BuildMode.Release;
+#endif
+
+    public InventoryDisplayStyle InventoryDisplayStyle
     {
-        private InventoryDisplayStyle inventoryDisplayStyle;
-
-        public InventoryDisplayStyle InventoryDisplayStyle
+        get => Enum.Parse<InventoryDisplayStyle>(Properties.Settings.Default.CurrentInventoryDisplayStyle);
+        set
         {
-            get => Enum.Parse<InventoryDisplayStyle>(Properties.Settings.Default.CurrentInventoryDisplayStyle);
-            set
+            if(Enum.TryParse<InventoryDisplayStyle>(Properties.Settings.Default.CurrentInventoryDisplayStyle,out InventoryDisplayStyle inventoryDisplayStyle))
             {
-                if(Enum.TryParse<InventoryDisplayStyle>(Properties.Settings.Default.CurrentInventoryDisplayStyle,out InventoryDisplayStyle inventoryDisplayStyle))
+                if (inventoryDisplayStyle != value)
                 {
-                    if (inventoryDisplayStyle != value)
+                    Properties.Settings.Default.CurrentInventoryDisplayStyle = value.ToString();
+                    OnPropertyChanged(nameof(InventoryDisplayStyle));
+                    //TODO: Determine UI Members on MainWindow that are affected probably as below
+                    WeakReferenceMessenger.Default.Send<NotifyContainerEventArgs>(new NotifyContainerEventArgs(new string[]
                     {
-                        Properties.Settings.Default.CurrentInventoryDisplayStyle = value.ToString();
-                        OnPropertyChanged(nameof(InventoryDisplayStyle));
-                        //TODO: Determine UI Members on MainWindow that are affected probably as below
-                        WeakReferenceMessenger.Default.Send<NotifyContainerEventArgs>(new NotifyContainerEventArgs(new string[]
-                        {
-                            nameof(MainWindowViewModel.UseSwissArmyKnifeUI),
-                            nameof(MainWindowViewModel.UseSimpleUI),
-                            nameof(MainWindowViewModel.UseFormUI)  
-                        }));
-                    }
+                        nameof(MainWindowViewModel.UseSwissArmyKnifeUI),
+                        nameof(MainWindowViewModel.UseSimpleUI),
+                        nameof(MainWindowViewModel.UseFormUI)  
+                    }));
                 }
             }
         }
-
-        public bool UseSwissArmyKnifeUI
-        {
-            get => Properties.Settings.Default.UseSwissArmyKnifeUI;
-            set
-            {
-                if (Properties.Settings.Default.UseSwissArmyKnifeUI != value)
-                {
-                    Properties.Settings.Default.UseSwissArmyKnifeUI = value;
-                    //Properties.Settings.Default.Save();
-                    OnPropertyChanged(nameof(UseSwissArmyKnifeUI));
-                    WeakReferenceMessenger.Default.Send<NotifyContainerEventArgs>(new NotifyContainerEventArgs(new string[] { nameof(UseSwissArmyKnifeUI) }));
-                }
-            }
-        }
-        private ICommand? handleFlatIconsClick;
-        public ICommand? HandleFlatIconsClick => handleFlatIconsClick ??= new RelayCommand(() =>
-        {
-
-            if (Uri.TryCreate("https://www.flaticon.com", UriKind.Absolute, out Uri? result))
-                Process.Start(new ProcessStartInfo("cmd", $"/c start {result.AbsoluteUri}") { CreateNoWindow = true });
-
-        });
     }
+
+    public bool UseSwissArmyKnifeUI
+    {
+        get => Properties.Settings.Default.UseSwissArmyKnifeUI;
+        set
+        {
+            if (Properties.Settings.Default.UseSwissArmyKnifeUI != value)
+            {
+                Properties.Settings.Default.UseSwissArmyKnifeUI = value;
+                //Properties.Settings.Default.Save();
+                OnPropertyChanged(nameof(UseSwissArmyKnifeUI));
+                WeakReferenceMessenger.Default.Send<NotifyContainerEventArgs>(new NotifyContainerEventArgs(new string[] { nameof(UseSwissArmyKnifeUI) }));
+            }
+        }
+    }
+    private ICommand? handleFlatIconsClick;
+    public ICommand? HandleFlatIconsClick => handleFlatIconsClick ??= new RelayCommand(() =>
+    {
+
+        if (Uri.TryCreate("https://www.flaticon.com", UriKind.Absolute, out Uri? result))
+            Process.Start(new ProcessStartInfo("cmd", $"/c start {result.AbsoluteUri}") { CreateNoWindow = true });
+
+    });
 }

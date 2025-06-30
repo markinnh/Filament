@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataDefinitions.Interfaces
+namespace DataDefinitions.Interfaces;
+
+public interface IFilterStatus
 {
-    public interface IFilterStatus
-    {
-        bool IsFilterSupported(IResolveFilter.Filters whichFilter);
-        bool IsFilterApplied(IResolveFilter.Filters whichFilter);
-    }
+    bool IsFilterSupported(IResolveFilter.Filters whichFilter);
+    bool IsFilterApplied(IResolveFilter.Filters whichFilter);
 }

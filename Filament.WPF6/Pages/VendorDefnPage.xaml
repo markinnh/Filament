@@ -48,30 +48,27 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <TextBlock Text="Selected Filament"
-                        FontSize="24"/>
+            <TextBlock Text="Selected Vendor"
+                        FontSize="18"/>
             <ContentControl Grid.Row="1" Grid.ColumnSpan="2"
                             Content="{Binding SelectedItem}"
                             ContentTemplate="{StaticResource EditVendorDefn}"/>
             <StackPanel Grid.Row="4"
                         Grid.ColumnSpan="2"
-                        Orientation="Horizontal">
-                <Button Content="Save All"
-                        Width="75"
-                        Height="30"
-                        Margin="5"
+                        Orientation="Horizontal" Margin="0,3,0,3">
+                <Button Content="{StaticResource SaveAll}"
+                        Style="{StaticResource RoundedCommandButton}"
+                        
                         IsEnabled="{Binding HasModifiedItems,Mode=OneWay}"
                         Command="{Binding SaveAllChangesCommand}"/>
-                <Button Content="Update"
-                        Width="75"
-                        Height="30"
-                        Margin="5"
+                <Button Content="{StaticResource SaveIcon}"
+                        Style="{StaticResource RoundedCommandButton}"
+                        
                         IsEnabled="{Binding SelectedItem.IsModified,Mode=OneWay}"
                         Command="{Binding UpdateCommand}"/>
-                <Button Content="Add"
-                        Width="75"
-                        Height="30"
-                        Margin="5"
+                <Button Content="{StaticResource AddIcon}"
+                        Style="{StaticResource RoundedCommandButton}"
+                        
                         IsEnabled="{Binding CanAdd,Mode=OneWay}"
                         Command="{Binding NewItemCommand}"/>
             </StackPanel>

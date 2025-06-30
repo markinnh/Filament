@@ -1,0 +1,10 @@
+﻿{
+    "profiles": {
+      "WinUITS (Package)": {
+        "commandName": "MsixPackage"
+      },
+      "WinUITS (Unpackaged)": {
+        "commandName": "Project"
+      }
+    }
+}

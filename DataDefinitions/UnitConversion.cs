@@ -4,134 +4,153 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataDefinitions
-{
-    /// <summary>
-    /// Converts units from imperial to metric
-    /// </summary>
-    public class UnitConversion
-    {
-        static string[] shortHandLengthNames = new string[] { "mm", "cm", "m" };
-        static string[] shortHandWeightNames = new string[] { "g", "mg", "kg" };
+namespace DataDefinitions;
 
-        /// <summary>
-        /// doesn't really convert anything, just formats it with the expected units, default is millimeters
-        /// </summary>
-        /// <param name="value">value to format</param>
-        /// <param name="parameter">expected units</param>
-        /// <returns>formatted result</returns>
-        public static object FormatLengthWithUnits(object value,object parameter)
+/// <summary>
+/// Converts units from imperial to metric, mainly called from ValueConverter classes
+/// </summary>
+public class UnitConversion
+{
+    static readonly string[] shortHandLengthNames = new string[] { "mm", "cm", "m" };
+    static readonly string[] shortHandWeightNames = new string[] { "g", "mg", "kg" };
+
+    /// <summary>
+    /// doesn't really convert anything, just formats it with the expected units, default is millimeters
+    /// </summary>
+    /// <param name="value">value to format</param>
+    /// <param name="parameter">expected units</param>
+    /// <returns>formatted result</returns>
+    public static object FormatLengthWithUnits(object value, object parameter)
+    {
+        ConvertToLength convertTo = ConvertToLength.Millimeter;
+        if (parameter is string paraString)
         {
-            ConvertToLength convertTo = ConvertToLength.Millimeter;
-            if (parameter is string paraString)
+            if (value is double d)
             {
-                if (value is double d)
+                if (!double.IsNaN(d))
                 {
-                    if (!double.IsNaN(d))
-                    {
-                        if (Enum.TryParse(paraString, out ConvertToLength result))
-                            return $"{value:#.###} {shortHandLengthNames[(int)result]}";
-                        else
-                            return $"{value:#.###} {shortHandLengthNames[(int)convertTo]}";
-                    }
+                    if (Enum.TryParse(paraString, out ConvertToLength result))
+                        return $"{value:#.###} {shortHandLengthNames[(int)result]}";
                     else
-                        return value;
+                        return $"{value:#.###} {shortHandLengthNames[(int)convertTo]}";
                 }
                 else
                     return value;
             }
-            return value;
-
-            //throw new NotImplementedException();
-        }
-        public static object ConvertWithUnitsOfLength(object value,object parameter)
-        {
-            ConvertToLength convertTo = ConvertToLength.Millimeter;
-            string defaultUnits;
-            if (parameter is string paraString)
-            {
-                if (Enum.TryParse(paraString, out ConvertToLength result))
-                {
-                    convertTo = result;
-                }
-                defaultUnits = shortHandLengthNames[(int)convertTo];
-            }
             else
-                defaultUnits = shortHandLengthNames[(int)convertTo];
+                return value;
+        }
+        return value;
 
-            if (value is string str)
+        //throw new NotImplementedException();
+    }
+    public static object ConvertWithUnitsOfLength(object value, object parameter)
+    {
+        ConvertToLength convertTo = ConvertToLength.Millimeter;  // default is to convert to millimeters
+        string defaultUnits;
+        if (parameter is string paraString)
+        {
+            if (Enum.TryParse(paraString, out ConvertToLength result))
             {
-                if (CompoundFractionWithUnits.TryParse(str, out CompoundFractionWithUnits compoundFractionWithUnits))
-                {
-                    //var fracMatch = Regex.Match(str, regexFindFraction);
-                    SupportedLength supported = FilamentMath.SupportedLengthAlias(!string.IsNullOrEmpty(compoundFractionWithUnits.Units) ? compoundFractionWithUnits.Units : "in");
-                    return FilamentMath.ConvertLength(compoundFractionWithUnits.Value, supported, convertTo);
-
-                }
-                else if (ValueWithUnits.TryParse(str, out ValueWithUnits valueWithUnits))
-                {
-                    SupportedLength supported = FilamentMath.SupportedLengthAlias(string.IsNullOrEmpty(valueWithUnits.Units) ? defaultUnits : valueWithUnits.Units);
-
-                    return FilamentMath.ConvertLength(valueWithUnits.Value, supported, convertTo);
-
-                }
-
-                else
-                    return double.NaN;
+                convertTo = result;
             }
+            defaultUnits = shortHandLengthNames[(int)convertTo];
+        }
+        else
+            defaultUnits = shortHandLengthNames[(int)convertTo];
+
+        if (value is string str && !string.IsNullOrEmpty(str))
+        {
+            if (CompoundFractionWithUnits.TryParse(str, out CompoundFractionWithUnits compoundFractionWithUnits))
+            {
+                //var fracMatch = Regex.Match(str, regexFindFraction);
+                SupportedLength supported = FilamentMath.SupportedLengthAlias(!string.IsNullOrEmpty(compoundFractionWithUnits.Units) ? compoundFractionWithUnits.Units : "in");
+                return FilamentMath.ConvertLength(compoundFractionWithUnits.Value, supported, convertTo);
+
+            }
+            else if (ValueWithUnits.TryParse(str, out ValueWithUnits valueWithUnits))
+            {
+                SupportedLength supported = FilamentMath.SupportedLengthAlias(string.IsNullOrEmpty(valueWithUnits.Units) ? defaultUnits : valueWithUnits.Units);
+
+                return FilamentMath.ConvertLength(valueWithUnits.Value, supported, convertTo);
+
+            }
+
             else
                 return double.NaN;
         }
-        public static object FormatWeightWithUnits(object value, object parameter)
+        else
+            return double.NaN;
+    }
+    public static object FormatWeightWithUnits(object value, object parameter)
+    {
+        var idx = GetWeightUnitsIndex(parameter);
+        return $"{value:0.######} {shortHandWeightNames[idx]}";
+        //if (parameter is string str)
+        //    if (Enum.TryParse(str, out ConvertToWeight convertTo))
+        //    {
+
+        //        if (value is double d)
+        //            if (double.IsNaN(d))
+        //                return d;
+        //            else
+        //                return ;
+        //    }
+        //    else if(Array.IndexOf(shortHandWeightNames, parameter) > -1)
+        //    {
+
+        //    }
+
+
+        //return value;
+
+        //throw new NotImplementedException();
+    }
+    private static int GetWeightUnitsIndex(object parameter)
+    {
+        var index = 0;
+        if (parameter is string str)
+            if (Enum.TryParse(str, out ConvertToWeight convertTo))
+                return (int)convertTo;
+            else if (Array.IndexOf(shortHandWeightNames, str) > -1)
+                return Array.IndexOf(shortHandWeightNames, str);
+            else return index;
+        else
+            return index;
+    }
+    public static object ConvertWithUnitsOfWeight(object value, object parameter)
+    {
+        ConvertToWeight convertTo = ConvertToWeight.Kilogram;
+        string defaultUnits;
+        if (parameter is string paraString)
         {
-            if (parameter is string str)
-                if (Enum.TryParse(str, out ConvertToWeight convertTo))
-                    if (value is double d)
-                        if (double.IsNaN(d))
-                            return d;
-                        else
-                            return $"{value:0.######} {shortHandWeightNames[(int)convertTo]}";
-
-
-
-            return value;
-
-            //throw new NotImplementedException();
-        }
-        public static object ConvertWithUnitsOfWeight(object value, object parameter)
-        {
-            ConvertToWeight convertTo = ConvertToWeight.Kilograms;
-            string defaultUnits;
-            if (parameter is string paraString)
+            if (Enum.TryParse(paraString, out ConvertToWeight result))
             {
-                if (Enum.TryParse(paraString, out ConvertToWeight result))
-                {
-                    convertTo = result;
-                    defaultUnits = shortHandWeightNames[(int)result];
-                }
-                else
-                    defaultUnits = shortHandWeightNames[(int)convertTo];
+                convertTo = result;
+                defaultUnits = shortHandWeightNames[(int)result];
             }
             else
                 defaultUnits = shortHandWeightNames[(int)convertTo];
-            if (value is string str)
+        }
+        else
+            defaultUnits = shortHandWeightNames[(int)convertTo];
+        if (value is string str)
+        {
+            if (ValueWithUnits.TryParse(str, out ValueWithUnits valueWithUnits))
             {
-                if (ValueWithUnits.TryParse(str, out ValueWithUnits valueWithUnits))
-                {
-                    return FilamentMath.ConvertWeight(valueWithUnits.Value,
-                        FilamentMath.SupportedWeightAlias(string.IsNullOrEmpty(valueWithUnits.Units) ? defaultUnits : valueWithUnits.Units),
-                        convertTo);
-                }
-                else
-                    return double.NaN;
+                return FilamentMath.ConvertWeight(valueWithUnits.Value,
+                    FilamentMath.SupportedWeightAlias(string.IsNullOrEmpty(valueWithUnits.Units) ? defaultUnits : valueWithUnits.Units),
+                    convertTo);
             }
-            if (value is double d)
-                return d;
             else
                 return double.NaN;
-
-
-            //throw new NotImplementedException();
         }
+        if (value is double d)
+            return d;
+        else
+            return double.NaN;
+
+
+        //throw new NotImplementedException();
     }
 }

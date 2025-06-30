@@ -1,8 +1,7 @@
-﻿namespace DataDefinitions.Interfaces
+﻿namespace DataDefinitions.Interfaces;
+
+public interface ITrackModified
 {
-    public interface ITrackModified
-    {
-        bool InDataOperations { get; }
-        bool IsModified { get; set; }
-    }
+    bool InDataOperations { get; }
+    bool IsModified { get; set; }
 }

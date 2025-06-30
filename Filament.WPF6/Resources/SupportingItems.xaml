@@ -8,13 +8,13 @@
                     xmlns:rsrc="clr-namespace:Filament.WPF6.Properties" 
                     xmlns:vm="clr-namespace:Filament.WPF6.ViewModels"
                     xmlns:filtr="clr-namespace:DataDefinitions.Filters;assembly=DataDefinitions"
-                    >
+                    xmlns:synf="http://schemas.syncfusion.com/wpf">
 
     <SolidColorBrush x:Key="StandardBackground" Color="WhiteSmoke"/>
     <core:Double x:Key="StdFontSize">14</core:Double>
     <core:Double x:Key="StdTextBoxHeight">26</core:Double>
     <core:Double x:Key="TitleSize">32</core:Double>
-    <core:String x:Key="EditIconSymbol">&#xE104;</core:String>
+    <!--<core:String x:Key="EditIconSymbol">&#xE104;</core:String>
     <core:String x:Key="CheckSymbol">&#xE10B;</core:String>
     <core:String x:Key="CalculatorSymbol">&#xE1D0;</core:String>
     <core:String x:Key="SaveSymbol">&#xE105;</core:String>
@@ -24,7 +24,7 @@
     <core:String x:Key="NoSymbol">&#xE10A;</core:String>
     <core:String x:Key="UndoSymbol">&#xE10E;</core:String>
     <core:String x:Key="SettingsSymbol">&#xE115;</core:String>
-    <core:String x:Key="ListSymbol">&#xE14C;</core:String>
+    <core:String x:Key="ListSymbol">&#xE14C;</core:String>-->
     <core:String x:Key="StandardBackgroundColor">Goldenrod</core:String>
     <core:Double x:Key="cls-1">0.75</core:Double>
     <core:String x:Key="FilamentPathData">M0,0 H16 M3,1.6 H13 M3,3 H13 M3,4.6 H13 M3,6 H13 M3,7.6 H13 M3,9 H11.6 M0,10.5 H10 M12,10.5 H16 M11,9.5 V16</core:String>
@@ -32,12 +32,12 @@
     <Style x:Key="StandardControl" TargetType="Control">
         <Setter Property="Background" Value="GhostWhite"/>
     </Style>
-    
+
 
     <Geometry x:Key="FilamentGeometry" >m 35.743449 41.500156 c -0.132537 -0.05741 -0.27021 -0.183225 -0.341593 -0.312171 -0.04723 -0.08532 -0.05387 -0.351293 -0.06809 -2.725993 l -0.01576 -2.63145 -4.593219 -0.008 -4.593219 -0.008 v -0.472609 -0.472611 h 1.032928 1.032928 l -0.01183 -0.124021 c -0.02484 -0.260513 0.109699 -0.495371 0.353334 -0.616779 l 0.157676 -0.07857 3.200398 4.76e-4 c 3.547214 4.77e-4 3.408453 -0.007 3.81716 0.207734 0.413664 0.217376 0.755075 0.659803 0.863235 1.118653 0.06888 0.292213 0.07248 5.604125 0.0039 5.768239 -0.134186 0.321151 -0.529459 0.488666 -0.837862 0.355083 z m 1.827833 -5.84017 c 0 -0.477022 -0.246081 -1.146744 -0.557226 -1.516519 l -0.07866 -0.09349 h 1.383245 1.383247 l 0.157676 0.07857 c 0.243634 0.121408 0.378177 0.356266 0.353333 0.616779 l -0.01183 0.124021 h 1.032928 1.032929 v 0.472716 0.472715 h -2.34782 -2.34782 z M 28.52588 33.222728 c -0.395611 -0.200094 -0.46074 -0.741033 -0.125667 -1.043751 0.06709 -0.06061 0.17617 -0.125253 0.242395 -0.143644 0.168665 -0.04684 10.944609 -0.04684 11.113274 0 0.06623 0.01839 0.175303 0.08303 0.242396 0.143644 0.335073 0.302718 0.269944 0.843657 -0.125668 1.043751 l -0.140191 0.07091 h -5.533174 -5.533173 z m 0.11828 -1.987827 c -0.557661 -0.173461 -0.627692 -0.925274 -0.110877 -1.190312 0.113624 -0.05827 0.273508 -0.05996 5.665962 -0.05996 5.392455 0 5.552338 0.0017 5.665963 0.05996 0.527164 0.270346 0.43751 1.053117 -0.137193 1.197829 -0.201225 0.05067 -10.920166 0.0434 -11.083855 -0.0075 z m -0.0705 -2.065393 c -0.492879 -0.22391 -0.52243 -0.910534 -0.04992 -1.159987 l 0.138893 -0.07333 h 5.536614 5.536615 l 0.138893 0.07333 c 0.472506 0.249453 0.442956 0.936077 -0.04992 1.159987 -0.120645 0.05481 -0.373709 0.05739 -5.625585 0.05739 -5.251876 0 -5.504939 -0.0026 -5.625584 -0.05739 z m -0.04992 -2.062985 c -0.07639 -0.04033 -0.181437 -0.133703 -0.233436 -0.207496 -0.08127 -0.115336 -0.09454 -0.162537 -0.09454 -0.336277 v -0.202108 l -1.032096 -8.4e-5 -1.032095 -8.2e-5 V 25.88776 25.415045 h 8.067677 8.067678 v 0.472715 0.472716 l -1.032096 8.1e-5 -1.032095 8.2e-5 v 0.202109 c 0 0.173741 -0.01327 0.22094 -0.09454 0.336278 -0.052 0.07379 -0.157045 0.167165 -0.233436 0.207494 l -0.138893 0.07333 h -5.536615 -5.536614 z</Geometry>
     <Geometry x:Key="ShelfGlyph">M0,0 V16 H1 V0 M2,4 H14 M2,9 H14 M2,14 H14 M15,0 V16 H16 V0 M3,2.5 H7 M3,1.5 H6 M3,7.5 H7 M3,6.5 H6 M9,7.5 H13 M10,6.5 H13 M3,12.5 H7 M3,11.5 H6 M9,12.5 H13 M10,11.5 H13</Geometry>
- <Path x:Key="TestPath"
-          Data=""/>   
+    <Path x:Key="TestPath"
+          Data=""/>
     <!--<Image x:Key="FilamentGlyph" Width="16" Height="16" >
         <Image.Source>
             <DrawingImage>
@@ -98,6 +98,12 @@
             <x:Type TypeName="model:SupportedSettingValueType"/>
         </ObjectDataProvider.MethodParameters>
     </ObjectDataProvider>
+    <ObjectDataProvider x:Key="DataFromMaterialModifier" MethodName="GetValues"
+                        ObjectType="{x:Type core:Enum}">
+        <ObjectDataProvider.MethodParameters>
+            <x:Type TypeName="model:MaterialModifier"/>
+        </ObjectDataProvider.MethodParameters>
+    </ObjectDataProvider>
     <x:Array x:Key="FilamentDiameters" Type="core:Double">
         <core:Double>1.75</core:Double>
         <core:Double>3.0</core:Double>
@@ -134,7 +140,7 @@
         <core:String>Silver</core:String>
     </x:Array>
     <core:Double x:Key="StandardListViewHeight">
-        350
+        450
     </core:Double>
     <helpers:EnumDescriptionConverter x:Key="EnumDescriptionConverter"/>
     <BooleanToVisibilityConverter x:Key="VisibilityConverter"/>
@@ -171,18 +177,49 @@
         <Setter Property="Margin" Value="5"/>
     </Style>
     <Style x:Key="IconCommandButton" TargetType="Button">
-        <Setter Property="Width" Value="32" />
-        <Setter Property="Height" Value="32" />
+        <Setter Property="Width" Value="24" />
+        <Setter Property="Height" Value="24" />
         <Setter Property="Margin" Value="3,0,0,0"/>
+        <Setter Property="Padding" Value="3"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Style.Triggers>
             <Trigger Property="IsEnabled" Value="False">
                 <Setter Property="Opacity" Value=".5"/>
                 <Setter Property="Background" Value="LightGray"/>
             </Trigger>
         </Style.Triggers>
-        
+
     </Style>
-    
+    <Style TargetType="Button" x:Key="RoundedCommandButton" BasedOn="{StaticResource IconCommandButton}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border CornerRadius="2" Background="#eee" BorderBrush="#aaa" BorderThickness="0.5,1.2,1.2,0.5" >
+                        <ContentPresenter x:Name="contentPresenter" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Margin}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <EventTrigger RoutedEvent="Mouse.MouseEnter">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation To="32" Duration="0:0:1.5" AccelerationRatio="0.1" DecelerationRatio="0.25" Storyboard.TargetProperty="(Button.Width)"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <EventTrigger RoutedEvent="MouseLeave">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Duration="0:0:1.5" AccelerationRatio="0.1" DecelerationRatio="0.25" Storyboard.TargetProperty="(Button.Width)"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
+    </Style>
+
     <Style x:Key="FontSymbolCommandButton" TargetType="Button">
         <Setter Property="Width" Value="32"/>
         <Setter Property="Height" Value="32"/>
@@ -196,6 +233,35 @@
         <Setter Property="FontFamily" Value="Segoe UI Symbol"/>
         <Setter Property="FontSize" Value="8"/>
         <Setter Property="Margin" Value="5,5,0,5"/>
+    </Style>
+    <Style x:Key="RoundedToggleButton" TargetType="ToggleButton">
+        <Setter Property="Width" Value="24"/>
+        <Setter Property="Height" Value="24"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Border CornerRadius="2" Background="#eee" BorderBrush="#aaa" BorderThickness="0.5,1.2,1.2,0.5" >
+                        <ContentPresenter x:Name="contentPresenter" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Margin}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <EventTrigger RoutedEvent="Mouse.MouseEnter">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation To="32" Duration="0:0:1.5" AccelerationRatio="0.1" DecelerationRatio="0.25" Storyboard.TargetProperty="(Button.Width)"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <EventTrigger RoutedEvent="MouseLeave">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Duration="0:0:1.5" AccelerationRatio="0.1" DecelerationRatio="0.25" Storyboard.TargetProperty="(Button.Width)"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
     <Style TargetType="GroupBox">
         <Setter Property="FontSize" Value="{StaticResource StdFontSize}"/>
@@ -228,6 +294,7 @@
             </Trigger>
         </Style.Triggers>
     </Style>
+
     <Style x:Key="StdTagEditor" TargetType="{x:Type TextBox}">
         <Setter Property="Width" Value="300"/>
         <Setter Property="Height" Value="90"/>
@@ -258,9 +325,9 @@
         </StackPanel>
     </DataTemplate>
     -->
-    
-        
-   
+
+
+
     <DataTemplate x:Key="EditingIndicatorsHelp">
         <StackPanel>
             <TextBlock Text="{x:Static rsrc:Resources.DataEditingIndicatorsHeader}"/>
@@ -269,11 +336,59 @@
                 <Run Text="{x:Static rsrc:Resources.ColonHeader}"/>
             </TextBlock>
             <StackPanel Orientation="Horizontal">
-                <TextBlock Text="{StaticResource CheckSymbol}" Style="{StaticResource FontIcon}" ToolTip="{x:Static rsrc:Resources.RecordInDbTip}"/>
+                <ContentControl ToolTip="{x:Static rsrc:Resources.RecordInDbTip}">
+                    <ContentControl.Content>
+                        <Rectangle Width="16 " Height="16">
+                            <Rectangle.Resources>
+                                <SolidColorBrush x:Key="canvas" Opacity="0" />
+                                <SolidColorBrush x:Key="light-defaultgrey" Color="#212121" Opacity="1" />
+                            </Rectangle.Resources>
+                            <Rectangle.Fill>
+                                <DrawingBrush Stretch="None">
+                                    <DrawingBrush.Drawing>
+                                        <DrawingGroup>
+                                            <DrawingGroup x:Name="canvas">
+                                                <GeometryDrawing Brush="{DynamicResource canvas}" Geometry="F1M16,16H0V0H16Z" />
+                                            </DrawingGroup>
+                                            <DrawingGroup x:Name="level_1">
+                                                <GeometryDrawing Brush="{DynamicResource light-defaultgrey}" Geometry="F1M6.365,12.367l-.741-.013-3.5-4L2.876,7.7,6.013,11.28,14.068,3l.729.684Z" />
+                                            </DrawingGroup>
+                                        </DrawingGroup>
+                                    </DrawingBrush.Drawing>
+                                </DrawingBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </ContentControl.Content>
+                </ContentControl>
                 <TextBlock Text="{x:Static rsrc:Resources.RecordInDbTip}"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
-                <TextBlock Text="{StaticResource EditIconSymbol}" Style="{StaticResource FontIcon}"/>
+                <ContentControl >
+                    <ContentControl.Content>
+                        <Rectangle Width="16 " Height="16">
+                            <Rectangle.Resources>
+                                <SolidColorBrush x:Key="canvas" Opacity="0" />
+                                <SolidColorBrush x:Key="light-defaultgrey-10" Color="#212121" Opacity="0.1" />
+                                <SolidColorBrush x:Key="light-defaultgrey" Color="#212121" Opacity="1" />
+                            </Rectangle.Resources>
+                            <Rectangle.Fill>
+                                <DrawingBrush Stretch="None">
+                                    <DrawingBrush.Drawing>
+                                        <DrawingGroup>
+                                            <DrawingGroup x:Name="canvas1">
+                                                <GeometryDrawing Brush="{DynamicResource canvas}" Geometry="F1M16,16H0V0H16Z" />
+                                            </DrawingGroup>
+                                            <DrawingGroup x:Name="level_11">
+                                                <GeometryDrawing Brush="{DynamicResource light-defaultgrey-10}" Geometry="F1M13.26,2.736a1.5,1.5,0,0,1,0,2.119l0,0L6.116,12,4,9.884l7.143-7.148A1.5,1.5,0,0,1,13.26,2.736Z" />
+                                                <GeometryDrawing Brush="{DynamicResource light-defaultgrey}" Geometry="F1M13.588,5.233A2,2,0,0,0,10.761,2.41v0h0L4.042,9.13,2,13.333,2.667,14l4.065-1.944L13.588,5.24ZM6.224,11.19l-.082.039L4.771,9.858l.039-.082,6.655-6.658a1,1,0,1,1,1.414,1.414h0Z" />
+                                            </DrawingGroup>
+                                        </DrawingGroup>
+                                    </DrawingBrush.Drawing>
+                                </DrawingBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </ContentControl.Content>
+                </ContentControl>
                 <TextBlock Text="{x:Static rsrc:Resources.NotInDbTip}"/>
                 <!--<TextBlock Text="{x:Static rsrc:Resources.NotInDbTip}"/>-->
             </StackPanel>
@@ -287,6 +402,7 @@
                 <ColumnDefinition Width="20"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -335,7 +451,9 @@
                       IsChecked="{Binding StopUsing}">
                 <CheckBox.Content>
                     <TextBlock Text="{x:Static rsrc:Resources.StopUsingHeader}"/>
-                    --><!--<TextBlock Text="{x:Static local:Constants.StopUsingHeader}"/>--><!--
+                    -->
+            <!--<TextBlock Text="{x:Static local:Constants.StopUsingHeader}"/>-->
+            <!--
                 </CheckBox.Content>
             </CheckBox>-->
             <Label Content="Tags" Grid.Row="4"/>
@@ -345,7 +463,11 @@
                      Text="{Binding Tags}"
                      Style="{StaticResource StdTagEditor}"
                      HorizontalAlignment="Left"/>
-            <TabControl Grid.Row="5"
+            <TextBlock Grid.Row="5" Grid.ColumnSpan="2">
+                <Run Text="{Binding SpoolDefns.Count,Mode=OneWay,StringFormat='{}{0} items of possible'}"/>
+                <Run Text="{Binding MaxAllowed,Mode=OneTime,StringFormat='{}{0} total items.'}"/>
+            </TextBlock>
+            <TabControl Grid.Row="6"
                       Grid.ColumnSpan="2">
                 <TabItem Header="{x:Static rsrc:Resources.SpoolDefinitionsHeader}">
                     <DataGrid ItemsSource="{Binding SpoolDefns}"
@@ -353,7 +475,7 @@
                       
                       CanUserDeleteRows="False"
                       Height="250"
-                      
+                      CanUserAddRows="{Binding CanAdd,Mode=OneWay}"
                       IsEnabled="{Binding StopUsing,Converter={StaticResource BooleanNotConverter}}" 
                       Style="{StaticResource StdDataGrid}">
                         <DataGrid.Columns>
@@ -380,16 +502,61 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{StaticResource CheckSymbol}"
-                                           Style="{StaticResource FontIcon}"
-                                           FontSize="12"
+                                            <ContentControl 
                                            Visibility="{Binding IsValid,Converter={StaticResource VisibilityConverter}}" 
-                                               ToolTip="{x:Static rsrc:Resources.RecordInDbTip}"/>
-                                            <TextBlock Text="{StaticResource EditIconSymbol}"
-                                               Style="{StaticResource FontIcon}"
+                                               ToolTip="{x:Static rsrc:Resources.RecordInDbTip}">
+                                                <ContentControl.Content>
+                                                    <Rectangle Width="16 " Height="16">
+                                                        <Rectangle.Resources>
+                                                            <SolidColorBrush x:Key="canvas" Opacity="0" />
+                                                            <SolidColorBrush x:Key="light-defaultgrey" Color="#212121" Opacity="1" />
+                                                        </Rectangle.Resources>
+                                                        <Rectangle.Fill>
+                                                            <DrawingBrush Stretch="None">
+                                                                <DrawingBrush.Drawing>
+                                                                    <DrawingGroup>
+                                                                        <DrawingGroup x:Name="canvas">
+                                                                            <GeometryDrawing Brush="{DynamicResource canvas}" Geometry="F1M16,16H0V0H16Z" />
+                                                                        </DrawingGroup>
+                                                                        <DrawingGroup x:Name="level_1">
+                                                                            <GeometryDrawing Brush="{DynamicResource light-defaultgrey}" Geometry="F1M6.365,12.367l-.741-.013-3.5-4L2.876,7.7,6.013,11.28,14.068,3l.729.684Z" />
+                                                                        </DrawingGroup>
+                                                                    </DrawingGroup>
+                                                                </DrawingBrush.Drawing>
+                                                            </DrawingBrush>
+                                                        </Rectangle.Fill>
+                                                    </Rectangle>
+                                                </ContentControl.Content>
+                                            </ContentControl>
+                                            <ContentControl 
                                                FontSize="12"
                                                Visibility="{Binding IsModified,Converter={StaticResource VisibilityConverter}}" 
-                                               ToolTip="{x:Static rsrc:Resources.RecordModifiedToolTip}"/>
+                                               ToolTip="{x:Static rsrc:Resources.RecordModifiedToolTip}">
+                                                <ContentControl.Content>
+                                                    <Rectangle Width="16 " Height="16">
+                                                        <Rectangle.Resources>
+                                                            <SolidColorBrush x:Key="canvas" Opacity="0" />
+                                                            <SolidColorBrush x:Key="light-defaultgrey-10" Color="#212121" Opacity="0.1" />
+                                                            <SolidColorBrush x:Key="light-defaultgrey" Color="#212121" Opacity="1" />
+                                                        </Rectangle.Resources>
+                                                        <Rectangle.Fill>
+                                                            <DrawingBrush Stretch="None">
+                                                                <DrawingBrush.Drawing>
+                                                                    <DrawingGroup>
+                                                                        <DrawingGroup x:Name="canvas1">
+                                                                            <GeometryDrawing Brush="{DynamicResource canvas}" Geometry="F1M16,16H0V0H16Z" />
+                                                                        </DrawingGroup>
+                                                                        <DrawingGroup x:Name="level_11">
+                                                                            <GeometryDrawing Brush="{DynamicResource light-defaultgrey-10}" Geometry="F1M13.26,2.736a1.5,1.5,0,0,1,0,2.119l0,0L6.116,12,4,9.884l7.143-7.148A1.5,1.5,0,0,1,13.26,2.736Z" />
+                                                                            <GeometryDrawing Brush="{DynamicResource light-defaultgrey}" Geometry="F1M13.588,5.233A2,2,0,0,0,10.761,2.41v0h0L4.042,9.13,2,13.333,2.667,14l4.065-1.944L13.588,5.24ZM6.224,11.19l-.082.039L4.771,9.858l.039-.082,6.655-6.658a1,1,0,1,1,1.414,1.414h0Z" />
+                                                                        </DrawingGroup>
+                                                                    </DrawingGroup>
+                                                                </DrawingBrush.Drawing>
+                                                            </DrawingBrush>
+                                                        </Rectangle.Fill>
+                                                    </Rectangle>
+                                                </ContentControl.Content>
+                                            </ContentControl>
                                         </StackPanel>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -424,7 +591,38 @@
                                     <DataTemplate>
                                         <StackPanel>
                                             <TextBox Text="{Binding DrumDiameter,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter'}"/>
-                                            <ToggleButton x:Name="ShowDepth" Content="{StaticResource CalculatorSymbol}" Style="{StaticResource FontSymbolToggleButton}"/>
+                                            <ToggleButton x:Name="ShowDepth" >
+                                                <ToggleButton.Content>
+                                                    <Rectangle Width="16 " Height="16">
+                                                        <Rectangle.Resources>
+                                                            <SolidColorBrush x:Key="canvas" Opacity="0" />
+                                                            <SolidColorBrush x:Key="light-defaultgrey-10" Color="#212121" Opacity="0.1" />
+                                                            <SolidColorBrush x:Key="light-defaultgrey" Color="#212121" Opacity="1" />
+                                                            <core:Double x:Key="cls-1">0.75</core:Double>
+                                                        </Rectangle.Resources>
+                                                        <Rectangle.Fill>
+                                                            <DrawingBrush Stretch="None">
+                                                                <DrawingBrush.Drawing>
+                                                                    <DrawingGroup>
+                                                                        <DrawingGroup x:Name="canvas">
+                                                                            <GeometryDrawing Brush="{DynamicResource canvas}" Geometry="F1M16,16H0V0H16Z" />
+                                                                            <GeometryDrawing Brush="{DynamicResource canvas}" Geometry="F1M16,16H0V0H16Z" />
+                                                                        </DrawingGroup>
+                                                                        <DrawingGroup x:Name="level_1">
+                                                                            <GeometryDrawing Brush="{DynamicResource light-defaultgrey-10}" Geometry="F1M13.5,14.5H3.5V1.5h10Z" />
+                                                                            <GeometryDrawing Brush="{DynamicResource light-defaultgrey}" Geometry="F1M13.5,1H3.5L3,1.5v13l.5.5h10l.5-.5V1.5ZM13,14H4V2h9Z" />
+                                                                            <DrawingGroup Opacity="{DynamicResource cls-1}">
+                                                                                <GeometryDrawing Brush="{DynamicResource light-defaultgrey}" Geometry="F1M8,9H9v1H8Zm0,2H9v1H8ZM5,7H6V8H5Zm0,4H6v1H5ZM5,9H6v1H5Zm6,2h1v1H11ZM8,7H9V8H8Zm3,0h1V8H11Zm0,2h1v1H11Z" />
+                                                                                <GeometryDrawing Brush="{DynamicResource light-defaultgrey}" Geometry="F1M5.5,3,5,3.5v2l.5.5h6l.5-.5v-2L11.5,3ZM11,5H6V4h5Z" />
+                                                                            </DrawingGroup>
+                                                                        </DrawingGroup>
+                                                                    </DrawingGroup>
+                                                                </DrawingBrush.Drawing>
+                                                            </DrawingBrush>
+                                                        </Rectangle.Fill>
+                                                    </Rectangle>
+                                                </ToggleButton.Content>
+                                            </ToggleButton>
                                             <TextBlock Text="{x:Static rsrc:Resources.SpoolDepthHeader}" Visibility="{Binding ElementName=ShowDepth,Path=IsChecked,Mode=OneWay,Converter={StaticResource VisibilityConverter}}"/>
                                             <TextBox Text="{Binding SpoolDepth,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter'}"
                                              Visibility="{Binding ElementName=ShowDepth,Path=IsChecked,Mode=OneWay,Converter={StaticResource VisibilityConverter}}"/>
@@ -442,7 +640,7 @@
                                         IsReadOnly="True"/>-->
                             <DataGridTextColumn Header="{x:Static rsrc:Resources.WeightHeader}"
                                         ToolTipService.ToolTip="{x:Static rsrc:Resources.WeightToolTip}"
-                                        Binding="{Binding Weight,Converter={StaticResource ConvertToMetricWeight},ConverterParameter='Kilograms'}"
+                                        Binding="{Binding Weight,Converter={StaticResource ConvertToMetricWeight},ConverterParameter='Kilogram'}"
                                         Width="{Binding WeightColumnWidth,Source={StaticResource LeakPrfSettings},Mode=TwoWay}"/>
                             <DataGridCheckBoxColumn Header="{x:Static rsrc:Resources.StopUsingHeader}"
                                             ToolTipService.ToolTip="{x:Static rsrc:Resources.StopUsingToolTip}"
@@ -455,8 +653,8 @@
                         </DataGrid.Columns>
                     </DataGrid>
                 </TabItem>
-                <TabItem Header="{x:Static rsrc:Resources.FilamentsHeader}">
-                    <DataGrid ItemsSource="{Binding VendorSettings}" 
+                <TabItem Header="{x:Static rsrc:Resources.FilamentsHeader}" Visibility="Hidden">
+                    <!--<DataGrid ItemsSource="{Binding VendorSettings}" 
                               AutoGenerateColumns="False" 
                               Style="{StaticResource StdDataGrid}">
                         <DataGrid.Columns>
@@ -465,7 +663,8 @@
                                     <TextBlock Text="{x:Static rsrc:Resources.DEIHeader}">
                                         <TextBlock.ToolTip>
                                             <ContentControl ContentTemplate="{StaticResource EditingIndicatorsHelp}"/>
-                                            <!--<StackPanel>
+                                            -->
+                    <!--<StackPanel>
                                         <TextBlock Text="Data Editing Indicators"/>
                                         <TextBlock Text="Legend:"/>
                                         <StackPanel Orientation="Horizontal">
@@ -477,6 +676,7 @@
                                             <TextBlock Text="item needs to be saved to database."/>
                                         </StackPanel>
                                     </StackPanel>-->
+                    <!--
                                         </TextBlock.ToolTip>
                                     </TextBlock>
                                 </DataGridTemplateColumn.Header>
@@ -522,7 +722,7 @@
                                 </DataGridTemplateColumn.CellEditingTemplate>
                             </DataGridTemplateColumn>
                         </DataGrid.Columns>
-                    </DataGrid>
+                    </DataGrid>-->
                 </TabItem>
             </TabControl>
         </Grid>
@@ -541,6 +741,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <Label 
                Grid.Row="1">
@@ -549,6 +750,15 @@
                 </Label.Content>
             </Label>
             <ComboBox Grid.Row="1"
+                      Grid.Column="2"
+                      Margin="3"
+                      Width="250"
+                      HorizontalAlignment="Left"
+                      SelectedItem="{Binding Material,Mode=TwoWay}"
+                      IsEnabled="{Binding CanEdit}"
+                      ItemsSource="{Binding ElementName=Main,Path=DataContext.Materials,StringFormat={}{0:B}}"
+                      Background="{StaticResource StandardBackground}"/>
+            <!--<ComboBox Grid.Row="1"
                   Grid.Column="2"
                   Margin="3"
                   Width="250"
@@ -565,16 +775,13 @@
                         </TextBlock>
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
-            </ComboBox>
+            </ComboBox>-->
             <Label 
                Grid.Row="2"
                >
                 <TextBlock Text="{x:Static rsrc:Resources.DiameterHeader}"/>
             </Label>
-            <Label Grid.Row="3"
-               >
-                <TextBlock Text="{x:Static rsrc:Resources.DensityMeasurementTypeHeader}"/>
-            </Label>
+
             <ComboBox 
                 Grid.Row="2" 
                 Grid.Column="1" 
@@ -591,14 +798,7 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-            <ComboBox Grid.Row="3"
-                  Grid.Column="1"
-                  Margin="3"
-                  Width="150"
-                  HorizontalAlignment="Left"
-                  ItemsSource="{Binding Source={StaticResource dataFromDensityEditType}}"
-                  SelectedItem="{Binding DensityAlias.DensityType,Mode=TwoWay}"
-                  IsEnabled="{Binding CanEdit}"/>
+
             <CheckBox
                       Grid.Row="4"
                       Grid.Column="1"
@@ -608,73 +808,46 @@
                     <TextBlock Text="{x:Static rsrc:Resources.StopUsingHeader}"/>
                 </CheckBox.Content>
             </CheckBox>
-            <GroupBox Header="Defined Density"
-            Grid.Row="5"
-            
-            Grid.ColumnSpan="2"
-            Visibility="{Binding DefinedDensityVisible,Converter={StaticResource VisibilityConverter}}"
-                  Margin="5" Height="75">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="190"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Label >
-                        <Label.Content>
-                            <TextBlock Text="{x:Static rsrc:Resources.DensityHeader}"/>
-                        </Label.Content></Label>
-                    <TextBox Grid.Column="1"
-                         Text="{Binding DensityAlias.DefinedDensity,Mode=TwoWay,UpdateSourceTrigger=LostFocus}"
+            <TextBlock Text="Density" Grid.Row="5"/>
+            <TextBox Grid.Column="1" Grid.Row="5"
+                         Text="{Binding Density,Mode=TwoWay,UpdateSourceTrigger=LostFocus}"
                          IsEnabled="{Binding CanEdit}" ToolTip="{x:Static rsrc:Resources.DefinedDensityToolTip}"/>
-                </Grid>
-            </GroupBox>
-
-            <DataGrid Grid.Row="6"
-                  
-                  Grid.ColumnSpan="2"
-                  Style="{StaticResource StdDataGrid}"
-                  ItemsSource="{Binding DensityAlias.MeasuredDensity}"
-                  Visibility="{Binding MeasuredDensityVisible,Converter={StaticResource VisibilityConverter}}" AutoGenerateColumns="False"
-                  IsEnabled="{Binding CanEdit}"
-                  >
-                <DataGrid.Columns>
-                    <DataGridTextColumn Binding="{Binding Diameter,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter',UpdateSourceTrigger=PropertyChanged}" 
-                                        ClipboardContentBinding="{x:Null}" 
-                                        Header="{x:Static rsrc:Resources.DiameterHeader}" 
-                                        Width="100"/>
-                    <DataGridTextColumn Binding="{Binding Length,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter',UpdateSourceTrigger=PropertyChanged}" 
-                                        ClipboardContentBinding="{x:Null}"
-                                        Header="{x:Static rsrc:Resources.LengthHeader}" 
-                                        Width="100"/>
-                    <DataGridTextColumn Binding="{Binding Weight,Converter={StaticResource ConvertToMetricWeight},ConverterParameter='Grams',UpdateSourceTrigger=LostFocus}" 
-                                        ClipboardContentBinding="{x:Null}" 
-                                        Header="{x:Static rsrc:Resources.WeightHeader}" 
-                                        Width="100"/>
-                    <DataGridTextColumn Binding="{Binding DensityInGmPerCC}" 
-                                        ClipboardContentBinding="{x:Null}" 
-                                        Header="{x:Static rsrc:Resources.DensityInGmPerCCHeader}" 
-                                        IsReadOnly="True" 
-                                        Width="100"/>
-                </DataGrid.Columns>
-            </DataGrid>
-
-            <GroupBox Header="{x:Static rsrc:Resources.AverageDensityHeader}"
-                  Grid.Row="5"
-                  Grid.ColumnSpan="2"
-                  Visibility="{Binding MeasuredDensityVisible,Converter={StaticResource VisibilityConverter}}"
-                  Margin="5" Height="75">
-                <StackPanel>
-                    <TextBlock>
-                    <Run Text="{x:Static rsrc:Resources.AverageMeasuredDensityHeader}"/>
-                    <Run Text="{Binding DensityAlias.Density, Mode=OneWay,StringFormat={}{0:#.#####}}"/>
-                    </TextBlock>
-                </StackPanel>
-            </GroupBox>
+            <Label Grid.Row="6" Content="Modifier"/>
+            <ComboBox Grid.Row="6" 
+                      Grid.Column="1"
+                      ItemsSource="{Binding Material.Enhancements,Mode=OneWay}"
+                      SelectedValue="{Binding Enhancement,Mode=TwoWay}"
+                      DisplayMemberPath="Name"
+                      SelectedValuePath="Name"
+                      IsEnabled="{Binding CanEdit}">
+                <!--<ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Name}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>-->
+            </ComboBox>
+            <!--<ComboBox Grid.Column="1" Grid.Row="6"
+                      ItemsSource="{Binding Source={StaticResource DataFromMaterialModifier}}"
+                      SelectedItem="{Binding Modifier,Mode=TwoWay}"
+                      Width="100"
+                      Height="26"
+                      HorizontalAlignment="Left">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding .,Converter={StaticResource SplitAtUpperConverter}}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>-->
+            <Label Grid.Row="7" Content="Vendor"/>
+            <ComboBox Grid.Row="7" Grid.Column="1" ItemsSource="{Binding ElementName=Main,Path=DataContext.Vendors}" SelectedValue="{Binding VendorID,Mode=TwoWay}" SelectedValuePath="VendorDefnId" DisplayMemberPath="Name" ToolTip="{Binding VendorID,Mode=OneWay}">
+                <!--<ComboBox.ItemTemplate>
+                    <DataTemplate DataType="model:VendorDefn">
+                        <TextBlock Text="{Binding Name}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>-->
+            </ComboBox>
         </Grid>
+
     </DataTemplate>
     <DataTemplate x:Key="DisplayVendorDefnInListView" DataType="{x:Type model:VendorDefn}">
         <Grid>
@@ -685,12 +858,34 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <TextBlock Text="{StaticResource EditIconSymbol}"
-                       FontFamily="Segoe UI Symbol"
-                       FontSize="20" 
-                       Foreground="Blue"
+            <ContentControl 
                        Visibility="{Binding IsModified,Converter={StaticResource VisibilityConverter}}"
-                       VerticalAlignment="Center"/>
+                       VerticalAlignment="Center">
+                <ContentControl.Content>
+                    <Rectangle Width="16 " Height="16">
+                        <Rectangle.Resources>
+                            <SolidColorBrush x:Key="canvas" Opacity="0" />
+                            <SolidColorBrush x:Key="light-defaultgrey-10" Color="#212121" Opacity="0.1" />
+                            <SolidColorBrush x:Key="light-defaultgrey" Color="#212121" Opacity="1" />
+                        </Rectangle.Resources>
+                        <Rectangle.Fill>
+                            <DrawingBrush Stretch="None">
+                                <DrawingBrush.Drawing>
+                                    <DrawingGroup>
+                                        <DrawingGroup x:Name="canvas">
+                                            <GeometryDrawing Brush="{DynamicResource canvas}" Geometry="F1M16,16H0V0H16Z" />
+                                        </DrawingGroup>
+                                        <DrawingGroup x:Name="level_1">
+                                            <GeometryDrawing Brush="{DynamicResource light-defaultgrey-10}" Geometry="F1M13.26,2.736a1.5,1.5,0,0,1,0,2.119l0,0L6.116,12,4,9.884l7.143-7.148A1.5,1.5,0,0,1,13.26,2.736Z" />
+                                            <GeometryDrawing Brush="{DynamicResource light-defaultgrey}" Geometry="F1M13.588,5.233A2,2,0,0,0,10.761,2.41v0h0L4.042,9.13,2,13.333,2.667,14l4.065-1.944L13.588,5.24ZM6.224,11.19l-.082.039L4.771,9.858l.039-.082,6.655-6.658a1,1,0,1,1,1.414,1.414h0Z" />
+                                        </DrawingGroup>
+                                    </DrawingGroup>
+                                </DrawingBrush.Drawing>
+                            </DrawingBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+                </ContentControl.Content>
+            </ContentControl>
             <StackPanel Grid.Column="1">
                 <TextBlock>
                 <Run Text="{x:Static rsrc:Resources.NameHeader}"/>
@@ -724,18 +919,49 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <TextBlock Text="{StaticResource EditIconSymbol}"
-                       FontFamily="Segoe UI Symbol"
+            <ContentControl
                        Visibility="{Binding IsModified,Converter={StaticResource VisibilityConverter}}"
-                       FontSize="20"
-                       Foreground="Blue"
-                       VerticalAlignment="Center"/>
+             
+                       VerticalAlignment="Center">
+                <ContentControl.Content>
+                    <Rectangle Width="16 " Height="16">
+                        <Rectangle.Resources>
+                            <SolidColorBrush x:Key="canvas" Opacity="0" />
+                            <SolidColorBrush x:Key="light-defaultgrey-10" Color="#212121" Opacity="0.1" />
+                            <SolidColorBrush x:Key="light-defaultgrey" Color="#212121" Opacity="1" />
+                        </Rectangle.Resources>
+                        <Rectangle.Fill>
+                            <DrawingBrush Stretch="None">
+                                <DrawingBrush.Drawing>
+                                    <DrawingGroup>
+                                        <DrawingGroup x:Name="canvas">
+                                            <GeometryDrawing Brush="{DynamicResource canvas}" Geometry="F1M16,16H0V0H16Z" />
+                                        </DrawingGroup>
+                                        <DrawingGroup x:Name="level_1">
+                                            <GeometryDrawing Brush="{DynamicResource light-defaultgrey-10}" Geometry="F1M13.26,2.736a1.5,1.5,0,0,1,0,2.119l0,0L6.116,12,4,9.884l7.143-7.148A1.5,1.5,0,0,1,13.26,2.736Z" />
+                                            <GeometryDrawing Brush="{DynamicResource light-defaultgrey}" Geometry="F1M13.588,5.233A2,2,0,0,0,10.761,2.41v0h0L4.042,9.13,2,13.333,2.667,14l4.065-1.944L13.588,5.24ZM6.224,11.19l-.082.039L4.771,9.858l.039-.082,6.655-6.658a1,1,0,1,1,1.414,1.414h0Z" />
+                                        </DrawingGroup>
+                                    </DrawingGroup>
+                                </DrawingBrush.Drawing>
+                            </DrawingBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+                </ContentControl.Content>
+            </ContentControl>
 
             <StackPanel Grid.Column="1">
+                <TextBlock Visibility="{Binding IsDebug,Mode=OneWay,Converter={StaticResource VisibilityConverter}}">
+                    <Run Text="Original Material"/>
+                    <Run Text="{Binding MaterialType,Mode=OneWay}"/>
+                </TextBlock>
                 <TextBlock >
                     <Run Text="Material Type"
                          FontWeight="Bold"/>
-                    <Run Text="{Binding MaterialType,Mode=OneWay}"/>
+                    <Run Text="{Binding Material.ShortName,Mode=OneWay}"/>
+                </TextBlock>
+                <TextBlock>
+                    <Run Text="Enhancement"/>
+                    <Run Text="{Binding Enhancement,Mode=OneWay}"/>
                 </TextBlock>
                 <TextBlock >
                     <Run Text="Diameter"
@@ -746,7 +972,7 @@
                            >
                     <Run Text="Density"
                          FontWeight="Bold"/>
-                    <Run Text="{Binding DensityAlias.Density,Mode=OneWay,StringFormat={}{0:#.###}}"/>
+                    <Run Text="{Binding Density,Mode=OneWay,StringFormat={}{0:#.###}}"/>
                 </TextBlock>
                 <TextBlock ToolTip="milligrams per mm"
                            >
@@ -777,7 +1003,7 @@
                     </TextBlock>
                     <TextBlock>
                                     <Run Text="Density"/>
-                                    <Run Text="{Binding DensityAlias.Density,Mode=OneWay}"/>
+                                    <Run Text="{Binding Density,Mode=OneWay}"/>
                     </TextBlock>
                     <TextBlock>
                                     <Run Text="mg/mm"/>
@@ -787,11 +1013,29 @@
             </StackPanel.ToolTip>
         </StackPanel>
     </HierarchicalDataTemplate>
-    <DataTemplate x:Key="EditInventorySpoolItems" DataType="{x:Type model:InventorySpool}">
+    <DataTemplate x:Key="FilamentColorEditor" DataType="model:FilamentColor">
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="150"/>
+                <ColumnDefinition Width="200"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Label Content="Vendor Color Name"/>
+            <TextBox Grid.Column="1" HorizontalAlignment="Left" Width="180" Text="{Binding VendorColorName,Mode=TwoWay}"/>
+            <Label Grid.Row="1" Content="Color (RGB)"/>
+            <synf:ColorPicker Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" Width="150" Color="{Binding ColorRGB,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
+        </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="MaterialEditor" DataType="model:Material">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="150"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -800,113 +1044,26 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <TextBlock Text="Date Opened"/>
-            <TextBlock Text="{Binding DateOpened,StringFormat={}{0:d}}"
-                       Grid.Column="1"/>
-            <TextBlock Text="Color"
-                       Grid.Row="1" VerticalAlignment="Center"/>
-            <StackPanel Orientation="Horizontal" Grid.Column="1"
-                       Grid.Row="1">
-                <Rectangle Fill="{Binding ColorName,Converter={StaticResource ColorFromNameConverter}}" Width="50"/>
-                <TextBlock Text="{Binding ColorName,Converter={StaticResource SplitAtUpperConverter}}" Margin="3,0,0,0"/>
-            </StackPanel>
-            <TextBlock Text="Material"
-                       Grid.Row="2"/>
-            <TextBlock Grid.Row="2"
-                       Grid.Column="1">
-                <Run Text="{Binding FilamentDefn.MaterialType}"/>
-                <Run Text=" - "/>
-                <Run Text="{Binding FilamentDefn.FilamentDefnId}"/>
-            </TextBlock>
-            <TextBlock Grid.Row="3"
-                       Text="Initial starting length"/>
-            <TextBlock Grid.Row="3"
-                       Grid.Column="1">
-                <Run Text="{Binding InitialLength,Mode=OneWay,StringFormat='{}{0:#}'}"/>
-                <Run Text="m"/>
-            </TextBlock>
-            <TextBlock Grid.Row="4">
-                <Run Text="Maximum Depth"/>
-                <!--<Run Text="{Binding SpoolDefn.MaxDepth,Mode=OneWay}"/>-->
-            </TextBlock>
-            <TextBlock Grid.Row="4"
-                       Grid.Column="1"
-                       Text="{Binding SpoolDefn.MaxDepth,Mode=OneWay,StringFormat='{}{0:#.### mm}'}"/>
-            <TextBlock Text="Measurements"
-                       Grid.Row="5"/>
-            <DataGrid ItemsSource="{Binding DepthMeasurements}"
-                      Grid.Row="5"
-                      Grid.ColumnSpan="2"
-                      AutoGenerateColumns="False"
-                      CanUserDeleteRows="False"
-                      Style="{StaticResource StdDataGrid}"
-                      IsEnabled="{Binding StopUsing,Converter={StaticResource BooleanNotConverter}}">
+            <TextBlock Text="Material Definition"/>
+            <Label Content="Material _Name" Grid.Row="1" Target="{Binding ElementName=NameTextBox}"/>
+            <TextBox x:Name="NameTextBox" Grid.Row="1" Grid.Column="1" Text="{Binding Name,Mode=TwoWay,UpdateSourceTrigger=LostFocus}" Width="250" HorizontalAlignment="Left"/>
+            <Label Content="_Short Name" Grid.Row="2" Target="{Binding ElementName=ShrtNameTextBox}" />
+            <TextBox x:Name="ShrtNameTextBox" Grid.Row="2" Grid.Column="1"  MaxLength="10" Text="{Binding ShortName,Mode=TwoWay,UpdateSourceTrigger=LostFocus}" Width="150" HorizontalAlignment="Left"/>
+            <Label Content="_Enhancements" Grid.Row="3"/>
+            <DataGrid Grid.Row="3" Grid.Column="1" ItemsSource="{Binding Enhancements}" AutoGenerateColumns="False" Width="350" Height="200" CanUserAddRows="True" HorizontalAlignment="Left">
                 <DataGrid.Columns>
-                    <DataGridTemplateColumn >
-                        <DataGridTemplateColumn.Header>
-                            <TextBlock Text="DEI">
-                                <TextBlock.ToolTip>
-                                    <ContentControl ContentTemplate="{StaticResource EditingIndicatorsHelp}"/>
-                                    <!--<StackPanel>
-                                        <TextBlock Text="Data Editing Indicators"/>
-                                        <TextBlock Text="Legend:"/>
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{StaticResource CheckSymbol}" Style="{StaticResource FontIcon}"/>
-                                            <TextBlock Text="record in database."/>
-                                        </StackPanel>
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{StaticResource EditIconSymbol}" Style="{StaticResource FontIcon}"/>
-                                            <TextBlock Text="item needs to be saved to database."/>
-                                        </StackPanel>
-                                    </StackPanel>-->
-                                </TextBlock.ToolTip>
-                            </TextBlock>
-                        </DataGridTemplateColumn.Header>
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{StaticResource CheckSymbol}"
-                                           Style="{StaticResource FontIcon}"
-                                           FontSize="12"
-                                           Visibility="{Binding IsValid,Converter={StaticResource EnhancedVisibilityConverter}}"/>
-                                    <TextBlock Text="{StaticResource EditIconSymbol}"
-                                               Style="{StaticResource FontIcon}"
-                                               FontSize="12"
-                                               Visibility="{Binding IsModified,Converter={StaticResource EnhancedVisibilityConverter}}"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTemplateColumn Width="{Binding MeasuredOnColumnWidth,Source={StaticResource LeakPrfSettings},Mode=TwoWay}"
-                                            Header="Measured On">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding MeasureDateTime,StringFormat={}{0:d}}"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                        <DataGridTemplateColumn.CellEditingTemplate>
-                            <DataTemplate>
-                                <DatePicker SelectedDate="{Binding MeasureDateTime,Mode=TwoWay}"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellEditingTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTextColumn Width="{Binding DepthLeftColumnWidth,Source={StaticResource LeakPrfSettings},Mode=TwoWay}"
-                                        Header="Depth Left"
-                                        Binding="{Binding Depth1,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter',Mode=TwoWay,UpdateSourceTrigger=LostFocus}"/>
-                    <DataGridTextColumn Width="{Binding DepthRightColumnWidth,Source={StaticResource LeakPrfSettings},Mode=TwoWay}"
-                                        Header="Depth Right"
-                                        Binding="{Binding Depth2,Converter={StaticResource ConvertToMetricLength},ConverterParameter='Millimeter',Mode=TwoWay,UpdateSourceTrigger=LostFocus}"/>
-                    <DataGridTextColumn Width="{Binding RemainingGColumnWidth,Source={StaticResource LeakPrfSettings},Mode=TwoWay}"
-                                        Header="Remaining (g)"
-                                        Binding="{Binding FilamentRemainingInGrams,Mode=OneWay,StringFormat='{}{0:#} g'}"
-                                        IsReadOnly="True"
-                                        ToolTipService.ToolTip="Amount remaining in grams."/>
-                    <DataGridTextColumn Width="{Binding RemainingMColumnWidth,Source={StaticResource LeakPrfSettings},Mode=TwoWay}"
-                                        Header="Remaining (m)"
-                                        Binding="{Binding FilamentRemainingInMeters,Mode=OneWay,StringFormat='{}{0:#} m'}"
-                                        IsReadOnly="True"
-                                        ToolTipService.ToolTip="Amount remaining in meters"/>
+                    <DataGridTextColumn Header="Name" Binding="{Binding Name,Mode=TwoWay}" Width="100"/>
+                    <DataGridCheckBoxColumn Header="MMS" Binding="{Binding MMSCompatible,Mode=TwoWay}" Width="100">
+                        <DataGridCheckBoxColumn.HeaderStyle>
+                            <Style>
+                                <Setter Property="ToolTipService.ToolTip" Value="Multimaterial system compatible"/>
+                            </Style>
+                        </DataGridCheckBoxColumn.HeaderStyle>
+                    </DataGridCheckBoxColumn>
+                    <DataGridCheckBoxColumn Header="Abrasive" Binding="{Binding Abrasive,Mode=TwoWay}" Width="100"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

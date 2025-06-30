@@ -24,7 +24,8 @@ namespace HintLib
         }
         ~DataLayer()
         {
-            Projects.CollectionChanged-= Projects_CollectionChanged;
+            if(Projects != null)
+                Projects.CollectionChanged-= Projects_CollectionChanged;
         }
         private void Projects_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {

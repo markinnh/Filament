@@ -30,7 +30,7 @@ namespace DataDefinitions
             StringBuilder builder = new StringBuilder();
             // append the preamble
             builder.Append("(?<ignore>");
-            foreach (string word in ignoreWords)
+            foreach (var word in ignoreWords)
             {
                 builder.Append(@$"(\b{word}\b)");
                 builder.Append(word == ignoreWords.Last() ? ")|" : "|");
@@ -86,9 +86,9 @@ namespace DataDefinitions
             {
                 words.AddRange(handler(obj));
             }
-            var uniques = from word in words.Distinct()
+            var uniqueWords = from word in words.Distinct()
                           select new WordWithOccuranceCount(word, words.Count(wd => wd == word));
-            return uniques;
+            return uniqueWords;
             //throw new NotImplementedException();
         }
         public IEnumerable<WordWithOccuranceCount> OrganizeTags(IEnumerable objects) { return OrganizeWords(objects, CollectTags); }

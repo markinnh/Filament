@@ -29,8 +29,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.0.0" />
-    <PackageReference Include="syncfusion.ui.wpf.net" Version="20.2.0.36" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+    <PackageReference Include="LiteDB" Version="5.0.21" />
+    <PackageReference Include="Syncfusion.Licensing" Version="28.1.36" />
+    <PackageReference Include="syncfusion.ui.wpf.net" Version="27.2.2" />
   </ItemGroup>
 
   <ItemGroup>

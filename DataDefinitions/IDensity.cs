@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace DataDefinitions
+namespace DataDefinitions;
+
+public interface IDensity
 {
-    public interface IDensity
-    {
-        double Density { get; }
-    }
+    double Density { get; }
 }

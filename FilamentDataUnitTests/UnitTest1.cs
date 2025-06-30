@@ -100,5 +100,13 @@ namespace FilamentDataUnitTests
                 Assert.AreEqual(expectedUnits.ToLower(), valueWithUnits.Units.ToLower());
             }
         }
+        [TestMethod,DataRow(DataDefinitions.LiteDBSupport.UIPlatform.WPF, @"C:\Users\markn\OneDrive\Documents2\Filament\TestingFilamentDataLDB.db"),
+            DataRow(DataDefinitions.LiteDBSupport.UIPlatform.WinUI3, @"C:\Users\markn\AppData\Roaming\TestingFilamentDataLDB.db")]
+        public void TestFileLocation(DataDefinitions.LiteDBSupport.UIPlatform platform,string location)
+        {
+            var wpfLoc = @"C:\Users\markn\OneDrive\Documents2\Filament\TestingFilamentDataLDB.db";
+            Assert.AreEqual(DataDefinitions.LiteDBSupport.FileLocator.DatabasePath(platform), location);
+            Console.WriteLine(DataDefinitions.LiteDBSupport.FileLocator.DatabasePath(DataDefinitions.LiteDBSupport.UIPlatform.WinUI3));
+        }
     }
 }

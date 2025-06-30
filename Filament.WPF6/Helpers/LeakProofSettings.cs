@@ -65,6 +65,18 @@ namespace Filament.WPF6.Helpers
                 }
             }
         }
+        public string RemainingWeightUnits
+        {
+            get => Properties.Settings.Default.RemainingWeightUnits;
+            set
+            {
+                if (value != Properties.Settings.Default.RemainingWeightUnits)
+                {
+                    Properties.Settings.Default.RemainingWeightUnits = value;
+                    OnPropertyChanged(nameof(RemainingWeightUnits));
+                }
+            }
+        }
         #region Individual DataGrid Columns
         public string DescriptionColumnWidth
         {

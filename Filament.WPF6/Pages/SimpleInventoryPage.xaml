@@ -37,14 +37,14 @@
                         <Image.Source>
                             <DrawingImage>
                                 <DrawingImage.Drawing>
-                                    <GeometryDrawing Brush="{Binding ColorName}" Geometry="{StaticResource FilamentGeometry}"/>
+                                    <GeometryDrawing Brush="{Binding FilamentColor.ColorRGB}" Geometry="{StaticResource FilamentGeometry}"/>
                                 </DrawingImage.Drawing>
                             </DrawingImage>
                         </Image.Source>
                     </Image>
                     <!--<Path VerticalAlignment="Center" Grid.RowSpan="2" Stroke="{Binding ColorName}" Data="{StaticResource FilamentPathData}"/>-->
                 </Border>
-                <TextBlock Grid.Column="1" Text="{Binding ColorName}"/>
+                <TextBlock Grid.Column="1" Text="{Binding FilamentColor.VendorColorName}"/>
                 <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding DateOpened,StringFormat={}{0:d}}"/>
                 <TextBlock FontSize="10" Grid.Column="1" Grid.Row="2" Text="{Binding GramsRemaining,StringFormat='{}{0:0} g'}"/>
             </Grid>
@@ -218,13 +218,13 @@
                     </Label>
                     <ComboBox ItemsSource="{Binding SpoolDefns}" 
                               Grid.Column="1" 
-                              SelectedItem="{Binding NewInventorySpool.SpoolDefn,Mode=TwoWay}" 
+                              SelectedItem="{Binding NewInventorySpool.Parent,Mode=TwoWay}" 
                               IsEnabled="{Binding InAddInventory,Mode=OneWay}">
                         <ComboBox.ItemTemplate>
                             <DataTemplate DataType="{x:Type models:SpoolDefn}">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock>
-                                        <Run Text="{Binding Vendor.Name}"/>
+                                        <Run Text="{Binding Parent.Name}"/>
                                         <Run Text=" - "/>
                                         <Run Text="{Binding Description}"/>
                                     </TextBlock>
@@ -247,15 +247,15 @@
                             <TextBlock Text="{x:Static rsrc:Resources.ColorHeader}"/>
                         </Label.Content>
                     </Label>
-                    <ComboBox ItemsSource="{Binding SupportedColorsCode}" 
+                    <ComboBox ItemsSource="{Binding Colors.View}" 
                               Grid.Column="1" 
                               Grid.Row="2" 
-                              SelectedItem="{Binding NewInventorySpool.ColorName,Mode=TwoWay}" 
+                              SelectedItem="{Binding NewInventorySpool.FilamentColor,Mode=TwoWay}" 
                               IsEnabled="{Binding InAddInventory,Mode=OneWay}">
                         <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <Border BorderBrush="{Binding }" BorderThickness="5" CornerRadius="4">
-                                    <TextBlock Text="{Binding }"/>
+                            <DataTemplate DataType="models:FilamentColor">
+                                <Border BorderBrush="{Binding ColorRGB}" BorderThickness="5" CornerRadius="4">
+                                    <TextBlock Text="{Binding VendorColorName}"/>
                                 </Border>
                             </DataTemplate>
                         </ComboBox.ItemTemplate>

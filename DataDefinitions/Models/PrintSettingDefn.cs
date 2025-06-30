@@ -83,7 +83,7 @@ namespace DataDefinitions.Models
         }
         
         protected override bool NeedsKey => true;
-        internal override int KeyID { get => PrintSettingDefnId; set => PrintSettingDefnId = value; }
+        internal override int KeyID => PrintSettingDefnId;
         //protected override void AssignKey(int myId)
         //{
         //    if (PrintSettingDefnId == default)
