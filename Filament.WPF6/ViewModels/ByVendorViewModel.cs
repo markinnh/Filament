@@ -1,36 +1,44 @@
-﻿using DataDefinitions;
-using DataDefinitions.Models;
-//using DataContext;
+﻿//using DataContext;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using System.Windows.Input;
-using Filament.WPF6.Helpers;
 using System.Reflection;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
+using System.Windows.Data;
+using System.Windows.Input;
+using System.Windows.Media;
+using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using DataDefinitions;
+using DataDefinitions.Filters;
+using DataDefinitions.Interfaces;
 using DataDefinitions.JsonSupport;
 using DataDefinitions.LiteDBSupport;
+using DataDefinitions.Models;
+using Filament.WPF6.Helpers;
 using Filament.WPF6.Pages;
-using DataDefinitions.Interfaces;
-using CommunityToolkit.Mvvm.Messaging;
-using DataDefinitions.Filters;
-using System.Windows.Media;
 using Filament.WPF6.Properties;
-using System.Windows.Data;
-using System.ComponentModel;
 
 namespace Filament.WPF6.ViewModels;
 
-public class ByVendorViewModel : BaseTagFilterViewModel<VendorDefn, DataDefinitions.DataObject>
+public partial class ByVendorViewModel : BaseTagFilterViewModel<VendorDefn, DataDefinitions.DataObject>
 {
     public override Guid Signature => Singleton<LiteDBDal>.Instance.Vendors.Signature;
     //private IEnumerable<string> _tags;
     //private bool _tagFilterApplied;
+    
+
     public ByVendorViewModel() : base()
     {
-
+        
+    }
+    public override void ReleaseEventHandlers()
+    {
+        base.ReleaseEventHandlers();
+        WeakReferenceMessenger.Default.Unregister<ExchangeActionEventArgs>(this);
     }
     ~ByVendorViewModel()
     {
@@ -62,7 +70,10 @@ public class ByVendorViewModel : BaseTagFilterViewModel<VendorDefn, DataDefiniti
     public string ChildTypeName => SelectedItem?.GetType().GetCustomAttribute<UIHintsAttribute>()?.AddType ?? "Nothing selected";
     protected override void DerivedInitItems()
     {
+        sortDirection= Enum.Parse<ListSortDirection>(Settings.Default.ByVendorPageSortDirection);
+        currentSortDescription = GetSortDirectionDescription();
         ViewSource.Source = Singleton<LiteDBDal>.Instance.Vendors;
+        ViewSource.SortDescriptions.Add(currentSortDescription);
         Colors.Source = Singleton<LiteDBDal>.Instance.FilamentColors;
         Colors.SortDescriptions.Add(new SortDescription("ColorRGB", ListSortDirection.Descending));
         //PrepareForDataOperations();
@@ -83,18 +94,49 @@ public class ByVendorViewModel : BaseTagFilterViewModel<VendorDefn, DataDefiniti
         //FinishedDataOperations();
 
     }
-//        protected override void InitFilterViewModel()
-//        {
-//            //DistinctTagStats = Singleton<LiteDBDal>.Instance.Vendors.DistinctTagStats;
-//            //DistinctTagStats = Singleton<WordCollect>.Instance.OrganizeTags(ViewSource.View);
-//            Signature = Singleton<LiteDBDal>.Instance.Vendors.Signature;
-//#if DEBUG
-//            filterSupported[(int)IResolveFilter.Filters.Tag] = filters.TryAdd(IResolveFilter.Filters.Tag, new WindowsFilter(new TagResolve() { Signature = Signature }));
-//#else
-//            filterSupported[(int)IResolveFilter.Filters.Tag] =filters.TryAdd(IResolveFilter.Filters.Tag, new WindowsFilter( new TagResolve() { Signature = Signature }));
-//#endif
-//            WeakReferenceMessenger.Default.Register<TagFilterChangedEventArgs>(this, HandleTagFilterMessages);
-//        }
+    #region Sorting
+    protected string sortField = nameof(VendorDefn.Name);
+    private bool sortAscending = true;
+
+    public bool SortAscending
+    {
+        get => sortAscending;
+        set => Set(ref sortAscending, value);
+    }
+    protected ListSortDirection sortDirection = ListSortDirection.Ascending;
+    protected SortDescription currentSortDescription
+    {
+        get; private set;
+    }
+    [RelayCommand]
+    protected void ToggleSortDirection(object p)
+    {
+        ViewSource.SortDescriptions.Remove(currentSortDescription);
+
+        sortDirection = SwitchSortDirection();
+        Settings.Default.ByVendorPageSortDirection = sortDirection.ToString();
+
+        currentSortDescription = GetSortDirectionDescription();
+
+        ViewSource.SortDescriptions.Add(currentSortDescription);
+        if (p is bool b)
+            SortAscending = b;
+    }
+    protected ListSortDirection SwitchSortDirection() => sortDirection == ListSortDirection.Ascending ? ListSortDirection.Descending : ListSortDirection.Ascending;
+    protected SortDescription GetSortDirectionDescription() => new(sortField, sortDirection);
+    #endregion
+    //        protected override void InitFilterViewModel()
+    //        {
+    //            //DistinctTagStats = Singleton<LiteDBDal>.Instance.Vendors.DistinctTagStats;
+    //            //DistinctTagStats = Singleton<WordCollect>.Instance.OrganizeTags(ViewSource.View);
+    //            Signature = Singleton<LiteDBDal>.Instance.Vendors.Signature;
+    //#if DEBUG
+    //            filterSupported[(int)IResolveFilter.Filters.Tag] = filters.TryAdd(IResolveFilter.Filters.Tag, new WindowsFilter(new TagResolve() { Signature = Signature }));
+    //#else
+    //            filterSupported[(int)IResolveFilter.Filters.Tag] =filters.TryAdd(IResolveFilter.Filters.Tag, new WindowsFilter( new TagResolve() { Signature = Signature }));
+    //#endif
+    //            WeakReferenceMessenger.Default.Register<TagFilterChangedEventArgs>(this, HandleTagFilterMessages);
+    //        }
     //private void HandleFilterMessages(object recipient, FilterChangedEventArgs message)
     //{
     //    _tags = message.SelectedTags;

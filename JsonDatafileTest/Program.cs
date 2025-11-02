@@ -7,7 +7,7 @@ using System.Text;
 using System.Text.Json;
 using System.Xml;
 using System.Xml.Serialization;
-
+#if SUPPORTJSON
 var jsonFile = new JsonFilamentDocument();
 jsonFile.SeedDocument();
 var vendorCount = jsonFile.VendorDefns.Count;
@@ -29,3 +29,6 @@ InsertTestItems.InsertTestObjects(result,vendorCount);
 //if (xmlResults is JsonFilamentDocument document)
 //    if (document.VendorDefns.Count == vendorCount)
 //        Console.WriteLine("Able to restore the data from an xml file");
+#else
+Console.WriteLine("This project was not built with JSON support enabled.");
+#endif

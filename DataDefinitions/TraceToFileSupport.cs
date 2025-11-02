@@ -7,13 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace DataDefinitions;
-public enum TraceToFileState
-{
-    NotInitialized = 0,
-    Initialized = 1,
-    StreamOpened = 2,
-    StreamClosed = 4
-}
+
 /// <summary>
 /// Support for trace to a text file
 /// </summary>
@@ -22,6 +16,14 @@ public enum TraceToFileState
 /// </remarks>
 public class TraceToFileSupport
 {
+    [Flags]
+    public enum TraceToFileState
+    {
+        NotInitialized = 0,
+        Initialized = 1,
+        StreamOpened = 2,
+        StreamClosed = 4
+    }
     public StreamWriter TraceStream
     {
         get; protected set;

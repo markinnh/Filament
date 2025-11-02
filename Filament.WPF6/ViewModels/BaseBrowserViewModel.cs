@@ -25,7 +25,7 @@ using System.Windows;
 
 namespace Filament.WPF6.ViewModels;
 
-public abstract class BaseBrowserViewModel<TBrowse, TSelect> : Observable, DataDefinitions.Interfaces.IFilterStatus,IViewModel where TBrowse : DataDefinitions.DataObject, new()
+public abstract partial class BaseBrowserViewModel<TBrowse, TSelect> : Observable, DataDefinitions.Interfaces.IFilterStatus,IViewModel where TBrowse : DataDefinitions.DataObject, new()
     where TSelect : DataDefinitions.DataObject, new()
 {
 #if DEBUG
@@ -64,13 +64,13 @@ public abstract class BaseBrowserViewModel<TBrowse, TSelect> : Observable, DataD
 
     }
     protected bool processingEvents = true;
-    protected const string showAllFilterKey = "ShowAll";
-    protected const string tagFilterKey = "Tags";
+    //protected const string showAllFilterKey = "ShowAll";
+    //protected const string tagFilterKey = "Tags";
 
     protected ConcurrentDictionary<IResolveFilter.Filters, IWindowsFilter> filters = new();
     protected ConcurrentDictionary<string,IEnumerable> menus = new();
     protected static bool ready = true;
-    protected virtual bool SupportsShowAllFiltering { get; } = true;
+    protected virtual bool SupportsShowAllFiltering { get; } = false;
 
     public bool Ready
     {
@@ -98,20 +98,33 @@ public abstract class BaseBrowserViewModel<TBrowse, TSelect> : Observable, DataD
     //private ObservableCollection<TBrowse>? _browse;
     //public ObservableCollection<TBrowse>? Items { get => _browse; set => Set(ref _browse, value); }
     public CollectionViewSource ViewSource { get; set; }
+    public virtual void InitFilterUI()
+    {
+        UpdateFilterUI();// overridden where filters are used
+        //throw new NotImplementedException();
+    }
+    protected void UpdateFilterUI(bool TagFilterEnabled = false, bool DateFilterEnabled = false, bool KeywordFilterEnabled = false)
+    {
+        var args = new FilterUIChangedEventArgs(TagFilterEnabled, DateFilterEnabled, KeywordFilterEnabled);
+        WeakReferenceMessenger.Default.Send(args);
+    }
 
-    private event EventHandler<SelectedItemChangedEventArgs> SelectedItemChanged;
+    //private event EventHandler<SelectedItemChangedEventArgs> SelectedItemChanged;
     private TSelect? selectedItem;
     [Affected(nameof(CanDelete), nameof(SelectedItemNotNull))]
     public TSelect? SelectedItem
     {
         get => selectedItem;
-        set
-        {
-            if (Set(ref selectedItem, value))
-                SelectedItemChanged?.Invoke(this, new SelectedItemChangedEventArgs(SelectedItem));
-        }
+        set => Set(ref selectedItem, value);
     }
-    public bool CanDelete => SelectedItem?.SupportsDelete ?? false;
+    public virtual bool CanDelete => (SelectedItem?.SupportsDelete ?? false) && !SelectedItemHasDependencies() ;
+    protected bool SelectedItemHasDependencies()
+    {
+        if(SelectedItem is DatabaseObject db)
+            return db.HasDependencies(Singleton<LiteDBDal>.Instance);
+        else
+            return false;
+    }
     public bool SelectedItemNotNull => SelectedItem != null;
 
     public bool HasModifiedItems => ((IEnumerable<TBrowse>)ViewSource.Source).Any(it => it.IsModified) && !InAddNew;
@@ -119,6 +132,10 @@ public abstract class BaseBrowserViewModel<TBrowse, TSelect> : Observable, DataD
     protected BaseBrowserViewModel()
     {
         ViewSource = new( ) { IsLiveFilteringRequested=true};
+        if (CollectionViewSource.GetDefaultView(ViewSource) is IEditableCollectionView icv)
+        {
+            icv.NewItemPlaceholderPosition = NewItemPlaceholderPosition.None;
+        }
         //Trace.WriteLine($"CollectionViewType = {ViewSource.CollectionViewType?.GetType().Name}", "Information");
         if (SupportsShowAllFiltering)
         {
@@ -132,17 +149,17 @@ public abstract class BaseBrowserViewModel<TBrowse, TSelect> : Observable, DataD
             //            ShowInUseItems();
             //    }
             //}
-            filters.TryAdd(IResolveFilter.Filters.ShowAll, new WindowsFilter(new ShowAllResolve()));
+            //filters.TryAdd(IResolveFilter.Filters.ShowAll, new WindowsFilter(new ShowAllResolve()));
             WeakReferenceMessenger.Default.Register<ShowAllFlagChanged>(this, HandleShowAllFlagChanged);
         }
         WeakReferenceMessenger.Default.Register<FilterChangedEventArgs>(this, HandleFilterChanged);
         DerivedInitItems();
-        var showState = Enum.Parse<ShowAllFlag>(Properties.Settings.Default.ShowStateFlag);
+        //var showState = Enum.Parse<ShowAllFlag>(Properties.Settings.Default.ShowStateFlag);
 
-        if (showState == ShowAllFlag.ShowAll)
-            ShowAllItems();
-        else
-            ShowInUseItems();
+        //if (showState == ShowAllFlag.ShowAll)
+        //    ShowAllItems();
+        //else
+        //    ShowInUseItems();
 
         UpdateEventLinks();
 
@@ -229,27 +246,27 @@ public abstract class BaseBrowserViewModel<TBrowse, TSelect> : Observable, DataD
     }
     protected virtual void ShowAllItems()
     {
-        if (filters.TryGetValue(IResolveFilter.Filters.ShowAll, out var filter))
-            if (filter.Applied)
-            {
-                filter.Applied = false;
-                ViewSource.Filter -= new FilterEventHandler(filter.Filter);
-            }
+        //if (filters.TryGetValue(IResolveFilter.Filters.ShowAll, out var filter))
+        //    if (filter.Applied)
+        //    {
+        //        filter.Applied = false;
+        //        ViewSource.Filter -= new FilterEventHandler(filter.Filter);
+        //    }
 
         //ViewSource.Filter -= FilterForITrackUsage;
     }
     protected virtual void ShowInUseItems()
     {
         //ViewSource.Filter += FilterForITrackUsage;
-        if (filters.TryGetValue(IResolveFilter.Filters.ShowAll, out var filter))
-            if (!filter.Applied)
-            {
-                if (filter.Resolve is ICriteriaFilter criteria)
-                    criteria.UpdateCriteria(false);
+        //if (filters.TryGetValue(IResolveFilter.Filters.ShowAll, out var filter))
+        //    if (!filter.Applied)
+        //    {
+        //        if (filter.Resolve is ICriteriaFilter criteria)
+        //            criteria.UpdateCriteria(false);
 
-                ViewSource.Filter += new FilterEventHandler(filter.Filter);
-                filter.Applied = true;
-            }
+        //        ViewSource.Filter += new FilterEventHandler(filter.Filter);
+        //        filter.Applied = true;
+        //    }
     }
 
     private void FilterForITrackUsage(object sender, FilterEventArgs e)
@@ -342,19 +359,20 @@ public abstract class BaseBrowserViewModel<TBrowse, TSelect> : Observable, DataD
         OnPropertyChanged(nameof(HasModifiedItems));
     }
 
-    private ICommand? updateCommand;
-    public ICommand UpdateCommand  => updateCommand ??= new RelayCommand(UpdateSelectedItemHander); 
+    //private ICommand? updateCommand;
+    //public ICommand UpdateCommand  => updateCommand ??= new RelayCommand(Update); 
 
-    private ICommand? newItemCommand;
+    //private ICommand? newItemCommand;
 
-    public ICommand NewItemCommand => newItemCommand ??= new RelayCommand(NewItemHandler);
+    //public ICommand NewItemCommand => newItemCommand ??= new RelayCommand(NewItem);
 
-    private ICommand? saveAllChangesCommand;
-    public ICommand SaveAllChangesCommand => saveAllChangesCommand ??= new RelayCommand(SaveAllChangesHandler);
+    //private ICommand? saveAllChangesCommand;
+    //public ICommand SaveAllChangesCommand => saveAllChangesCommand ??= new RelayCommand(SaveAllChanges);
 
-    private ICommand? deleteSelectedCommand;
-    public ICommand DeleteSelectedCommand => deleteSelectedCommand ??= new RelayCommand(DeleteSelectedHandler);
-    protected virtual void SaveAllChangesHandler()
+    //private ICommand? deleteSelectedCommand;
+    //public ICommand DeleteSelectedCommand => deleteSelectedCommand ??= new RelayCommand(DeleteSelected);
+    [RelayCommand]
+    protected virtual void SaveAllChanges()
     {
         try
         {
@@ -370,13 +388,13 @@ public abstract class BaseBrowserViewModel<TBrowse, TSelect> : Observable, DataD
         catch (Exception ex)
         {
             
-            TraceError($"Unable to complete data operations.  The following error was returned.  {ex.Message}, Inner Exception : {ex.InnerException?.Message}");
+            TraceError($"Unable to complete SaveAllChanges data operations.  The following error was returned.  {ex.Message}, Inner Exception : {ex.InnerException?.Message}");
             Debug.Assert(false);
         }
         //System.Diagnostics.Debug.WriteLine("Save all changes not implemented.");
     }
-
-    protected virtual void NewItemHandler()
+    [RelayCommand]
+    protected virtual void NewItem()
     {
         InAddNew = true;
         SelectedItem = new TSelect();
@@ -384,8 +402,8 @@ public abstract class BaseBrowserViewModel<TBrowse, TSelect> : Observable, DataD
         OnPropertyChanged(nameof(CanAdd));
         //System.Diagnostics.Debug.WriteLine("Add new item not implemented.");
     }
-
-    protected virtual void UpdateSelectedItemHander()
+    [RelayCommand]
+    protected virtual void Update()
     {
         if (SelectedItem != null)
         {
@@ -425,15 +443,23 @@ public abstract class BaseBrowserViewModel<TBrowse, TSelect> : Observable, DataD
         //System.Diagnostics.Debug.WriteLine($"Update selected item for {typeof(TBrowse).Name} not implemented.");
     }
     protected virtual void UpdateAfterItemDelete() { }
-    protected virtual void DeleteSelectedHandler()
+    [RelayCommand]
+    protected virtual void DeleteSelected()
     {
         if (SelectedItem != null)
         {
             //Singleton<DAL.DataLayer>.Instance.Remove(SelectedItem);
             // TODO: Develop code for removing an item from the database, or stopping the deletion if it has references in other objects,
             // currently if the Item supports ITrackUsable it is flagged to stop using it.
-            if (SelectedItem is ISupportDelete supportDelete)
-                supportDelete.Delete(Singleton<LiteDBDal>.Instance);
+            if (SelectedItem is IDeleteSupport iSupportDelete && SelectedItem.SupportsDelete)
+                try
+                {
+                    iSupportDelete.Delete(Singleton<LiteDBDal>.Instance);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Unable to delete the selected item.  The following error was returned.  {ex.Message}, Inner Exception : {ex.InnerException?.Message}", "Error Deleting Item", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             else if (SelectedItem is ITrackUsable track)
                 track.StopUsing = true;
 
@@ -495,11 +521,12 @@ public abstract class BaseBrowserViewModel<TBrowse, TSelect> : Observable, DataD
             return false;
         //throw new NotImplementedException();
     }
-    private ICommand generateCode;
-    public ICommand GenerateCode => generateCode ??= new RelayCommand(HandleCodeGenerate);
+    //private ICommand generateCode;
+    //public ICommand GenerateCode => generateCode ??= new RelayCommand(CodeGenerate);
 #if DEBUG
     public bool CodeGenSupported => true;
-    private void HandleCodeGenerate()
+    [RelayCommand]
+    private void CodeGenerate()
     {
         if (SelectedItem!=null)
             WriteLine(SelectedItem.GenerateCode());
@@ -507,7 +534,8 @@ public abstract class BaseBrowserViewModel<TBrowse, TSelect> : Observable, DataD
 #else
 
     public bool CodeGenSupported=>false;
-    private void HandleCodeGenerate(){
+    [RelayCommand]
+    private void CodeGenerate(){
         MessageBox.Show("Code Generation Not Supported in the release version of this app", "Not Supported", MessageBoxButton.OK, MessageBoxImage.Stop);
     }
 #endif

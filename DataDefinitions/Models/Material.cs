@@ -34,6 +34,7 @@ public class Material : DatabaseObject, IFormattable
     public override bool InDatabase => MaterialId != default;
     [JsonIgnore, BsonIgnore]
     public override bool IsValid => !string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(ShortName);
+    [JsonIgnore]
     public int MaterialId
     {
         get;
@@ -55,7 +56,7 @@ public class Material : DatabaseObject, IFormattable
         set => Set(ref shorthandName, value);
     }
     private ObservableCollection<Descriptor> enhancements;
-    [BsonField("Enhance")]
+    [BsonField("Enhance"),JsonPropertyName("Enhance")]
     public ObservableCollection<Descriptor> Enhancements
     {
         get => enhancements;
@@ -88,6 +89,7 @@ public class Material : DatabaseObject, IFormattable
     {
         Enhancements = new ObservableCollection<Descriptor>();
     }
+    public override string ToString() => ToString("N",null);
     public string ToString(string format, IFormatProvider formatProvider)
     {
         var specifier = string.IsNullOrEmpty(format) ? "N" : format;
@@ -136,8 +138,8 @@ public class Material : DatabaseObject, IFormattable
                 builder.Append("}");
                 return builder.ToString();
             default:
-                return $"{format} not supported";
-                break;
+                throw new NotSupportedException($"the format specifier '{specifier}' is not supported") ;
+
         }
         //throw new NotImplementedException();
     }
@@ -159,14 +161,14 @@ public class Descriptor : DataObject, IFormattable
     //    set => Set(ref description, value);
     //}
     private bool mmsCompatible;
-    [BsonField("MMSComp")]
+    [BsonField("MMSComp"),JsonPropertyName("MMSComp")]
     public bool MMSCompatible
     {
         get => mmsCompatible;
         set => Set(ref mmsCompatible, value);
     }
     private bool abrasive;
-    [BsonField("Abras")]
+    [BsonField("Abras"), JsonPropertyName("Abras")]
     public bool Abrasive
     {
         get => abrasive;
@@ -198,8 +200,8 @@ public class Descriptor : DataObject, IFormattable
             case "CG":
                 return $"new Descriptor({Name.DoQuote()},{MMSCompatible});";
             default:
-                return $"{specifier} is not supported";
-                break;
+                throw new NotSupportedException($"the format specifier '{specifier}' is not supported") ;
+
         }
     }
 }

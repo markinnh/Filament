@@ -16,21 +16,27 @@ using System.Diagnostics;
 using DataDefinitions.LiteDBSupport;
 using CommunityToolkit.Mvvm.Input;
 using System.Windows;
+using CommunityToolkit.Mvvm.Messaging;
 //using DAL;
 
 namespace Filament.WPF6.ViewModels;
 
-public class FilamentDefnViewModel : BaseBrowserViewModel<FilamentDefn, FilamentDefn>
+public partial class FilamentDefnViewModel : BaseBrowserViewModel<FilamentDefn, FilamentDefn>,IExportUI
 {
     public ObservableCollection<Material> Materials
     {
         get;
     } = Singleton<LiteDBDal>.Instance.Materials;
 
+    public ImportExportUIState ImportExportUIState => new (true,false);
     public ObservableCollection<VendorDefn> Vendors { get; set; }=Singleton<LiteDBDal>.Instance.Vendors;
     public FilamentDefnViewModel() : base()
     {
-
+        WeakReferenceMessenger.Default.Register<ExchangeActionEventArgs>(this, (r, m) =>
+        {
+            if(m.Action == ExchangeActions.ExportSelected)
+                ExportFilament();
+        });
     }
     protected override void DerivedInitItems()
     {
@@ -43,7 +49,47 @@ public class FilamentDefnViewModel : BaseBrowserViewModel<FilamentDefn, Filament
         //}
         //FinishedDataOperations();
     }
-
+    [RelayCommand]
+    private void ExportFilament()
+    {
+        /*
+        if (SelectedItem != null)
+        {
+            var sfd = new Microsoft.Win32.SaveFileDialog
+            {
+                Title = "Export Filament Definition",
+                Filter = "JSON Files|*.json|All Files|*.*",
+                FileName = $"{SelectedItem.Name}.json",
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+            };
+            if (sfd.ShowDialog() == true)
+            {
+                try
+                {
+                    JsonFileSupport.WriteToJsonFile(sfd.FileName, SelectedItem);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error exporting filament definition to {sfd.FileName}\n{ex.Message}", "Export Filament Definition", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }*/
+        var exportFilename = string.Empty;
+        var suggestedFilename = SelectedItem != null ? $"{SelectedItem.Material.ShortName}{SelectedItem.Enhancement}{SelectedItem.Vendor?.Name} - {DateTime.Now:yyyyMMddHHmmss}.json" : $"Filament - {DateTime.Now:yyyyMMddHHmmss}.json";
+        try
+        {
+            exportFilename = JsonFileSupport.GetExportJsonFilename(suggestedName: suggestedFilename,
+            startingPath: System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), Properties.Settings.Default.DataPath, Properties.Settings.Default.ExchangePath, "Filaments"));
+            if (SelectedItem != null)
+                JsonFileSupport.ExportToGJsonPackage(exportFilename, SelectedItem);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error exporting filament definition to {exportFilename}\n{ex.Message}", "Export Filament Definition", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        Debug.WriteLine($"FilamentDefnViewModel ExportFilamentDefn called" );
+        Debug.WriteLine(SelectedItem?.SerializeForSharing());
+    }
     //protected override void FinishedDataOperations() => FilamentDefn.InDataOps = false;
 
     //protected override void PrepareForDataOperations() => FilamentDefn.InDataOps = true;

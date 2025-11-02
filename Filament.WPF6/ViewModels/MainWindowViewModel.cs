@@ -12,6 +12,7 @@ using DataDefinitions;
 using DataDefinitions.Filters;
 using DataDefinitions.Interfaces;
 using Filament.WPF6.Helpers;
+using Windows.UI.WebUI;
 
 namespace Filament.WPF6.ViewModels;
 
@@ -19,7 +20,7 @@ public enum InventoryDisplayStyle
 {
     Intuitive, Simple, Form
 }
-public class MainWindowViewModel : Observable
+public partial class MainWindowViewModel : Observable
 {
     private static readonly IEnumerable<string> emptyKeywords = new string[] { ".*" };
     //[Flags]
@@ -53,32 +54,6 @@ public class MainWindowViewModel : Observable
         get => Properties.Settings.Default.SelectedTabIndex;
         set => Properties.Settings.Default.SelectedTabIndex = value;
     }
-    #endregion
-    public MainWindowViewModel()
-    {
-        CheckableTagStats = new ObservableCollection<CheckableWordStat>();
-        CheckableKeywords = new ObservableCollection<CheckableWordStat>();
-
-        WeakReferenceMessenger.Default.Register<NotifyContainerEventArgs>(this, HandleNotifyContainer);
-        EndFilterStartDate = DateTime.Today.AddDays(1);
-        FilterEndDate = EndFilterStartDate;
-    }
-    private ObservableCollection<CheckableWordStat>? checkableTagStats;
-
-    public ObservableCollection<CheckableWordStat> CheckableTagStats
-    {
-        get => checkableTagStats ?? new ObservableCollection<CheckableWordStat>();
-        set => Set(ref checkableTagStats, value);
-    }
-
-    private ObservableCollection<CheckableWordStat>? checkableKeywords;
-
-    public ObservableCollection<CheckableWordStat> CheckableKeywords
-    {
-        get => checkableKeywords ?? new ObservableCollection<CheckableWordStat>();
-        set => Set<ObservableCollection<CheckableWordStat>>(ref checkableKeywords, value);
-    }
-
     private bool tagFilterApplied;
 
     public bool TagFilterApplied
@@ -86,6 +61,30 @@ public class MainWindowViewModel : Observable
         get => tagFilterApplied;
         set => Set<bool>(ref tagFilterApplied, value);
     }
+    private bool canFilterTag;
+
+    public bool CanFilterByTag
+    {
+        get => canFilterTag;
+        set => Set(ref canFilterTag, value);
+    }
+
+    private bool canFilterKeyword;
+
+    public bool CanFilterByKeyword
+    {
+        get => canFilterKeyword;
+        set => Set(ref canFilterKeyword, value);
+    }
+
+    private bool canFilterByDate;
+
+    public bool CanFilterByDate
+    {
+        get => canFilterByDate;
+        set => Set(ref canFilterByDate, value);
+    }
+
     private bool keywordFilterApplied;
 
     public bool KeywordFilterApplied
@@ -217,7 +216,58 @@ public class MainWindowViewModel : Observable
         get => dateFilterSupported;
         set => Set<bool>(ref dateFilterSupported, value);
     }
+    private bool supportsExport;
 
+    public bool SupportsExport
+    {
+        get => supportsExport;
+        set => Set(ref supportsExport, value);
+    }
+    private ImportExportUIState exportUIState;
+
+    public ImportExportUIState ExportUIState
+    {
+        get => exportUIState;
+        set => Set(ref exportUIState, value);
+    }
+    #endregion
+    public MainWindowViewModel()
+    {
+        CheckableTagStats = new ObservableCollection<CheckableWordStat>();
+        CheckableKeywords = new ObservableCollection<CheckableWordStat>();
+
+        WeakReferenceMessenger.Default.Register<NotifyContainerEventArgs>(this, HandleNotifyContainer);
+        WeakReferenceMessenger.Default.Register<FilterUIChangedEventArgs>(this, (r, m) =>
+        {
+            TagFilterSupported = m.TagFilterEnabled;
+            KeywordFilterSupported = m.KeywordFilterEnabled;
+            DateFilterSupported = m.DateFilterEnabled;
+        });
+        EndFilterStartDate = DateTime.Today.AddDays(1);
+        FilterEndDate = EndFilterStartDate;
+    }
+    private ObservableCollection<CheckableWordStat>? checkableTagStats;
+
+    public ObservableCollection<CheckableWordStat> CheckableTagStats
+    {
+        get => checkableTagStats ?? new ObservableCollection<CheckableWordStat>();
+        set => Set(ref checkableTagStats, value);
+    }
+
+    private ObservableCollection<CheckableWordStat>? checkableKeywords;
+
+    public ObservableCollection<CheckableWordStat> CheckableKeywords
+    {
+        get => checkableKeywords ?? new ObservableCollection<CheckableWordStat>();
+        set => Set<ObservableCollection<CheckableWordStat>>(ref checkableKeywords, value);
+    }
+
+
+    internal void UpdateExportUI(IExportUI exportUI)
+    {
+        SupportsExport = exportUI != null;
+        ExportUIState = exportUI?.ImportExportUIState ?? new ImportExportUIState(false, false,false);
+    }
     //public MainWindowViewModel()
     //{
     //    EndFilterStartDate = DateTime.Today + new TimeSpan(1, 0, 0, 0);
@@ -277,7 +327,7 @@ public class MainWindowViewModel : Observable
         {
             var replaceTags = new ObservableCollection<CheckableWordStat>(
                 (from tag in tagCollate.DistinctTagStats
-                select new CheckableWordStat(CheckableTagStats.FirstOrDefault(cws => cws?.Item?.Word == tag.Word)?.IsChecked ?? false, tag)).ToArray());
+                 select new CheckableWordStat(CheckableTagStats.FirstOrDefault(cws => cws?.Item?.Word == tag.Word)?.IsChecked ?? false, tag)).ToArray());
             CheckableTagStats = replaceTags;
         }
         else
@@ -292,11 +342,26 @@ public class MainWindowViewModel : Observable
         {
             var replaceKeywords = new ObservableCollection<CheckableWordStat>(
                 (from kw in newKeywords
-                select new CheckableWordStat(CheckableKeywords.FirstOrDefault(cws => cws.Item.Word == kw.Word)?.IsChecked ?? false, kw)).ToArray());
+                 select new CheckableWordStat(CheckableKeywords.FirstOrDefault(cws => cws.Item.Word == kw.Word)?.IsChecked ?? false, kw)).ToArray());
             CheckableKeywords = replaceKeywords;
         }
         else
             SetKeywordList(noteViewModel);
+        noteViewModel.InitFilterUI();
+        //UpdateFilterUI(noteViewModel);
+    }
+    internal void UpdateFilterUI(NoteViewModel noteViewModel)
+    {
+        CanFilterByDate = noteViewModel.CanFilterByDate;
+        CanFilterByKeyword = noteViewModel.CanFilterByKeyword;
+        CanFilterByTag = noteViewModel.CanFilterByTag;
+    }
+    internal void UpdateFilterUI(IViewModelTagCollate tagCollate)
+    {
+        tagCollate.InitFilterUI();
+        //CanFilterByTag = true;
+        //CanFilterByDate = false;
+        //CanFilterByKeyword = false;
     }
     //private static IEnumerable<WordWithOccuranceCount> DifferByCount(IEnumerable<WordWithOccuranceCount> original, IEnumerable<WordWithOccuranceCount> modified)
     //{
@@ -317,19 +382,19 @@ public class MainWindowViewModel : Observable
         }
     }
     #region Commands and Handlers
-    private ICommand listChangeCommand;
-    public ICommand ListChangeCommand => listChangeCommand ??= new RelayCommand<string?>(HandleListChange);
-
-    private void HandleListChange(string? obj)
+    //private ICommand listChangeCommand;
+    //public ICommand ListChangeCommand => listChangeCommand ??= new RelayCommand<string?>(ListChange);
+    [RelayCommand]
+    private void ListChange(string? obj)
     {
         if (string.IsNullOrEmpty(obj)) return;
 
-        Trace.WriteLine($"List Changed command received {obj}","Information");
+        Trace.WriteLine($"List Changed command received {obj}", "Information");
         switch (obj)
         {
             case "Tag":
                 _filterTags = CheckableTagStats?.Where(ck => ck.IsChecked).Select(ck => ck.Item.Word).ToArray();
-                WeakReferenceMessenger.Default.Send(new TagFilterChangedEventArgs(FilterAction.Update, IResolveFilter.Filters.Tag, _filterTags, _tagId,_targetViewModel));
+                WeakReferenceMessenger.Default.Send(new TagFilterChangedEventArgs(FilterAction.Update, IResolveFilter.Filters.Tag, _filterTags, _tagId, _targetViewModel));
                 WeakReferenceMessenger.Default.Send(new TagInteractionNotification(ContentInteraction.ContentUpdated));
                 break;
             case "Keyword":
@@ -350,12 +415,12 @@ public class MainWindowViewModel : Observable
 
     }
 
-    private ICommand applyFilterCommand;
-    public ICommand ApplyTagFilterCommand => applyFilterCommand ??= new RelayCommand<bool>(HandleApplyFilter);
-
-    private void HandleApplyFilter(bool obj)
+    //private ICommand applyFilterCommand;
+    //public ICommand ApplyTagFilterCommand => applyFilterCommand ??= new RelayCommand<bool>(ApplyFilter);
+    [RelayCommand]
+    private void ApplyTagFilter(bool obj)
     {
-        Trace.WriteLine($"Received ApplyTagFilter command, state = {obj}","Information");
+        Trace.WriteLine($"Received ApplyTagFilter command, state = {obj}", "Information");
         if (obj)
         {
             WeakReferenceMessenger.Default.Send(new TagFilterChangedEventArgs(FilterAction.Apply | FilterAction.Update, IResolveFilter.Filters.Tag, _filterTags, _tagId, _targetViewModel));
@@ -365,10 +430,10 @@ public class MainWindowViewModel : Observable
         //throw new NotImplementedException();
     }
 
-    private ICommand applyKeywordFilterCommand;
-    public ICommand ApplyKeywordFilterCommand => applyKeywordFilterCommand ??= new RelayCommand<bool>(HandleKeywordFilter);
-
-    private void HandleKeywordFilter(bool obj)
+    //private ICommand applyKeywordFilterCommand;
+    //public ICommand ApplyKeywordFilterCommand => applyKeywordFilterCommand ??= new RelayCommand<bool>(ApplyKeywordFilter);
+    [RelayCommand]
+    private void ApplyKeywordFilter(bool obj)
     {
         Trace.WriteLine($"Received ApplyKeywordFilter command, state = {obj}", "Information");
 
@@ -384,10 +449,10 @@ public class MainWindowViewModel : Observable
                 ?? emptyKeywords));
         //throw new NotImplementedException();
     }
-    private ICommand toggleFilterCommand;
-    public ICommand ToggleFilterCommand => toggleFilterCommand ??= new RelayCommand<object>(HandleToggleFilter);
-
-    private void HandleToggleFilter(object? obj)
+    //private ICommand toggleFilterCommand;
+    //public ICommand ToggleFilterCommand => toggleFilterCommand ??= new RelayCommand<object>(ToggleFilter);
+    [RelayCommand]
+    private void ToggleFilter(object? obj)
     {
         if (obj is Tuple<object, object> tpl && tpl.Item1 is bool bln && tpl.Item2 is string str)
         {
@@ -414,6 +479,39 @@ public class MainWindowViewModel : Observable
             }
         }
         //throw new NotImplementedException();
+    }
+    //private ICommand exportSelectedCommand;
+    //public ICommand ExportSelectedCommand => exportSelectedCommand ??= new RelayCommand(ExportSelected);
+    [RelayCommand]
+    private void ExportSelected()
+    {
+        WeakReferenceMessenger.Default.Send(new ExchangeActionEventArgs(ExchangeActions.ExportSelected));
+        //throw new NotImplementedException();
+    }
+    //private ICommand exportCheckedCommand;
+    //public ICommand ExportCheckedCommand => exportCheckedCommand ??= new RelayCommand(ExportChecked);
+    [RelayCommand]
+    private void ExportChecked()
+    {
+        WeakReferenceMessenger.Default.Send(new ExchangeActionEventArgs(ExchangeActions.ExportAllChecked));
+        //throw new NotImplementedException();
+    }
+    //private ICommand importFileCommand;
+    //public ICommand ImportFileCommand=>importFileCommand ??=new RelayCommand(ImportFile);
+    [RelayCommand]
+    private void ImportFile()
+    {
+        WeakReferenceMessenger.Default.Send(new ExchangeActionEventArgs(ExchangeActions.ImportFile));
+    }
+    [RelayCommand]
+    private void CheckAll()
+    {
+        WeakReferenceMessenger.Default.Send(new ExchangeActionEventArgs(ExchangeActions.CheckAllInView));
+    }
+    [RelayCommand]
+    private void UncheckAll()
+    {
+        WeakReferenceMessenger.Default.Send(new ExchangeActionEventArgs(ExchangeActions.UnCheckAllInView));
     }
     #endregion
 }

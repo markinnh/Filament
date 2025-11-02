@@ -90,6 +90,7 @@ public partial class MainWindow : Window
         if (message.Value == ContentInteraction.ContentUpdated && ViewFrame.Content is Page page && page.DataContext is IViewModelTagCollate tagCollate && DataContext is MainWindowViewModel main)
         {
             main.UpdateTagList(tagCollate);
+            tagCollate.InitFilterUI();
             if (page.DataContext is NoteViewModel noteViewModel)
             {
                 main.UpdateKeywordList(noteViewModel);
@@ -106,6 +107,7 @@ public partial class MainWindow : Window
             page.DataContext is NoteViewModel model &&
             DataContext is MainWindowViewModel main)
         {
+            model.InitFilterUI();
             main.UpdateKeywordList(model);
         }
     }
@@ -187,18 +189,40 @@ public partial class MainWindow : Window
         Trace.WriteLine($"Navigated to {e.Content.GetType().Name}", "Information");
         //this all has to go to the MainWindowViewModel
         // if DataContext is MainWindowViewModel then set child page member, handle all the other issues in the MainWindowViewModel
-        if (e.Content is Page page && page.DataContext is IViewModelTagCollate tagCollation && DataContext is MainWindowViewModel main)
+        if (DataContext is MainWindowViewModel main)
         {
-            // TODO: 2-3-2023 Add code to initialize the Keywords List
-            main.SetTagList(tagCollation);
-            if (tagCollation is IFilterStatus filterStatus)
-                main.UpdateUI(filterStatus);
-            if (page.DataContext is NoteViewModel noteViewModel)
+            if (e.Content is Page page && page.DataContext is IViewModelTagCollate tagCollation )
             {
-                main.SetKeywordList(noteViewModel);
+                // TODO: 2-3-2023 Add code to initialize the Keywords List
+                main.SetTagList(tagCollation);
+                if (tagCollation is IFilterStatus filterStatus)
+                    main.UpdateUI(filterStatus);
+                if (page.DataContext is NoteViewModel noteViewModel)
+                {
+                    main.SetKeywordList(noteViewModel);
+                }
+                tagCollation.InitFilterUI();
             }
-        }
+            else if(e.Content is Page pg && pg.DataContext is IViewModel vm1)
+            {
+                vm1.InitFilterUI();
+            }
+            else
+            {
+                var args = new FilterUIChangedEventArgs(false);
+                WeakReferenceMessenger.Default.Send(args);
 
+            }
+            if (e.Content is Page p && p.DataContext is IExportUI vm)
+            {
+                main.UpdateExportUI(vm);
+            }
+            else
+            {
+                main.UpdateExportUI(null);
+            }
+            
+        }
         //{
         //    Debug.WriteLine($"tag collation count {tagCollation.TagStats.Count()}");
         //    if (tagCollation.TagStats != null)
@@ -225,7 +249,7 @@ public partial class MainWindow : Window
 
     private void Trace_Click(object sender, RoutedEventArgs e)
     {
-        if (Settings.Default.EnableDebugToFile )
+        if (Settings.Default.EnableDebugToFile)
         {
             Trace.WriteLine($"Listening to file disabled {DateTime.Now:g}", "Information");
             Singleton<TraceToFileSupport>.Instance.StopListening();

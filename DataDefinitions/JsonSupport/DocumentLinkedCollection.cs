@@ -8,7 +8,7 @@ using DataDefinitions.Interfaces;
 using LiteDB;
 
 namespace DataDefinitions.JsonSupport;
-
+#if SUPPORTJSON
 public class DocumentLinkedCollection<T> : ObservableCollection<T>, ILinked, ITrackModified, IUpdateModified where T : ILinked,ITrackModified
 {
     public bool InDataOperations => false;
@@ -57,3 +57,4 @@ public class DocumentLinkedCollection<T> : ObservableCollection<T>, ILinked, ITr
             throw new ArgumentNullException(nameof(item), $"trying to add a null item of type {typeof(T).Name} to the collection, this will lead to problems later");
     }
 }
+#endif

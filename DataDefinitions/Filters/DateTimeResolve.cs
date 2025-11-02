@@ -5,60 +5,61 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataDefinitions.Filters
+namespace DataDefinitions.Filters;
+/// <summary>
+/// WhichCompare includes the test date for comparison, so Before means before or equal to the test date
+/// </summary>
+public enum WhichCompare : short
 {
-    public enum WhichCompare : short
+    Before = 0x10,
+    After,
+    Between
+};
+/// <summary>
+/// Provides a date filtering class
+/// </summary>
+/// <seealso cref="IDate"/>
+public class DateTimeResolve : IResolveFilter
+{
+    public DateTime CompareDateTime { get; protected set; }
+    public DateTime EndDateTime { get; protected set; }
+    public WhichCompare Compare { get; protected set; }
+    public DateTimeResolve()
     {
-        Before = 0x10,
-        After,
-        Between
-    };
-    /// <summary>
-    /// Provides a date filtering class
-    /// </summary>
-    /// <seealso cref="IDate"/>
-    public class DateTimeResolve : IResolveFilter
+        Compare = WhichCompare.Before;
+        CompareDateTime = DateTime.Today;
+        EndDateTime = default(DateTime);
+    }
+    public DateTimeResolve(WhichCompare compare, DateTime compareDateTime, DateTime endDateTime = default)
     {
-        public DateTime CompareDateTime { get; protected set; }
-        public DateTime EndDateTime { get; protected set; }
-        public WhichCompare Compare { get; protected set; }
-        public DateTimeResolve()
-        {
-            Compare = WhichCompare.Before;
-            CompareDateTime = DateTime.Today;
-            EndDateTime = default(DateTime);
-        }
-        public DateTimeResolve(WhichCompare compare, DateTime compareDateTime, DateTime endDateTime = default)
-        {
-            Compare = compare;
-            CompareDateTime = compareDateTime;
-            EndDateTime = endDateTime;
-        }
-        public static bool operator ==(DateTimeResolve left, DateTimeResolve right)
-        {
-            return left.Compare == right.Compare && left.CompareDateTime == right.CompareDateTime && left.EndDateTime == right.EndDateTime;
-        }
-        public static bool operator !=(DateTimeResolve left, DateTimeResolve right)
-        {
-            return !(left == right);
-        }
-        public bool SatisfiedCriteria(object item)
-        {
-            bool result = true;
-            if (item is IDate date)
-                switch (Compare)
-                {
-                    case WhichCompare.Before:
-                        result = date.DateTime <= CompareDateTime;
-                        break;
-                    case WhichCompare.After:
-                        result = date.DateTime >= CompareDateTime;
-                        break;
-                    case WhichCompare.Between:
-                        result = date.DateTime >= CompareDateTime && date.DateTime <= EndDateTime;
-                        break;
-                }
-            return result;
-        }
+        Compare = compare;
+        CompareDateTime = compareDateTime;
+        EndDateTime = endDateTime;
+    }
+    public static bool operator ==(DateTimeResolve left, DateTimeResolve right)
+    {
+        return left.Compare == right.Compare && left.CompareDateTime == right.CompareDateTime && left.EndDateTime == right.EndDateTime;
+    }
+    public static bool operator !=(DateTimeResolve left, DateTimeResolve right)
+    {
+        return !(left == right);
+    }
+    public bool SatisfiedCriteria(object item)
+    {
+        bool result = true;
+        if (item is IDate date)
+            switch (Compare)
+            {
+                case WhichCompare.Before:
+                    result = date.DateTime <= CompareDateTime;
+                    break;
+                case WhichCompare.After:
+                    result = date.DateTime >= CompareDateTime;
+                    break;
+                case WhichCompare.Between:
+                    result = date.DateTime >= CompareDateTime && date.DateTime <= EndDateTime;
+                    break;
+            }
+        return result;
     }
 }

@@ -15,6 +15,8 @@ public class Seed
     {
         return new FilamentDefn[]
         {
+#if SUPPORTINTERNALSEED
+  // This no longer works as we are defining material separately
             new ()
             {
                 MaterialType=MaterialType.PLA,
@@ -51,6 +53,7 @@ public class Seed
                 IsIntrinsic = true,
                 Density = Constants.BasicWoodPLA
              }
+             #endif
         };
     }
     #endregion
@@ -58,7 +61,7 @@ public class Seed
     #region Vendor Definition Seed Data
     public static VendorDefn[] InitialVendorDefinitions()
     {
-
+#if SUPPORTINTERNALSEED
         var vendor1 = new VendorDefn()
         {
             Name = "3d Solutech",
@@ -304,14 +307,19 @@ public class Seed
             }
 
         };
+#else
+        return Array.Empty<VendorDefn>();
+#endif
+
     }
-    #endregion
+#endregion
 
     #region Print Setting Definitions Seed Data
     public static PrintSettingDefn[] InitialPrintSettingDefinitions()
     {
         return new PrintSettingDefn[]
         {
+#if SUPPORTINTERNALSEED
             new PrintSettingDefn()
             {
                 Definition="Extruder Temperature",
@@ -332,6 +340,7 @@ public class Seed
                 Definition="Parts Cooling Fan",
                 SettingValueType=SupportedSettingValueType.Boolean
             }
+            #endif
         };
     }
     #endregion

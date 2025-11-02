@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:Filament.WPF6"
         xmlns:helpers1="clr-namespace:Filament.WPF6.Helpers" x:Class="Filament.WPF6.MainWindow"
         mc:Ignorable="d"
-        Title="Filaments" Height="450" Width="800" SizeToContent="WidthAndHeight" x:Name="Main">
+        Title="Filaments" Height="600" Width="800" SizeToContent="WidthAndHeight" x:Name="Main">
     <Window.Resources>
 
         <BooleanToVisibilityConverter x:Key="BooleanToVisibility"/>
@@ -27,6 +27,7 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="Page">
+                <MenuItem x:Name="ImportPage" Header="Import" Tag="Pages\ImportPage.xaml" Click="SelectPage_Click"/>
                 <MenuItem Header="Inventory" IsCheckable="False">
                     <MenuItem x:Name="IntuitivePage" Header="Intuitive" Tag="Pages\ByVendorPage.xaml" Click="SelectPage_Click" />
                     <MenuItem x:Name="SimplePage" Header="Simple" Tag="Pages\SimpleInventoryPage.xaml" Click="SelectPage_Click"/>
@@ -43,7 +44,7 @@
                 <MenuItem x:Name="NotePage" Header="Notes" Tag="Pages\NotePage.xaml" Click="SelectPage_Click"/>
                 <MenuItem x:Name="SettingsPage"  Header="Settings" Tag="Pages\SettingsPage.xaml" Click="SelectPage_Click"/>
             </MenuItem>
-            <MenuItem Header="Filter">
+            <MenuItem Header="Filter" Visibility="Collapsed">
                 <!--<MenuItem Header="Tag" 
                           IsCheckable="True" 
                           IsChecked="{Binding TagMenuChecked,Mode=TwoWay}"/>
@@ -57,6 +58,14 @@
                 
             </MenuItem>
             <MenuItem Header="Edit" Visibility="{Binding HasEdits,Converter={StaticResource BooleanToVisibility}}" />
+            <MenuItem Header="Export" Visibility="{Binding SupportsExport,Converter={StaticResource BooleanToVisibility}}">
+                <MenuItem Header="Single Selected" Command="{Binding ExportSelectedCommand}" Visibility="{Binding ExportUIState.SupportsSingleExport,Converter={StaticResource VisibilityConverter}}"/>
+                <MenuItem Header="All Checked" Command="{Binding ExportCheckedCommand}" Visibility="{Binding ExportUIState.SupportsMultiExport,Converter={StaticResource VisibilityConverter}}"/>
+                <MenuItem Header="Import File" Command="{Binding ImportFileCommand}" Visibility="{Binding ExportUIState.SupportsImport,Converter={StaticResource VisibilityConverter}}"/>
+                <Separator/>
+                <MenuItem Header="Check All" Command="{Binding CheckAllCommand}" Visibility="{Binding ExportUIState.SupportsMultiExport,Mode=OneWay,Converter={StaticResource VisibilityConverter}}"/>
+                <MenuItem Header="Uncheck All" Command="{Binding UncheckAllCommand}" Visibility="{Binding ExportUIState.SupportsMultiExport,Mode=OneWay,Converter={StaticResource VisibilityConverter}}"/>
+            </MenuItem>
             <MenuItem Header="Window">
                 <MenuItem x:Name="TraceMenuItem" Header="Enable Trace" Click="Trace_Click" IsCheckable="True"/>
                 <MenuItem x:Name="GenCodeMenuItem" Header="Generate Code" ToolTip="Generate Code for predefined items" Click="GenCodeMenuItem_Click" />
@@ -77,7 +86,7 @@
                     </ComboBox.ItemTemplate>
                 </ComboBox>-->
                 <StackPanel Orientation="Horizontal" 
-                            Visibility="{Binding TagFilterSupported,Mode=OneWay,Converter={StaticResource VisibilityConverter}}">
+                            Visibility="{Binding TagFilterSupported,Mode=OneWay,Converter={StaticResource VisibilityConverter}}" IsEnabled="{Binding TagFilterSupported,Mode=OneWay}" Margin="0,0,0,3">
                 <ComboBox x:Name="TagBrowse" 
                           ItemsSource="{Binding CheckableTagStats}"
                           Width="75"
@@ -99,7 +108,7 @@
                 </ComboBox>
                     <ToggleButton Name="TagToggle" Width="32" Height="32" 
                                    Tag="Tag"
-                                  Command="{Binding ToggleFilterCommand, Mode=OneWay}" >
+                                  Command="{Binding ToggleFilterCommand, Mode=OneWay}" Style="{StaticResource RoundedToggleButton}">
                         <ToggleButton.CommandParameter>
                             <MultiBinding Converter="{StaticResource MultiValueToTuple}">
                                 <Binding Path="IsChecked" ElementName="TagToggle"/>
@@ -127,7 +136,7 @@
                         </ToggleButton.Content>
                     </ToggleButton>
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" Visibility="{Binding KeywordFilterSupported,Mode=OneWay,Converter={StaticResource VisibilityConverter}}">
+                <StackPanel Orientation="Horizontal" Visibility="{Binding KeywordFilterSupported,Mode=OneWay,Converter={StaticResource VisibilityConverter}}" IsEnabled="{Binding KeywordFilterSupported,Mode=OneWay}" Margin="0,0,0,3">
                     <ComboBox Width="75" Height="26" ItemsSource="{Binding CheckableKeywords}">
                         <ComboBox.ItemTemplate>
                             <DataTemplate DataType="{x:Type local:CheckableWordStat}">
@@ -147,7 +156,7 @@
                                   Height="32"
                                   IsChecked="{Binding KeywordFilterApplied,Mode=TwoWay}"
                                   Tag="Keyword"
-                                  Command="{Binding ToggleFilterCommand, Mode=OneWay}" >
+                                  Command="{Binding ToggleFilterCommand, Mode=OneWay}" Style="{StaticResource RoundedToggleButton}">
                         <ToggleButton.CommandParameter>
                             <MultiBinding Converter="{StaticResource MultiValueToTuple}">
                                 <Binding Path="IsChecked" ElementName="KeywordToggle"/>
@@ -175,7 +184,7 @@
                         </ToggleButton.Content>
                     </ToggleButton>
                 </StackPanel>
-                <StackPanel HorizontalAlignment="Left" Visibility="{Binding DateFilterSupported,Mode=OneWay,Converter={StaticResource VisibilityConverter}}">
+                <StackPanel HorizontalAlignment="Left" Visibility="{Binding DateFilterSupported,Mode=OneWay,Converter={StaticResource VisibilityConverter}}" IsEnabled="{Binding DateFilterSupported,Mode=OneWay}">
                     <ComboBox Width="75" 
                               ItemsSource="{Binding Mode=OneWay, Source={StaticResource DataFromWhichCompare}}" 
                               SelectedItem="{Binding WhichCompare,Mode=TwoWay}" 
@@ -190,7 +199,7 @@
                                   Height="32"
                                   Tag="Date"
                                   ToolTip="Date Filter"
-                                  Command="{Binding ToggleFilterCommand,Mode=OneWay}">
+                                  Command="{Binding ToggleFilterCommand,Mode=OneWay}" Style="{StaticResource RoundedToggleButton}">
                         <ToggleButton.CommandParameter>
                             <MultiBinding Converter="{StaticResource MultiValueToTuple}">
                                 <Binding Path="IsChecked" ElementName="DateToggle"/>
@@ -204,7 +213,7 @@
                 </StackPanel>
             </ToolBarPanel>
         </ToolBar>
-        <Frame x:Name="ViewFrame" NavigationUIVisibility="Hidden" Navigated="ViewFrame_Navigated"  Navigating="ViewFrame_Navigating" >
+        <Frame x:Name="ViewFrame" NavigationUIVisibility="Hidden" Style="{StaticResource CustomFrameStyle}" Navigated="ViewFrame_Navigated"  Navigating="ViewFrame_Navigating" >
             <Frame.LayoutTransform>
                 <Binding ElementName="Main" Path="LayoutTransform"/>
             </Frame.LayoutTransform>

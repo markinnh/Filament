@@ -32,7 +32,15 @@
             MaxHeight="450"
             ItemsSource="{Binding ViewSource.View}"
             ItemTemplate="{Binding Mode=OneWay, Source={StaticResource DisplayVendorDefnInListView}}"
-            SelectedItem="{Binding SelectedItem,Mode=TwoWay}"/>
+            SelectedItem="{Binding SelectedItem,Mode=TwoWay}">
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Export Selected" Command="{Binding ContextExportSelectedCommand}"/>
+                    <MenuItem Header="Export Checked" Command="{Binding ContextExportCheckedCommand}"/>
+                    <Separator/>
+                    <MenuItem Header="Check All" Command="{Binding ContextCheckAllCommand}"/>
+                    <MenuItem Header="Uncheck All" Command="{Binding ContextUncheckAllCommand}"/>
+                </ContextMenu></ListView.ContextMenu></ListView>
         <GridSplitter Grid.Column="1" Grid.RowSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="AliceBlue" 
                       ResizeBehavior="PreviousAndNext"
                       ResizeDirection="Columns"/>
@@ -71,6 +79,20 @@
                         
                         IsEnabled="{Binding CanAdd,Mode=OneWay}"
                         Command="{Binding NewItemCommand}"/>
+                <Button 
+        Style="{StaticResource RoundedCommandButton}"
+        Command="{Binding DeleteSelectedCommand}"
+        Content="{StaticResource DeleteIcon}"
+        IsEnabled="{Binding CanDelete,Mode=OneWay}"
+        Visibility="{Binding SelectedItem.SupportsDelete,Converter={StaticResource VisibilityConverter}}">
+
+                    <Button.ToolTip>
+                        <TextBlock>
+            <Run Text="Delete"/>
+            <Run Text="{Binding ChildTypeName,Mode=OneWay}"/>
+                        </TextBlock>
+                    </Button.ToolTip>
+                </Button>
             </StackPanel>
         </Grid>
         

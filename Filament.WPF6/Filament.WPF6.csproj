@@ -2,11 +2,16 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows7.0</TargetFramework>
+    <TargetFramework>net8.0-windows10.0.17763.0</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>Resources\Test.ico</ApplicationIcon>
     <AssemblyName>Filament</AssemblyName>
+    <Version>$(VersionPrefix)</Version>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>$(DefineConstants);SUPPORTDELETE</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

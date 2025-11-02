@@ -156,14 +156,16 @@ public class DatabaseObject : DataObject,ILinked
         var needsAdd = !InDatabase;
         //if (!InDatabase)
         //    AssignKey(Document.Counters.NextID(this));
-
+#if SUPPORTJSON
         UpdateContainedItemsForJson();
-        
         if (needsAdd)
         {
             //TODO: Develop a virtual method to save the object to the 'database' should only apply for Settings, VendorDefn, FilamentDefn and PrintSettingDefn
             SaveToJsonDatabase();
         }
+#else
+        throw new Exception("JSON Database support not compiled in");
+#endif
     }
     /// <summary>
     /// This is the only method that actually 'stores' data into the database, all the others walk up the tree until they reach the 'root' DatabaseObject
@@ -178,10 +180,12 @@ public class DatabaseObject : DataObject,ILinked
         //else
         //    dal.Add(this);
     }
+#if SUPPORTJSON
     protected virtual void SaveToJsonDatabase()
     {
         // does nothing for most methods, but does actually save item in the case of Setting, VendorDefn, FilamentDefn and PrintSettingDefn
     }
+#endif
     [JsonIgnore, BsonIgnore]
     protected virtual bool NeedsKey => false;
     
@@ -228,10 +232,12 @@ public class DatabaseObject : DataObject,ILinked
     {
         WriteLine($"In the base {nameof(SetDataOpsState)}, this should be implemented by each consumer of DatabaseObject", "Information");
     }
+#if SUPPORTJSON
     internal virtual void UpdateContainedItemsForJson()
     {
 
     }
+#endif
     internal virtual void UpdateContainedItemsForLiteDb(ref bool updated)
     {
 
@@ -245,7 +251,7 @@ public class DatabaseObject : DataObject,ILinked
     //    WriteLine($"Unable to set the ContainedModifiedState to '{state}' for {GetType().Name}, this is{(HasContainedItems ? string.Empty : " not")} required.");
     //    Assert(!HasContainedItems);  // This should only fire if this is not implemented and the class has contained items.
     //}
-
+    public virtual bool HasDependencies(ILiteDBDAL lite) => false;
     public virtual void AddChild() => WriteLine($"Add child not supported in {GetType().Name}", "Information");
     /// <summary>
     /// Probably Obsolete

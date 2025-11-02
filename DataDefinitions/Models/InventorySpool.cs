@@ -20,7 +20,7 @@ using static System.Diagnostics.Debug;
 namespace DataDefinitions.Models;
 
 [UIHints("Inventory")]
-public class InventorySpool : ParentLinkedDataObject<SpoolDefn>, ITag, ITrackUsable, ISupportDelete, IDataErrorInfo, IEventListener, IFormattable
+public class InventorySpool : ParentLinkedDataObject<SpoolDefn>, ITag, ITrackUsable, IDeleteSupport, IDataErrorInfo, IEventListener, IFormattable
 {
     // TODO: Establish an cumulative counter for the InventorySpool it must be stored in the database 
     // TODO: Make InventorySpool a standalone DatabaseObject, to be stored separately from the VendorDefn - abandoned, too much work for not enough benefit
@@ -285,13 +285,13 @@ public class InventorySpool : ParentLinkedDataObject<SpoolDefn>, ITag, ITrackUsa
     internal override void DeleteMe(DataObject dataObject, ILiteDBDAL lite)
     {
         //Assert(this != dataObject, "Can't delete yourself");
-        if (lite is LiteDBDal dal)
+        if (lite !=null)
         {
             var parentRef = this.Parent;
             //lite.Remove(this);
-            parentRef.DeleteMe(this, dal);
+            parentRef.DeleteMe(this, lite);
         }
-        dataObject = null;
+        //dataObject = null;
 
     }
     // if this is used in the wpf app it will need to exist in some form, probably for the UWP app,

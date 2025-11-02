@@ -11,4 +11,5 @@ namespace DataDefinitions.Interfaces;
 public interface IViewModel:IEventListener
 {
     Guid ViewModelGuid { get; }
+    void InitFilterUI();
 }

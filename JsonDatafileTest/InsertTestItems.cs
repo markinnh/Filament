@@ -10,6 +10,7 @@ namespace JsonDatafileTest;
 
 internal class InsertTestItems
 {
+#if SUPPORTJSON
     internal static void InsertTestObjects(DataDefinitions.JsonSupport.JsonFilamentDocument document, int vendorCount)
     {
         Assert(document.Vendors.Count > 0 && document.VendorDefns.Count == vendorCount);
@@ -73,4 +74,5 @@ internal class InsertTestItems
         Assert(retrieveResult != null && retrieveResult.Vendors.Count == vendorCount + 1);
         Console.WriteLine("Insert test vendor appears to have succeeded");
     }
+#endif
 }

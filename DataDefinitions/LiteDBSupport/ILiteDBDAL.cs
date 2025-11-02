@@ -17,4 +17,15 @@ public interface ILiteDBDAL:IStandardCrudActions
     List<Setting> Settings { get; }
     ObservableCollection<PrintSettingDefn> PrintSettings { get; }
     void SmartAdd(DataObject databaseObject);
+#if SUPPORTDELETE
+    void Remove(VendorDefn vendor);
+    void Remove(FilamentColor color);
+    void Remove(FilamentDefn filament);
+#endif
+#if DEBUG // Import Support
+    void Import(VendorDefn vendor);
+    void Import(FilamentColor color);
+    void Import(FilamentDefn filament);
+
+#endif
 }

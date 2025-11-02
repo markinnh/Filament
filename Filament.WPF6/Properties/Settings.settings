@@ -116,5 +116,20 @@
     <Setting Name="RemainingWeightUnits" Type="System.String" Scope="User">
       <Value Profile="(Default)">Kilogram</Value>
     </Setting>
+    <Setting Name="ExchangePath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Exchange</Value>
+    </Setting>
+    <Setting Name="NotePageSortDirection" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Ascending</Value>
+    </Setting>
+    <Setting Name="ByVendorPageSortDirection" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Ascending</Value>
+    </Setting>
+    <Setting Name="VendorDefnPageSortDirection" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Ascending</Value>
+    </Setting>
+    <Setting Name="FilamentColorPageSortDirection" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Ascending</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

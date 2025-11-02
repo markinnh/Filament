@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace DataDefinitions.LiteDBSupport;
 
-public class LiteDBDal : ILiteDBDAL, IReferenceUsage<FilamentDefn>, IEventListener
+public partial class LiteDBDal : ILiteDBDAL, IReferenceUsage<FilamentDefn>, IEventListener
 {
 
     const string settingTableName = "settings";
@@ -96,7 +96,7 @@ public class LiteDBDal : ILiteDBDAL, IReferenceUsage<FilamentDefn>, IEventListen
 
         Filaments = new ObservableCollection<FilamentDefn>(database.GetCollection<FilamentDefn>(filamentTableName).Query().ToEnumerable());
         Vendors = new CollateTagsCollection<VendorDefn>(database.GetCollection<VendorDefn>(vendorTableName).Query().ToEnumerable());
-        FilamentColors =new ObservableCollection<FilamentColor>(database.GetCollection<FilamentColor>(filamentColorsTableName).Query().ToEnumerable());
+        FilamentColors = new ObservableCollection<FilamentColor>(database.GetCollection<FilamentColor>(filamentColorsTableName).Query().ToEnumerable());
         Materials = new ObservableCollection<Material>(database.GetCollection<Material>(materialTableName).Query().ToEnumerable());
         // populate the Inventory
         // TODO: relink the Materials with the Filaments, after the MaterialType is changed to Material and a MaterialId member is added to the FilamentDefn
@@ -124,7 +124,7 @@ public class LiteDBDal : ILiteDBDAL, IReferenceUsage<FilamentDefn>, IEventListen
     }
     public LiteDBDal()
     {
-        
+
     }
     public void SetFilename(string filename) => Filename = filename;
     public void SmartAdd(DataObject dbObject)
@@ -183,9 +183,10 @@ public class LiteDBDal : ILiteDBDAL, IReferenceUsage<FilamentDefn>, IEventListen
                     Update(filamentColor);
                 else
                     Add(filamentColor);
+
                 if (!FilamentColors.Contains(filamentColor))
                     FilamentColors.Add(filamentColor);
-                    break;
+                break;
             case Material material:
                 if (material.InDatabase)
                     Update(material);
@@ -298,18 +299,7 @@ public class LiteDBDal : ILiteDBDAL, IReferenceUsage<FilamentDefn>, IEventListen
     public void Update(FilamentColor filamentColor) => Update(filamentColor, filamentColorsTableName);
     public void Update(Material material) => Update(material, materialTableName);
     //public void Update(InventorySpool inventorySpool) => Update(inventorySpool, inventoryTableName);
-    public void Remove(FilamentDefn filament)
-    {
-        Debug.Assert(!filament.IsIntrinsic, "Can't delete intrinsic filaments");
-
-        using LiteDatabase database = new LiteDatabase(ConnectionString);
-        database.GetCollection<FilamentDefn>(filamentTableName).Delete(filament.FilamentDefnId);
-    }
-    //public void Remove(InventorySpool inventorySpool)
-    //{
-    //    using LiteDatabase db = new LiteDatabase(ConnectionString);
-    //    db.GetCollection<InventorySpool>(inventoryTableName).Delete(inventorySpool.KeyID);
-    //}
+    
     public void SeedDatabase()
     {
         if (string.IsNullOrEmpty(Filename))
@@ -460,4 +450,25 @@ public class LiteDBDal : ILiteDBDAL, IReferenceUsage<FilamentDefn>, IEventListen
             filament.ReleaseEventHandlers();
 
     }
+    public void UpdateInDatabaseFlag(ISharingSupport support)
+    {
+        switch (support)
+        {
+            case VendorDefn vdefn:
+                vdefn.NotAlreadyInDatabase = Vendors.FirstOrDefault(v => v.Name == vdefn.Name && v.WebUrl == vdefn.WebUrl) == null;
+                break;
+            case FilamentDefn fdefn:
+                fdefn.NotAlreadyInDatabase = Filaments.FirstOrDefault(fd => fd.Material?.ShortName == fdefn?.Material.ShortName) == null;
+                break;
+            case FilamentColor filaColor:
+                filaColor.NotAlreadyInDatabase = FilamentColors.FirstOrDefault(fc => fc.VendorColorName == filaColor.VendorColorName && fc.ColorRGB == filaColor.ColorRGB) == null;
+                break;
+            default:
+                Trace.WriteLine($"No support to update database existence for {support.GetType().Name}");
+                break;
+        }
+    }
+#if DEBUG
+
+#endif
 }

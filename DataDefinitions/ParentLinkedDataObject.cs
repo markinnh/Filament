@@ -1,13 +1,14 @@
 ﻿using DataDefinitions.LiteDBSupport;
 using LiteDB;
 using System.Dynamic;
+using System.Text.Json.Serialization;
 using static System.Diagnostics.Debug;
 
 namespace DataDefinitions;
 
 public class ParentLinkedDataObject<ParentType> : DataObject where ParentType : DataObject
 {
-    [BsonIgnore]
+    [BsonIgnore,JsonIgnore]
     public ParentType Parent { get; set; }
 
     internal virtual void LinkToParent(ParentType parent)
@@ -24,6 +25,6 @@ public class ParentLinkedDataObject<ParentType> : DataObject where ParentType : 
     {
         //Assert(this != dataObject, "Can't delete yourself.");
         Parent.DeleteMe(this,lite);
-        dataObject = null;
+        //dataObject = null;
     }
 }

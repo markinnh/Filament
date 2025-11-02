@@ -8,7 +8,7 @@
       xmlns:models="clr-namespace:DataDefinitions.Models;assembly=DataDefinitions"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      Title="FilamentColors">
+      Title="FilamentColors" Name="Main">
     <Page.DataContext>
         <vm:FilamentColorsViewModel/>
     </Page.DataContext>
@@ -29,14 +29,24 @@
         <ToggleButton Grid.Row="1" x:Name="SortDirection" 
                         HorizontalAlignment="Right"
                         Content="{StaticResource SortAscendingIcon}"
-                        Command="{Binding DoSwitchSortDirectionCommand}" 
+                        Command="{Binding ToggleSortDirectionCommand}" 
                         CommandParameter="{Binding ElementName=SortDirection,Path=IsChecked}"
                         IsChecked="{Binding SortAscending,Mode=OneWay}"
                         />
         <ListView Grid.Row="2" Height="400" ItemsSource="{Binding ViewSource.View}" SelectedItem="{Binding SelectedItem}" >
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <!--<MenuItem Header="Export Selected" Command="{Binding ContextExportSelectedCommand}"/>-->
+                    <MenuItem Header="Export Checked" Command="{Binding ContextExportCheckedCommand}" IsEnabled="{Binding ExportUIState.CanExportMulti,Mode=OneWay}"/>
+                    <Separator/>
+                    <MenuItem Header="Check All" Command="{Binding ContextCheckAllCommand}"/>
+                    <MenuItem Header="Uncheck All" Command="{Binding ContextUncheckAllCommand}"/>
+                </ContextMenu>
+            </ListView.ContextMenu>
             <ListView.ItemTemplate>
                 <DataTemplate DataType="models:FilamentColor">
                     <StackPanel Orientation="Horizontal">
+                        <CheckBox IsChecked="{Binding IsSelectedForSharing,Mode=TwoWay}" Margin="0,0,5,0" Command="{Binding DataContext.UpdateUIForCheckedCommand,ElementName=Main}"/>
                         <Rectangle Fill="{Binding ColorRGB}" Height="20" Width="20"/>
                         <TextBlock Text="{Binding VendorColorName}"/>
                     </StackPanel>
@@ -69,6 +79,21 @@
                         Content="{StaticResource LookupListItem}"
                         Command="{Binding DoLookupCommand}" 
                         CommandParameter="{Binding ElementName=LookupRGB,Path=Text}"/>
+                <Button 
+        Style="{StaticResource RoundedCommandButton}"
+        Command="{Binding DeleteSelectedCommand}"
+        Content="{StaticResource DeleteIcon}"
+        IsEnabled="{Binding CanDelete,Mode=OneWay}"
+        Visibility="{Binding SelectedItem.SupportsDelete,Converter={StaticResource VisibilityConverter}}">
+
+                    <Button.ToolTip>
+                        <TextBlock>
+            <Run Text="Delete"/>
+            <Run Text="{Binding ChildTypeName,Mode=OneWay}"/>
+                        </TextBlock>
+                    </Button.ToolTip>
+                </Button>
+
             </StackPanel>
         </Grid>
 

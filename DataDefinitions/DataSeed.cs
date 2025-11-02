@@ -25,6 +25,7 @@ public class DataSeed
     internal const double AddPrinterSettingDefn = 0.171;
     internal const double AddInventorySpools = .16;
     // TODO: write seeding code to support JSON document format and current version of software
+#if SUPPORTJSON
     public static void Seed(IJsonFilamentDocument document)
     {
         var setting = document.Settings.FirstOrDefault(st => st.Name == Constants.dataSeedingKey);
@@ -249,4 +250,5 @@ public class DataSeed
         filamentContext.SaveChanges();
     }
     */
+#endif
 }

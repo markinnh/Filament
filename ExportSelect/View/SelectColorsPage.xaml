@@ -1,0 +1,51 @@
+﻿<Page x:Class="ExportSelect.View.SelectColorsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:ExportSelect.View"
+      xmlns:vm="clr-namespace:ExportSelect.ViewModel"
+      xmlns:model="clr-namespace:DataDefinitions.Models;assembly=DataDefinitions"
+      xmlns:helpers="clr-namespace:ExportSelect.Helpers"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="SelectColorsPage" Name="Main">
+    <Page.DataContext>
+        <vm:SelectColorViewModel/>
+    </Page.DataContext>
+        <Page.Resources>
+        <DataTemplate x:Key="SelectFilamentColor" DataType="helpers:SelectFilamentColorWrapper">
+            <StackPanel Orientation="Horizontal" Margin="3">
+                <CheckBox IsChecked="{Binding IsSelected}" VerticalAlignment="Center" Margin="3" Command="{Binding Path=DataContext.ItemCheckedCommand,RelativeSource={RelativeSource AncestorType=Page}}"  />
+                <TextBlock Text="{Binding Item.VendorColorName}" VerticalAlignment="Center" Margin="3" Width="150" TextWrapping="Wrap"/>
+                <Border Width="26" Height="40" Background="{Binding Item.ColorRGB}" BorderBrush="Black" CornerRadius="3" BorderThickness="1" VerticalAlignment="Center" Margin="3" ToolTip="{Binding Item.ColorRGB}"/>
+            </StackPanel>
+
+        </DataTemplate>
+    </Page.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+           
+        </Grid.ColumnDefinitions>
+        <ListView  
+                  ItemsSource="{Binding ViewSource.Source}" 
+                  ItemTemplate="{StaticResource SelectFilamentColor}"
+                  SelectionMode="Extended"
+                  Grid.Column="0"
+                  Margin="10">
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Columns="3"/>
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+        </ListView>
+        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10">
+            <TextBlock>
+                <Run Text="Items Checked"/>
+                <Run Text="{Binding ItemsChecked}"/>
+            </TextBlock>
+        </StackPanel>
+    </Grid>
+</Page>

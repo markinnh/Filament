@@ -119,6 +119,8 @@ public class Constants
     public const string regexFindNumberAndUnitV2 = @"(?<number>^\d*(\.\d+)?)\s*(?<units>[a-zA-Z\x22]*)";
     public const string regexARGB = "#(?<alpha>[0-9A-F]{2})(?<red>[0-9A-F]{2})(?<green>[0-9A-F]{2})(?<blue>[0-9A-F]{2})";
 
+    internal const string EmptyString = "";
+
     // Settings Key, mainly for database type settings
     public const string dataSeedingKey = "SeedData";
     public const string prepopulateDateTime = "PrepopulateDateTime";

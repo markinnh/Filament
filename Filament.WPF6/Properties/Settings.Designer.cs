@@ -12,7 +12,7 @@ namespace Filament.WPF6.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.13.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.14.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -477,6 +477,66 @@ namespace Filament.WPF6.Properties {
             }
             set {
                 this["RemainingWeightUnits"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Exchange")]
+        public string ExchangePath {
+            get {
+                return ((string)(this["ExchangePath"]));
+            }
+            set {
+                this["ExchangePath"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Ascending")]
+        public string NotePageSortDirection {
+            get {
+                return ((string)(this["NotePageSortDirection"]));
+            }
+            set {
+                this["NotePageSortDirection"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Ascending")]
+        public string ByVendorPageSortDirection {
+            get {
+                return ((string)(this["ByVendorPageSortDirection"]));
+            }
+            set {
+                this["ByVendorPageSortDirection"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Ascending")]
+        public string VendorDefnPageSortDirection {
+            get {
+                return ((string)(this["VendorDefnPageSortDirection"]));
+            }
+            set {
+                this["VendorDefnPageSortDirection"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Ascending")]
+        public string FilamentColorPageSortDirection {
+            get {
+                return ((string)(this["FilamentColorPageSortDirection"]));
+            }
+            set {
+                this["FilamentColorPageSortDirection"] = value;
             }
         }
     }

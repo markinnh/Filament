@@ -40,7 +40,7 @@
     </Page.DataContext>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="3*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -55,7 +55,15 @@
                       ResizeDirection="Columns" 
                       ResizeBehavior="PreviousAndNext"
                       Background="AliceBlue"/>
-        <ListView Grid.Row="0" Grid.RowSpan="2"  ItemsSource="{Binding ViewSource.View}" 
+        <ToggleButton x:Name="SortDirection" 
+        HorizontalAlignment="Right"
+        Content="{StaticResource SortAscendingIcon}"
+        Command="{Binding ToggleSortDirectionCommand}" 
+        Style="{StaticResource RoundedToggleButton}"
+        CommandParameter="{Binding ElementName=SortDirection,Path=IsChecked}"
+        IsChecked="{Binding SortAscending,Mode=OneWay}"
+        />
+        <ListView Grid.Row="1" Grid.RowSpan="2"  ItemsSource="{Binding ViewSource.View}" 
                   SelectedItem="{Binding SelectedItem,Mode=TwoWay}"
                   Height="450">
             <ListView.ItemTemplate>
@@ -113,25 +121,26 @@
                      Height="200"
                       TextWrapping="Wrap"
                       VerticalScrollBarVisibility="Auto"
-                      />
+                      VerticalAlignment="Top"
+                     VerticalContentAlignment="Top" />
             </StackPanel>
             <StackPanel Grid.Row="2">
             <Label Content="_Tags" Target="{Binding ElementName=NoteTag, Mode=OneWay}" />
             <TextBox x:Name="NoteTag" 
                      Text="{Binding SelectedItem.Tags,Mode=TwoWay}"
-                Style="{StaticResource StdTagEditor}"/>
+                Style="{StaticResource StdTagEditor}" VerticalAlignment="Top"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Grid.Row="3">
                 <Button Content="{StaticResource AddIcon}"
-                        Style="{StaticResource IconCommandButton}"
+                        Style="{StaticResource RoundedCommandButton}"
                         Command="{Binding NewItemCommand}"
                         IsEnabled="{Binding CanAdd}"/>
                 <Button Content="{StaticResource SaveIcon}"
-                        Style="{StaticResource IconCommandButton}"
+                        Style="{StaticResource RoundedCommandButton}"
                         IsEnabled="{Binding SelectedItem.IsModified,Mode=OneWay}"
                         Command="{Binding UpdateCommand}"/>
                 <Button Content="{StaticResource DeleteIcon}"
-                        Style="{StaticResource IconCommandButton}"
+                        Style="{StaticResource RoundedCommandButton}"
                         IsEnabled="{Binding SelectedItem.SupportsDelete,Mode=OneWay}"
                         />
             </StackPanel>

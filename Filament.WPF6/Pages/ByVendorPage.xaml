@@ -3,6 +3,7 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      
       xmlns:local="clr-namespace:Filament.WPF6"
       xmlns:helpers="clr-namespace:Filament.WPF6.Helpers"
       xmlns:vm="clr-namespace:Filament.WPF6.ViewModels"
@@ -16,7 +17,7 @@
     </Page.DataContext>
     <Page.InputBindings>
         <KeyBinding Modifiers="Ctrl" Key="S" Command="{Binding UpdateCommand}"/>
-        <KeyBinding Modifiers="Ctrl" Key="G" Command="{Binding GenerateCode}" />
+        <KeyBinding Modifiers="Ctrl" Key="G" Command="{Binding CodeGenerateCommand}" />
     </Page.InputBindings>
     <Page.Resources>
         <CollectionViewSource x:Key="DefinedFilaments" Source="{Binding Filaments}"/>
@@ -92,7 +93,7 @@
                           Grid.Row="3"
                           />
                 <TextBlock Grid.Row="4" Grid.ColumnSpan="2">
-                    <Run Text="{Binding Inventory.Count,Mode=OneWay,StringFormat='#{0} of possible'}"/>
+                    <Run Text="{Binding Inventory.Count,Mode=OneWay,StringFormat='{}{0} of possible'}"/>
                     <Run Text="{Binding MaxAllowed,Mode=OneTime, StringFormat='{}{0} total items.'}"/>
                 </TextBlock>
 
@@ -211,6 +212,7 @@
                                                 <StackPanel Orientation="Horizontal">
                                                     <Border Background="{Binding ColorRGB,Mode=OneWay}" Width="30" Height="24" CornerRadius="3"/>
                                                     <TextBlock Text="{Binding VendorColorName,Mode=OneWay}"/>
+                                                    <TextBlock Text="{Binding Tags}" FontSize="10" Margin="3,0,0,0" TextWrapping="Wrap"/>
                                                 </StackPanel>
                                             </DataTemplate>
                                         </ComboBox.ItemTemplate>
@@ -287,6 +289,219 @@
                                   EditInventorySpoolTemplate="{StaticResource EditInventorySpoolItems}"
                                   NoEditorTemplate="{StaticResource NoEditorTemplate}" />
 
+        <helpers:IgnoreNewItemPlaceholder x:Key="IgnoreNewItemPlaceholderConverter"/>
+
+        <!-- Remove or comment out this block:
+<HierarchicalDataTemplate DataType="{x:Type core:Object}" ItemsSource="{Binding Children}">
+    <ContentControl Content="{Binding Converter={StaticResource IgnoreNewItemPlaceholdersConverter}}"/>
+</HierarchicalDataTemplate>
+-->
+
+        <!-- If you want a fallback template for unknown types, use: -->
+        <DataTemplate x:Key="IgnoreNewItem" >
+            <StackPanel>
+                <TextBlock Text="(New Item Placeholder - Ignored)" FontStyle="Italic" FontWeight="Light" ToolTip="Item is ignored for this program"/>
+            </StackPanel>
+            <!--<ContentControl Content="{Binding Converter={StaticResource IgnoreNewItemPlaceholderConverter}}"/>-->
+        </DataTemplate>
+        <HierarchicalDataTemplate x:Key="DisplayVendorDefn" DataType="{x:Type model:VendorDefn}" ItemsSource="{Binding SpoolDefns}" >
+            <StackPanel Orientation="Horizontal">
+                <ContentControl 
+                                   Visibility="{Binding IsModified,Mode=OneWay,Converter={StaticResource VisibilityConverter}}">
+                    <ContentControl.Content>
+                        <Rectangle Width="16 " Height="16">
+                            <Rectangle.Resources>
+                                <SolidColorBrush x:Key="canvas" Opacity="0" />
+                                <SolidColorBrush x:Key="light-defaultgrey-10" Color="#212121" Opacity="0.1" />
+                                <SolidColorBrush x:Key="light-defaultgrey" Color="#212121" Opacity="1" />
+                            </Rectangle.Resources>
+                            <Rectangle.Fill>
+                                <DrawingBrush Stretch="None">
+                                    <DrawingBrush.Drawing>
+                                        <DrawingGroup>
+                                            <DrawingGroup x:Name="canvas">
+                                                <GeometryDrawing Brush="{DynamicResource canvas}" Geometry="F1M16,16H0V0H16Z" />
+                                            </DrawingGroup>
+                                            <DrawingGroup x:Name="level_1">
+                                                <GeometryDrawing Brush="{DynamicResource light-defaultgrey-10}" Geometry="F1M13.26,2.736a1.5,1.5,0,0,1,0,2.119l0,0L6.116,12,4,9.884l7.143-7.148A1.5,1.5,0,0,1,13.26,2.736Z" />
+                                                <GeometryDrawing Brush="{DynamicResource light-defaultgrey}" Geometry="F1M13.588,5.233A2,2,0,0,0,10.761,2.41v0h0L4.042,9.13,2,13.333,2.667,14l4.065-1.944L13.588,5.24ZM6.224,11.19l-.082.039L4.771,9.858l.039-.082,6.655-6.658a1,1,0,1,1,1.414,1.414h0Z" />
+                                            </DrawingGroup>
+                                        </DrawingGroup>
+                                    </DrawingBrush.Drawing>
+                                </DrawingBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </ContentControl.Content>
+                </ContentControl>
+                <TextBlock Text="{Binding Name}">
+
+                    <TextBlock.ToolTip>
+                        <StackPanel>
+                            <TextBlock Text="{Binding Name}"/>
+                            <TextBlock Text="{Binding WebUrl}"/>
+                            <CheckBox IsChecked="{Binding FoundOnAmazon}" 
+                                          IsEnabled="False"
+                                          Content="Found On Amazon"/>
+                            <ContentControl
+                                           Visibility="{Binding IsModified,Mode=OneWay,Converter={StaticResource VisibilityConverter}}">
+                                <ContentControl.Content>
+                                    <Rectangle Width="16 " Height="16">
+                                        <Rectangle.Resources>
+                                            <SolidColorBrush x:Key="canvas" Opacity="0" />
+                                            <SolidColorBrush x:Key="light-defaultgrey-10" Color="#212121" Opacity="0.1" />
+                                            <SolidColorBrush x:Key="light-defaultgrey" Color="#212121" Opacity="1" />
+                                        </Rectangle.Resources>
+                                        <Rectangle.Fill>
+                                            <DrawingBrush Stretch="None">
+                                                <DrawingBrush.Drawing>
+                                                    <DrawingGroup>
+                                                        <DrawingGroup x:Name="canvas1">
+                                                            <GeometryDrawing Brush="{DynamicResource canvas}" Geometry="F1M16,16H0V0H16Z" />
+                                                        </DrawingGroup>
+                                                        <DrawingGroup x:Name="level_11">
+                                                            <GeometryDrawing Brush="{DynamicResource light-defaultgrey-10}" Geometry="F1M13.26,2.736a1.5,1.5,0,0,1,0,2.119l0,0L6.116,12,4,9.884l7.143-7.148A1.5,1.5,0,0,1,13.26,2.736Z" />
+                                                            <GeometryDrawing Brush="{DynamicResource light-defaultgrey}" Geometry="F1M13.588,5.233A2,2,0,0,0,10.761,2.41v0h0L4.042,9.13,2,13.333,2.667,14l4.065-1.944L13.588,5.24ZM6.224,11.19l-.082.039L4.771,9.858l.039-.082,6.655-6.658a1,1,0,1,1,1.414,1.414h0Z" />
+                                                        </DrawingGroup>
+                                                    </DrawingGroup>
+                                                </DrawingBrush.Drawing>
+                                            </DrawingBrush>
+                                        </Rectangle.Fill>
+                                    </Rectangle>
+                                </ContentControl.Content>
+                            </ContentControl>
+                            <TextBlock Text="{Binding DocumentSize,StringFormat='{}{0:0.###}Kb'}" Margin="3,0,0,0">
+                            </TextBlock>
+                        </StackPanel>
+                    </TextBlock.ToolTip>
+                    </TextBlock>
+
+            </StackPanel>
+        </HierarchicalDataTemplate>
+
+
+        <HierarchicalDataTemplate x:Key="DisplaySpoolDefn" DataType="{x:Type model:SpoolDefn}" ItemsSource="{Binding Inventory}">
+            <StackPanel Orientation="Horizontal">
+                <ContentControl
+                                   Visibility="{Binding IsModified,Mode=OneWay,Converter={StaticResource VisibilityConverter}}">
+                    <ContentControl.Content>
+                        <Rectangle Width="16 " Height="16">
+                            <Rectangle.Resources>
+                                <SolidColorBrush x:Key="canvas" Opacity="0" />
+                                <SolidColorBrush x:Key="light-defaultgrey-10" Color="#212121" Opacity="0.1" />
+                                <SolidColorBrush x:Key="light-defaultgrey" Color="#212121" Opacity="1" />
+                            </Rectangle.Resources>
+                            <Rectangle.Fill>
+                                <DrawingBrush Stretch="None">
+                                    <DrawingBrush.Drawing>
+                                        <DrawingGroup>
+                                            <DrawingGroup x:Name="canvas">
+                                                <GeometryDrawing Brush="{DynamicResource canvas}" Geometry="F1M16,16H0V0H16Z" />
+                                            </DrawingGroup>
+                                            <DrawingGroup x:Name="level_1">
+                                                <GeometryDrawing Brush="{DynamicResource light-defaultgrey-10}" Geometry="F1M13.26,2.736a1.5,1.5,0,0,1,0,2.119l0,0L6.116,12,4,9.884l7.143-7.148A1.5,1.5,0,0,1,13.26,2.736Z" />
+                                                <GeometryDrawing Brush="{DynamicResource light-defaultgrey}" Geometry="F1M13.588,5.233A2,2,0,0,0,10.761,2.41v0h0L4.042,9.13,2,13.333,2.667,14l4.065-1.944L13.588,5.24ZM6.224,11.19l-.082.039L4.771,9.858l.039-.082,6.655-6.658a1,1,0,1,1,1.414,1.414h0Z" />
+                                            </DrawingGroup>
+                                        </DrawingGroup>
+                                    </DrawingBrush.Drawing>
+                                </DrawingBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </ContentControl.Content>
+                </ContentControl>
+                <TextBlock>
+                        <Run Text="{Binding Description}"/>
+                    <TextBlock.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Add Temporary Spool"/>
+                            <MenuItem Header="Delete"/>
+                        </ContextMenu>
+                    </TextBlock.ContextMenu>
+                </TextBlock>
+
+                <!--<CheckBox IsChecked="{Binding ShowInUse,Mode=TwoWay}" ToolTip="Show in use spools only"
+                                  VerticalAlignment="Center"/>-->
+                <StackPanel.ToolTip>
+                    <StackPanel>
+                        <TextBlock>
+                            <Run Text="Spool #"/>
+                            <Run Text="{Binding SpoolDefnId}"/>
+                        </TextBlock>
+                        <TextBlock>
+                                
+<Run Text="{Binding Weight,Converter={StaticResource ConvertToMetricWeight},ConverterParameter='Kilogram'}"/>
+                        </TextBlock>
+                    </StackPanel>
+                </StackPanel.ToolTip>
+            </StackPanel>
+        </HierarchicalDataTemplate>
+        <DataTemplate x:Key="DisplayInventorySpool" DataType="{x:Type model:InventorySpool}">
+            <StackPanel Orientation="Horizontal">
+                <ContentControl 
+                                   Visibility="{Binding IsModified,Mode=OneWay,Converter={StaticResource VisibilityConverter}}">
+                    <ContentControl.Content>
+                        <Rectangle Width="16 " Height="16">
+                            <Rectangle.Resources>
+                                <SolidColorBrush x:Key="canvas" Opacity="0" />
+                                <SolidColorBrush x:Key="light-defaultgrey-10" Color="#212121" Opacity="0.1" />
+                                <SolidColorBrush x:Key="light-defaultgrey" Color="#212121" Opacity="1" />
+                            </Rectangle.Resources>
+                            <Rectangle.Fill>
+                                <DrawingBrush Stretch="None">
+                                    <DrawingBrush.Drawing>
+                                        <DrawingGroup>
+                                            <DrawingGroup x:Name="canvas">
+                                                <GeometryDrawing Brush="{DynamicResource canvas}" Geometry="F1M16,16H0V0H16Z" />
+                                            </DrawingGroup>
+                                            <DrawingGroup x:Name="level_1">
+                                                <GeometryDrawing Brush="{DynamicResource light-defaultgrey-10}" Geometry="F1M13.26,2.736a1.5,1.5,0,0,1,0,2.119l0,0L6.116,12,4,9.884l7.143-7.148A1.5,1.5,0,0,1,13.26,2.736Z" />
+                                                <GeometryDrawing Brush="{DynamicResource light-defaultgrey}" Geometry="F1M13.588,5.233A2,2,0,0,0,10.761,2.41v0h0L4.042,9.13,2,13.333,2.667,14l4.065-1.944L13.588,5.24ZM6.224,11.19l-.082.039L4.771,9.858l.039-.082,6.655-6.658a1,1,0,1,1,1.414,1.414h0Z" />
+                                            </DrawingGroup>
+                                        </DrawingGroup>
+                                    </DrawingBrush.Drawing>
+                                </DrawingBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </ContentControl.Content>
+                </ContentControl>
+                <!--<Border  BorderThickness="3" CornerRadius="3" BorderBrush="{Binding ColorName}">-->
+                <!--<Rectangle Fill="{Binding ColorName,Converter={StaticResource ColorFromNameConverter}}"
+                                   Width="30"
+                                   Height="16"/>-->
+                <Image  Width="16" Height="16" >
+                    <Image.Source>
+                        <DrawingImage>
+                            <DrawingImage.Drawing>
+                                <GeometryDrawing Brush="{Binding FilamentColor.ColorRGB}" Geometry="{StaticResource FilamentGeometry}"/>
+                            </DrawingImage.Drawing>
+                        </DrawingImage>
+                    </Image.Source>
+                </Image>
+                <TextBlock ><Run Text="{Binding FilamentDefn.Material.ShortName,StringFormat='{}{0}'}" />
+                        <Run Text="{Binding FilamentDefn.Enhancement}"/></TextBlock>
+                <!--</Border>-->
+
+
+                <StackPanel.ToolTip>
+                    <StackPanel>
+                        <TextBlock>
+                                    <Run Text="Color"/>
+                                    <Run Text=":"/>
+                                    <Run Text="{Binding FilamentColor.VendorColorName,Converter={StaticResource SplitAtUpperConverter}}"/>
+                        </TextBlock>
+                        <TextBlock>
+                            <Run Text="Inventory #"/>
+                            <Run Text="{Binding InventoryCount}"/>
+                        </TextBlock>
+                        <TextBlock>
+                                    <Run Text="Date Opened : "/>
+                                    <Run Text="{Binding DateOpened,StringFormat='{}{0:d}'}"/>
+                        </TextBlock>
+                    </StackPanel>
+
+                </StackPanel.ToolTip>
+            </StackPanel>
+        </DataTemplate>
+        <helpers:ByVendorSelector x:Key="SelectTemplatesForTreeView" InventorySpoolTemplate="{StaticResource DisplayInventorySpool}" VendorDefitionTemplate="{StaticResource DisplayVendorDefn}" SpoolDefinitionTemplate="{StaticResource DisplaySpoolDefn}" NewItemTemplate="{StaticResource IgnoreNewItem}" />
     </Page.Resources>
 
     <Grid>
@@ -300,222 +515,27 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Menu Grid.ColumnSpan="2">
-            <MenuItem Header="Options">
-                <MenuItem Header="Expand Nodes"
-                          IsChecked="{Binding ExpandTreeNodesOnStartup,Mode=TwoWay}"/>
-            </MenuItem>
-        </Menu>
+        <ToggleButton x:Name="SortDirection" 
+                HorizontalAlignment="Right"
+                Content="{StaticResource SortAscendingIcon}"
+                Command="{Binding ToggleSortDirectionCommand}" 
+                Style="{StaticResource RoundedToggleButton}"
+                CommandParameter="{Binding ElementName=SortDirection,Path=IsChecked}"
+                IsChecked="{Binding SortAscending,Mode=OneWay}"
+                />
         <TreeView Name="MyTreeView" ItemsSource="{Binding ViewSource.View}"
                   SelectedItemChanged="TreeView_SelectedItemChanged"
                   Height="{StaticResource StandardListViewHeight}"
                   VerticalAlignment="Top"
                   Margin="5"
                   Grid.Row="1"
-                  Background="{StaticResource StandardBackground}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
+                  Background="{StaticResource StandardBackground}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" ItemTemplateSelector="{StaticResource SelectTemplatesForTreeView}">
             <TreeView.ItemContainerStyle>
                 <Style TargetType="TreeViewItem">
                     <Setter Property="IsExpanded" Value="{Binding DataContext.ExpandTreeNodesOnStartup, ElementName=MyPage}"/>
                 </Style>
             </TreeView.ItemContainerStyle>
             <TreeView.Resources>
-                <HierarchicalDataTemplate DataType="{x:Type model:VendorDefn}" ItemsSource="{Binding SpoolDefns}" >
-                    <StackPanel Orientation="Horizontal">
-                        <ContentControl 
-                                   Visibility="{Binding IsModified,Mode=OneWay,Converter={StaticResource VisibilityConverter}}">
-                            <ContentControl.Content>
-                                <Rectangle Width="16 " Height="16">
-                                    <Rectangle.Resources>
-                                        <SolidColorBrush x:Key="canvas" Opacity="0" />
-                                        <SolidColorBrush x:Key="light-defaultgrey-10" Color="#212121" Opacity="0.1" />
-                                        <SolidColorBrush x:Key="light-defaultgrey" Color="#212121" Opacity="1" />
-                                    </Rectangle.Resources>
-                                    <Rectangle.Fill>
-                                        <DrawingBrush Stretch="None">
-                                            <DrawingBrush.Drawing>
-                                                <DrawingGroup>
-                                                    <DrawingGroup x:Name="canvas">
-                                                        <GeometryDrawing Brush="{DynamicResource canvas}" Geometry="F1M16,16H0V0H16Z" />
-                                                    </DrawingGroup>
-                                                    <DrawingGroup x:Name="level_1">
-                                                        <GeometryDrawing Brush="{DynamicResource light-defaultgrey-10}" Geometry="F1M13.26,2.736a1.5,1.5,0,0,1,0,2.119l0,0L6.116,12,4,9.884l7.143-7.148A1.5,1.5,0,0,1,13.26,2.736Z" />
-                                                        <GeometryDrawing Brush="{DynamicResource light-defaultgrey}" Geometry="F1M13.588,5.233A2,2,0,0,0,10.761,2.41v0h0L4.042,9.13,2,13.333,2.667,14l4.065-1.944L13.588,5.24ZM6.224,11.19l-.082.039L4.771,9.858l.039-.082,6.655-6.658a1,1,0,1,1,1.414,1.414h0Z" />
-                                                    </DrawingGroup>
-                                                </DrawingGroup>
-                                            </DrawingBrush.Drawing>
-                                        </DrawingBrush>
-                                    </Rectangle.Fill>
-                                </Rectangle>
-                            </ContentControl.Content>
-                        </ContentControl>
-                        <TextBlock Text="{Binding Name}">
-
-                            <TextBlock.ToolTip>
-                                <StackPanel>
-                                    <TextBlock Text="{Binding Name}"/>
-                                    <TextBlock Text="{Binding WebUrl}"/>
-                                    <CheckBox IsChecked="{Binding FoundOnAmazon}" 
-                                          IsEnabled="False"
-                                          Content="Found On Amazon"/>
-                                    <ContentControl
-                                           Visibility="{Binding IsModified,Mode=OneWay,Converter={StaticResource VisibilityConverter}}">
-                                        <ContentControl.Content>
-                                            <Rectangle Width="16 " Height="16">
-                                                <Rectangle.Resources>
-                                                    <SolidColorBrush x:Key="canvas" Opacity="0" />
-                                                    <SolidColorBrush x:Key="light-defaultgrey-10" Color="#212121" Opacity="0.1" />
-                                                    <SolidColorBrush x:Key="light-defaultgrey" Color="#212121" Opacity="1" />
-                                                </Rectangle.Resources>
-                                                <Rectangle.Fill>
-                                                    <DrawingBrush Stretch="None">
-                                                        <DrawingBrush.Drawing>
-                                                            <DrawingGroup>
-                                                                <DrawingGroup x:Name="canvas1">
-                                                                    <GeometryDrawing Brush="{DynamicResource canvas}" Geometry="F1M16,16H0V0H16Z" />
-                                                                </DrawingGroup>
-                                                                <DrawingGroup x:Name="level_11">
-                                                                    <GeometryDrawing Brush="{DynamicResource light-defaultgrey-10}" Geometry="F1M13.26,2.736a1.5,1.5,0,0,1,0,2.119l0,0L6.116,12,4,9.884l7.143-7.148A1.5,1.5,0,0,1,13.26,2.736Z" />
-                                                                    <GeometryDrawing Brush="{DynamicResource light-defaultgrey}" Geometry="F1M13.588,5.233A2,2,0,0,0,10.761,2.41v0h0L4.042,9.13,2,13.333,2.667,14l4.065-1.944L13.588,5.24ZM6.224,11.19l-.082.039L4.771,9.858l.039-.082,6.655-6.658a1,1,0,1,1,1.414,1.414h0Z" />
-                                                                </DrawingGroup>
-                                                            </DrawingGroup>
-                                                        </DrawingBrush.Drawing>
-                                                    </DrawingBrush>
-                                                </Rectangle.Fill>
-                                            </Rectangle>
-                                        </ContentControl.Content>
-                                    </ContentControl>
-                                    <TextBlock Text="{Binding DocumentSize,StringFormat='{}{0:0.###}Kb'}" Margin="3,0,0,0">
-                                    </TextBlock>
-                                </StackPanel>
-                            </TextBlock.ToolTip>
-                    </TextBlock>
-
-                    </StackPanel>
-                </HierarchicalDataTemplate>
-
-
-                <HierarchicalDataTemplate DataType="{x:Type model:SpoolDefn}" ItemsSource="{Binding Inventory}">
-                    <StackPanel Orientation="Horizontal">
-                        <ContentControl
-                                   Visibility="{Binding IsModified,Mode=OneWay,Converter={StaticResource VisibilityConverter}}">
-                            <ContentControl.Content>
-                                <Rectangle Width="16 " Height="16">
-                                    <Rectangle.Resources>
-                                        <SolidColorBrush x:Key="canvas" Opacity="0" />
-                                        <SolidColorBrush x:Key="light-defaultgrey-10" Color="#212121" Opacity="0.1" />
-                                        <SolidColorBrush x:Key="light-defaultgrey" Color="#212121" Opacity="1" />
-                                    </Rectangle.Resources>
-                                    <Rectangle.Fill>
-                                        <DrawingBrush Stretch="None">
-                                            <DrawingBrush.Drawing>
-                                                <DrawingGroup>
-                                                    <DrawingGroup x:Name="canvas">
-                                                        <GeometryDrawing Brush="{DynamicResource canvas}" Geometry="F1M16,16H0V0H16Z" />
-                                                    </DrawingGroup>
-                                                    <DrawingGroup x:Name="level_1">
-                                                        <GeometryDrawing Brush="{DynamicResource light-defaultgrey-10}" Geometry="F1M13.26,2.736a1.5,1.5,0,0,1,0,2.119l0,0L6.116,12,4,9.884l7.143-7.148A1.5,1.5,0,0,1,13.26,2.736Z" />
-                                                        <GeometryDrawing Brush="{DynamicResource light-defaultgrey}" Geometry="F1M13.588,5.233A2,2,0,0,0,10.761,2.41v0h0L4.042,9.13,2,13.333,2.667,14l4.065-1.944L13.588,5.24ZM6.224,11.19l-.082.039L4.771,9.858l.039-.082,6.655-6.658a1,1,0,1,1,1.414,1.414h0Z" />
-                                                    </DrawingGroup>
-                                                </DrawingGroup>
-                                            </DrawingBrush.Drawing>
-                                        </DrawingBrush>
-                                    </Rectangle.Fill>
-                                </Rectangle>
-                            </ContentControl.Content>
-                        </ContentControl>
-                        <TextBlock>
-                        <Run Text="{Binding Description}"/>
-                            <TextBlock.ContextMenu>
-                                <ContextMenu>
-                                    <MenuItem Header="Add Temporary Spool"/>
-                                    <MenuItem Header="Delete"/>
-                                </ContextMenu>
-                            </TextBlock.ContextMenu>
-                        </TextBlock>
-
-                        <CheckBox IsChecked="{Binding ShowInUse,Mode=TwoWay}" ToolTip="Show in use spools only"
-                                  VerticalAlignment="Center"/>
-                        <StackPanel.ToolTip>
-                            <StackPanel>
-                                <TextBlock>
-                            <Run Text="Spool #"/>
-                            <Run Text="{Binding SpoolDefnId}"/>
-                                </TextBlock>
-                                <TextBlock>
-                                
-<Run Text="{Binding Weight,Converter={StaticResource ConvertToMetricWeight},ConverterParameter='Kilogram'}"/>
-                                </TextBlock>
-                            </StackPanel>
-                        </StackPanel.ToolTip>
-                    </StackPanel>
-                </HierarchicalDataTemplate>
-                <DataTemplate DataType="{x:Type model:InventorySpool}">
-                    <StackPanel Orientation="Horizontal">
-                        <ContentControl 
-                                   Visibility="{Binding IsModified,Mode=OneWay,Converter={StaticResource VisibilityConverter}}">
-                            <ContentControl.Content>
-                                <Rectangle Width="16 " Height="16">
-                                    <Rectangle.Resources>
-                                        <SolidColorBrush x:Key="canvas" Opacity="0" />
-                                        <SolidColorBrush x:Key="light-defaultgrey-10" Color="#212121" Opacity="0.1" />
-                                        <SolidColorBrush x:Key="light-defaultgrey" Color="#212121" Opacity="1" />
-                                    </Rectangle.Resources>
-                                    <Rectangle.Fill>
-                                        <DrawingBrush Stretch="None">
-                                            <DrawingBrush.Drawing>
-                                                <DrawingGroup>
-                                                    <DrawingGroup x:Name="canvas">
-                                                        <GeometryDrawing Brush="{DynamicResource canvas}" Geometry="F1M16,16H0V0H16Z" />
-                                                    </DrawingGroup>
-                                                    <DrawingGroup x:Name="level_1">
-                                                        <GeometryDrawing Brush="{DynamicResource light-defaultgrey-10}" Geometry="F1M13.26,2.736a1.5,1.5,0,0,1,0,2.119l0,0L6.116,12,4,9.884l7.143-7.148A1.5,1.5,0,0,1,13.26,2.736Z" />
-                                                        <GeometryDrawing Brush="{DynamicResource light-defaultgrey}" Geometry="F1M13.588,5.233A2,2,0,0,0,10.761,2.41v0h0L4.042,9.13,2,13.333,2.667,14l4.065-1.944L13.588,5.24ZM6.224,11.19l-.082.039L4.771,9.858l.039-.082,6.655-6.658a1,1,0,1,1,1.414,1.414h0Z" />
-                                                    </DrawingGroup>
-                                                </DrawingGroup>
-                                            </DrawingBrush.Drawing>
-                                        </DrawingBrush>
-                                    </Rectangle.Fill>
-                                </Rectangle>
-                            </ContentControl.Content>
-                        </ContentControl>
-                        <!--<Border  BorderThickness="3" CornerRadius="3" BorderBrush="{Binding ColorName}">-->
-                        <!--<Rectangle Fill="{Binding ColorName,Converter={StaticResource ColorFromNameConverter}}"
-                                   Width="30"
-                                   Height="16"/>-->
-                        <Image  Width="16" Height="16" >
-                            <Image.Source>
-                                <DrawingImage>
-                                    <DrawingImage.Drawing>
-                                        <GeometryDrawing Brush="{Binding FilamentColor.ColorRGB}" Geometry="{StaticResource FilamentGeometry}"/>
-                                    </DrawingImage.Drawing>
-                                </DrawingImage>
-                            </Image.Source>
-                        </Image>
-                        <TextBlock ><Run Text="{Binding FilamentDefn.Material.ShortName,StringFormat='{}{0}'}" />
-                        <Run Text="{Binding FilamentDefn.Enhancement}"/></TextBlock>
-                        <!--</Border>-->
-
-
-                        <StackPanel.ToolTip>
-                            <StackPanel>
-                                <TextBlock>
-                                    <Run Text="Color"/>
-                                    <Run Text=":"/>
-                                    <Run Text="{Binding FilamentColor.VendorColorName,Converter={StaticResource SplitAtUpperConverter}}"/>
-                                </TextBlock>
-                                <TextBlock>
-                            <Run Text="Inventory #"/>
-                            <Run Text="{Binding InventoryCount}"/>
-                                </TextBlock>
-                                <TextBlock>
-                                    <Run Text="Date Opened : "/>
-                                    <Run Text="{Binding DateOpened,StringFormat='{}{0:d}'}"/>
-                                </TextBlock>
-                            </StackPanel>
-
-                        </StackPanel.ToolTip>
-                    </StackPanel>
-                </DataTemplate>
             </TreeView.Resources>
 
         </TreeView>

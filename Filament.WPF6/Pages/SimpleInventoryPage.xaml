@@ -130,7 +130,7 @@
                           Visibility="{Binding ShowDebugElements,Converter={StaticResource EnhancedVisibilityConverter}}"/>
                 <Button Name="btnSave"
                         Command="{Binding UpdateCommand}"
-                        Style="{StaticResource IconCommandButton}">
+                        Style="{StaticResource RoundedCommandButton}">
                     <Button.IsEnabled>
                         <MultiBinding Converter="{StaticResource MultiBoolConverter}">
                             <Binding ElementName="cbNullCheck" Path="IsChecked" Mode="OneWay"/>
@@ -166,7 +166,7 @@
                         </Rectangle>
                     </Button.Content>
                 </Button>
-                <Button Style="{StaticResource IconCommandButton}"
+                <Button Style="{StaticResource RoundedCommandButton}"
                         IsEnabled="{Binding CanDelete, Mode=OneWay}" 
                         Command="{Binding DeleteSelectedCommand}"
                         
@@ -303,7 +303,7 @@
                                     </Rectangle.Fill>
                                 </Rectangle>
                             </Button.Content></Button>-->
-                        <Button Style="{StaticResource IconCommandButton}" 
+                        <Button Style="{StaticResource RoundedCommandButton}" 
                                 Visibility="{Binding InAddInventory,Converter={StaticResource EnhancedVisibilityConverter},ConverterParameter='Collapsed,Visible'}" 
                                 Command="{Binding AddNewInventoryCommand}"
                                 Content="{StaticResource AddIcon}">
@@ -334,7 +334,7 @@
                                 Content="{StaticResource SaveSymbol}" 
                                 Visibility="{Binding InAddInventory,Converter={StaticResource EnhancedVisibilityConverter}}"
                                 Command="{Binding SaveNewInventoryCommand}"/>-->
-                        <Button Style="{StaticResource IconCommandButton}"
+                        <Button Style="{StaticResource RoundedCommandButton}"
                                 Visibility="{Binding InAddInventory,Converter={StaticResource EnhancedVisibilityConverter}}"
                                 Command="{Binding SaveNewInventoryCommand}"
                                 Content="{StaticResource SaveIcon}">
@@ -371,7 +371,7 @@
                                 Content="{StaticResource UndoSymbol}"
                                 Visibility="{Binding InAddInventory,Converter={StaticResource EnhancedVisibilityConverter}}"
                                 Command="{Binding UndoNewInventoryCommand}"/>-->
-                        <Button Style="{StaticResource IconCommandButton}"
+                        <Button Style="{StaticResource RoundedCommandButton}"
                                 Visibility="{Binding InAddInventory,Converter={StaticResource EnhancedVisibilityConverter}}"
                                 Command="{Binding UndoNewInventoryCommand}"
                                 Content="{StaticResource UndoIcon}">

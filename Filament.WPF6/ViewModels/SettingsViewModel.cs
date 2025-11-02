@@ -9,6 +9,7 @@ using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using DataDefinitions;
+using DataDefinitions.Interfaces;
 
 namespace Filament.WPF6.ViewModels;
 public enum BuildMode

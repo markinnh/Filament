@@ -16,6 +16,6 @@ public partial class CalculationsViewModel: ObservableRecipient
     [ObservableProperty,NotifyPropertyChangedFor(nameof(DrumDiameter))]
     private double depth;
 
-    public double DrumDiameter => !double.IsNaN(spoolDiameter) && !double.IsNaN(depth) ? SpoolDiameter - depth * 2 : double.NaN;
+    public double DrumDiameter => !double.IsNaN(SpoolDiameter) && !double.IsNaN(Depth) ? SpoolDiameter - Depth * 2 : double.NaN;
     #endregion
 }

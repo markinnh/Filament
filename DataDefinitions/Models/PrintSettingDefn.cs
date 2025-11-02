@@ -77,10 +77,10 @@ namespace DataDefinitions.Models
         //public override bool InDatabase => PrintSettingDefnId != default;
         [JsonIgnore,BsonIgnore]
         public override bool IsValid => !string.IsNullOrEmpty(myDefinition);
-        protected override void SaveToJsonDatabase()
-        {
-            //Document.Add(this);
-        }
+        //protected override void SaveToJsonDatabase()
+        //{
+        //    //Document.Add(this);
+        //}
         
         protected override bool NeedsKey => true;
         internal override int KeyID => PrintSettingDefnId;

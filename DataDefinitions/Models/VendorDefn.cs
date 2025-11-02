@@ -10,23 +10,76 @@ using static System.Diagnostics.Trace;
 using System.Linq;
 
 using System.Reflection;
+using json = System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Xml.Serialization;
 using LiteDB;
 using DataDefinitions.Interfaces;
 using DataDefinitions.LiteDBSupport;
 
+
 namespace DataDefinitions.Models;
 
 // TODO: Develop a UI for VendorDefn; Add, Delete, Update
-// TODO: Develop a DataObject class the sit between data classes and Observable since the data is going to be disconnected from the DbContext
-public class VendorDefn : TaggedDatabaseObject, IDataErrorInfo, IEditableObject, ITrackUsable, IReferenceUsage<FilamentDefn>, IEventListener
+public class VendorDefn : TaggedDatabaseObject, IDataErrorInfo, IEditableObject, ITrackUsable, IReferenceUsage<FilamentDefn>, IEventListener, ISharingSupport
+#if SUPPORTDELETE
+    , IDeleteSupport
+#endif
 {
+    #region Sharing Support
+    internal const string VendorDefnIdentifier = "A1B2C3D4-E5F6-47A8-90B1-C2D3E4F5A6B7";
+
+    internal static Guid identifier = new(VendorDefnIdentifier);
+    [BsonIgnore, JsonIgnore, XmlIgnore]
+    public Guid SharingID => identifier;
+    private bool isSelected;
+    [JsonIgnore, BsonIgnore]
+    public bool IsSelectedForSharing
+    {
+        get => isSelected;
+        set => Set(ref isSelected, value, true);
+    }
+    private bool alreadyInDatabase;
+    [JsonIgnore, BsonIgnore]
+    public bool NotAlreadyInDatabase
+    {
+        get => alreadyInDatabase;
+        set => Set(ref alreadyInDatabase, value);
+    }
+
+    public string SerializeForSharing()
+    {
+        var options = new json.JsonSerializerOptions()
+        {
+            WriteIndented = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            ReferenceHandler = ReferenceHandler.IgnoreCycles
+        };
+        return json.JsonSerializer.Serialize(this, options);
+    }
+    #endregion
+
 #if DEBUG
     const int MaxSpoolDefnsAllowed = 4;
 #else
     const int MaxSpoolDefnsAllowed = 5;
 #endif
+    #region Delete Support
+#if SUPPORTDELETE
+    public bool CanDelete => SpoolDefns.Count == 0;
+
+    public void Delete(ILiteDBDAL lite)
+    {
+        if (lite is LiteDBDal dal && dal.Filaments.Count(f => f.VendorID == VendorDefnId) is int c && c > 0)
+        {
+            throw new NotSupportedException($"Unable to delete {Name} from the database, {c} filaments reference the vendor as specific to {Name}");
+        }
+        ReleaseEventHandlers();
+        lite.Remove(this);
+    }
+#endif
+    #endregion
+    #region Data Operations Support
     public static event InDataOpsChangedHandler InDataOpsChanged;
 
     private static bool inDataOps;
@@ -43,6 +96,7 @@ public class VendorDefn : TaggedDatabaseObject, IDataErrorInfo, IEditableObject,
     }
     [JsonIgnore, XmlIgnore, BsonIgnore]
     public override bool InDataOperations => InDataOps;
+    #endregion
     [JsonIgnore, XmlIgnore, BsonIgnore]
     public override bool IsModified
     {
@@ -52,10 +106,7 @@ public class VendorDefn : TaggedDatabaseObject, IDataErrorInfo, IEditableObject,
     //public override bool InDatabase => vendorID != default;
     [JsonIgnore, XmlIgnore, BsonIgnore]
     public override bool IsValid => !string.IsNullOrEmpty(name);
-    //public const string _3DSolutechName = "3D Solutech";
-    //public const string HatchBoxName = "HatchBox";
-    //public const string SunluName = "Sunlu";
-    //public const string DefaultVendorName = "Generic";
+    #region Actual Data
     private int vendorID;
     /// <summary>
     /// Gets or sets the vendor identifier.
@@ -63,7 +114,7 @@ public class VendorDefn : TaggedDatabaseObject, IDataErrorInfo, IEditableObject,
     /// <value>
     /// The vendor identifier.
     /// </value>
-    [XmlAttribute("ID"), JsonPropertyName("ID")]
+    [XmlAttribute("ID"), JsonIgnore]
     public int VendorDefnId
     {
         get => vendorID;
@@ -98,7 +149,7 @@ public class VendorDefn : TaggedDatabaseObject, IDataErrorInfo, IEditableObject,
         get => foundOnAmazon;
         set => Set<bool>(ref foundOnAmazon, value);
     }
-    [BsonIgnore]
+    [BsonIgnore, JsonIgnore]
     public bool UrlHasContent => !string.IsNullOrEmpty(webUrl);
     private string webUrl;
     /// <summary>
@@ -122,7 +173,7 @@ public class VendorDefn : TaggedDatabaseObject, IDataErrorInfo, IEditableObject,
     /// <value>
     ///   <c>true</c> if [stop using]; otherwise, <c>false</c>.
     /// </value>
-    [XmlAttribute("notUsed")]
+    [XmlAttribute("notUsed"), JsonIgnore]
     public bool? StopUsing
     {
         get => stopUsing ?? false;
@@ -130,14 +181,15 @@ public class VendorDefn : TaggedDatabaseObject, IDataErrorInfo, IEditableObject,
     }
     [JsonIgnore, BsonIgnore]
     public bool CollectionNotInitialized => SpoolDefns == null;
-    [BsonIgnore]
+    [BsonIgnore, JsonIgnore]
     public int MaxAllowed => MaxSpoolDefnsAllowed;
-    [BsonIgnore]
+    [BsonIgnore, JsonIgnore]
     public bool CanAdd => SpoolDefns?.Count < MaxSpoolDefnsAllowed;
     public ObservableCollection<SpoolDefn> SpoolDefns
     {
         get; set;
     }
+    #endregion
 
     [JsonIgnore]
     public string Error => null;
@@ -155,7 +207,7 @@ public class VendorDefn : TaggedDatabaseObject, IDataErrorInfo, IEditableObject,
         }
     }
 #if DEBUG
-    [BsonIgnore]
+    [BsonIgnore, JsonIgnore]
     public float DocumentSize => (from kvp in BsonMapper.Global.ToDocument(this)
                                   select kvp.Key.Length + kvp.Value.ToString().Length).Sum() / 1000f;
 #endif
@@ -261,11 +313,11 @@ public class VendorDefn : TaggedDatabaseObject, IDataErrorInfo, IEditableObject,
     }
     public override string UIHintAddType() => typeof(SpoolDefn).GetCustomAttribute<UIHintsAttribute>()?.AddType ?? String.Empty;
 
-    protected override void SaveToJsonDatabase()
-    {
-        //if (Document != null)
-        //    Document.Add(this);
-    }
+    //protected override void SaveToJsonDatabase()
+    //{
+    //    //if (Document != null)
+    //    //    Document.Add(this);
+    //}
     public override void UpdateItem(LiteDBDal dal, bool holdContainerUpdate = false)
     {
 
@@ -326,7 +378,7 @@ public class VendorDefn : TaggedDatabaseObject, IDataErrorInfo, IEditableObject,
                     inv.IsModified = state;
                     foreach (var dm in inv.DepthMeasurements)
                         dm.IsModified = state;
-                    foreach(var wm in inv.WeightMeasurements)
+                    foreach (var wm in inv.WeightMeasurements)
                         wm.IsModified = state;
                 }
                 spec.IsModified = state;
@@ -335,7 +387,14 @@ public class VendorDefn : TaggedDatabaseObject, IDataErrorInfo, IEditableObject,
         IsModified = state;
         OnPropertyChanged(nameof(IsModified));
     }
-
+    public override bool HasDependencies(ILiteDBDAL lite)
+    {
+        if (lite == null)
+            throw new ArgumentNullException(nameof(lite), $"A null argument was passed for the {nameof(ILiteDBDAL)} argument.");
+        if (lite.Filaments.Count(f => f.VendorID == VendorDefnId) is int c && c > 0)
+            return true;
+        return false;
+    }
     public override void LinkChildren<ParentType>(ParentType parent)
     {
         //Assert(Document != null, "Document is not initialized before calling this method.");
@@ -347,9 +406,6 @@ public class VendorDefn : TaggedDatabaseObject, IDataErrorInfo, IEditableObject,
         foreach (var spoolDefn in SpoolDefns)
             foreach (var inv in spoolDefn.Inventory)
             {
-                inv.LinkToParent(spoolDefn);
-                inv.LinkToParent(spoolDefn);
-                inv.LinkToParent(spoolDefn);
                 inv.LinkToParent(spoolDefn);
             }
     }
@@ -368,33 +424,17 @@ public class VendorDefn : TaggedDatabaseObject, IDataErrorInfo, IEditableObject,
                 foreach (var inv in spoolDefn.Inventory)
                     inv.FilamentColor = filamentColors.FirstOrDefault(fc => fc.FilamentColorId == inv.FilamentColorId);
     }
-    //public override void EstablishLink(IJsonFilamentDocument document)
-    //{
-    //    base.EstablishLink(document);
-    //    InitEventHandlers();
 
-    //    foreach (var printSetting in VendorSettings)
-    //    {
-    //        printSetting.Link(document.Filaments);
-    //        printSetting.Link(document.PrintSettingsDefn);
-    //        //printSetting.EstablishLink(document);
-    //    }
-    //    foreach (var spoolDefn in SpoolDefns)
-    //    {
-    //        //spoolDefn.EstablishLink(document);
-    //        foreach (var inventory in spoolDefn.Inventory)
-    //            inventory.Link(document.Filaments);
-    //    }
-    //}
     public override void PostDataRetrieveActions()
     {
         InitEventHandlers();
         WatchContained();
-        foreach (SpoolDefn spoolDefn in SpoolDefns)
-        {
-            spoolDefn.LinkToParent(this);
-            spoolDefn.PostDataRetrieveActions();
-        }
+        if (SpoolDefns.Count > 0)
+            foreach (SpoolDefn spoolDefn in SpoolDefns)
+            {
+                spoolDefn.LinkToParent(this);
+                spoolDefn.PostDataRetrieveActions();
+            }
         // TODO: Add code to initialize VendorPrintSettings
     }
     private void InitEventHandlers()
@@ -402,28 +442,7 @@ public class VendorDefn : TaggedDatabaseObject, IDataErrorInfo, IEditableObject,
         SpoolDefns.CollectionChanged += Defns_CollectionChanged;
     }
 
-    //internal override void AssignKey(int myId)
-    //{
-    //    //base.AssignKey(myId);
-    //    foreach (var spoolDefn in SpoolDefns)
-    //    {
-    //        spoolDefn.VendorDefnId = myId;
-    //        //                spoolDefn.AssignKey(Document.Counters.NextID(spoolDefn));
-    //    }
-    //}
-    /// <summary>
-    /// Called from UpdateItem, used to update contained items, primarily for updating contained item Keys
-    /// </summary>
-    //internal override void UpdateContainedItemsForJson()
-    //{
-    //    foreach (var spoolDefn in SpoolDefns)
-    //    {
-    //        if (!spoolDefn.InDatabase && spoolDefn.IsValid)
-    //            spoolDefn.AssignKey(Document.Counters.NextID(spoolDefn));
 
-    //        spoolDefn.UpdateContainedItemsForJson();
-    //    }
-    //}
     internal override void UpdateContainedItemsForLiteDb(ref bool updated)
     {
         foreach (var spoolDefn in SpoolDefns)
@@ -458,6 +477,7 @@ public class VendorDefn : TaggedDatabaseObject, IDataErrorInfo, IEditableObject,
         return builder.ToString();
     }
 #endif
+
     #region IEditableObject Implementation
     struct BackupData
     {

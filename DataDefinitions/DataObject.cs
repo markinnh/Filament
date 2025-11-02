@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using static System.Diagnostics.Debug;
 
@@ -18,32 +19,32 @@ namespace DataDefinitions;
 /// </summary>
 public class DataObject : Observable, ITrackModified
 {
-    [BsonIgnore]
+    [BsonIgnore, JsonIgnore]
     public virtual bool InDataOperations => false;
 
     private bool isModified;
-    [BsonIgnore, Affected(Names = new string[] { nameof(IsValid) })]
+    [BsonIgnore, Affected(Names = new string[] { nameof(IsValid) }),JsonIgnore]
     public virtual bool IsModified { get => isModified; set => Set(ref isModified, value); }
-    [BsonIgnore]
+    [BsonIgnore,JsonIgnore]
     public virtual bool IsValid => false;
-    [BsonIgnore]
+    [BsonIgnore,JsonIgnore]
     public virtual bool CanEdit => !InDataOperations;
 
 #if DEBUG
-    [BsonIgnore]
+    [BsonIgnore,JsonIgnore]
     public bool IsDebug => true;
 #else
-    [BsonIgnore]
+    [BsonIgnore, JsonIgnore]
     public bool IsDebug => false;
 #endif
 
     /// <summary>
     /// A flag to determine if an object has any items in an internal container
     /// </summary>
-    [BsonIgnore]
+    [BsonIgnore, JsonIgnore]
     protected virtual bool HasContainedItems => false;
-    [BsonIgnore]
-    public virtual bool SupportsDelete => this is ISupportDelete;
+    [BsonIgnore, JsonIgnore]
+    public virtual bool SupportsDelete => this is IDeleteSupport;
 
     public virtual void SetContainedModifiedState(bool value) { }
     public virtual string UIHintAddType() => GetType().GetCustomAttribute<UIHintsAttribute>()?.AddType ?? string.Empty;

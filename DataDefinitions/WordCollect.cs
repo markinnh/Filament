@@ -15,7 +15,7 @@ namespace DataDefinitions
     {
         const string collectWords = @"(?<ignore>(\bthe\b)|(\bfor\b))|(?<word>\w{3,})";
 
-        string[] baseIgnoreWords = new string[] { "the", "for" };
+        string[] baseIgnoreWords = new string[] { "the", "for","has" };
 
         private int minimumWordLength;
 

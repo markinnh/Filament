@@ -27,6 +27,15 @@ public abstract class BaseTagFilterViewModel<TBrowse, TSelect> : BaseBrowserView
         get;
     }
     
+    protected bool TagFilterApplied
+    {
+        get
+        {
+            if (filters.TryGetValue(IResolveFilter.Filters.Tag, out var filter))
+                return filter.Applied;
+            return false;
+        }
+    }
 
     public IEnumerable<WordWithOccuranceCount>? DistinctTagStats => Singleton<WordCollect>.Instance.OrganizeTags(ViewSource.View);
 
@@ -36,7 +45,10 @@ public abstract class BaseTagFilterViewModel<TBrowse, TSelect> : BaseBrowserView
         InitFilterViewModel();
         //ViewSource.Filter += ViewSource_Filter;
     }
-
+    public override void InitFilterUI()
+    {
+        UpdateFilterUI(true);
+    }
     //private void ViewSource_Filter1(object sender, System.Windows.Data.FilterEventArgs e)
     //{
     //    throw new NotImplementedException();
@@ -65,6 +77,11 @@ public abstract class BaseTagFilterViewModel<TBrowse, TSelect> : BaseBrowserView
         WeakReferenceMessenger.Default.Register<TagFilterChangedEventArgs>(this, HandleTagFilterMessages);
 
     }
+    /// <summary>
+    /// Handle tag filter messages for this view model.
+    /// </summary>
+    /// <param name="recipient"></param>
+    /// <param name="message"></param>
     protected void HandleTagFilterMessages(object recipient, TagFilterChangedEventArgs message)
     {
         Trace.WriteLine($"In HandleTagFilterMessages, for {GetType().Name}, message will {(message.TargetViewModel == ViewModelGuid ? "not " : string.Empty)}be ignored",(message.TargetViewModel==ViewModelGuid?"Information":"Error"));
@@ -91,6 +108,7 @@ public abstract class BaseTagFilterViewModel<TBrowse, TSelect> : BaseBrowserView
                     try
                     {
                         ViewSource.Filter += new FilterEventHandler(filter.Filter);
+                        UpdateFilterUI(TagFilterEnabled: true);
                     }
                     catch (Exception ex)
                     {
@@ -106,6 +124,7 @@ public abstract class BaseTagFilterViewModel<TBrowse, TSelect> : BaseBrowserView
                     try
                     {
                         ViewSource.Filter -= new FilterEventHandler(filter.Filter);
+                        UpdateFilterUI(TagFilterEnabled: true);
                     }
                     catch (Exception ex)
                     {

@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.ComponentModel;
 using System.Reflection;
 using System.Text.Json.Serialization;
+using json=System.Text.Json;
 using System.Xml.Serialization;
 using DataDefinitions.Interfaces;
 using LiteDB;
@@ -22,8 +23,26 @@ namespace DataDefinitions.Models;
 
 // TODO: Develop a UI for SpoolDefinition; Add, Update, Delete
 [UIHints("Spool Definition")]
-public class SpoolDefn : ParentLinkedDataObject<VendorDefn>, ITrackUsable, IEventListener
+public class SpoolDefn : ParentLinkedDataObject<VendorDefn>, ITrackUsable, IEventListener//,ISharingSupport
 {
+    #region Sharing Support
+    internal static Guid indentifier= new("2ee1db76-87df-476b-8932-29cb384bad94");
+    [JsonIgnore, BsonIgnore, XmlIgnore]
+    public Guid SharingID => indentifier;
+    private bool isSelected;
+    [JsonIgnore, BsonIgnore]
+    public bool IsSelectedForSharing
+    {
+        get => isSelected;
+        set => Set(ref isSelected, value);
+    }
+    public string SerializeForSharing()
+    {
+        return json.JsonSerializer.Serialize(this, new json.JsonSerializerOptions() { WriteIndented = true, ReferenceHandler = ReferenceHandler.IgnoreCycles });
+    }
+    #endregion
+
+    // Maximum number of inventory spools allowed per spool definition
 #if DEBUG
     const int MaxInventory = 20;
 #else
@@ -141,7 +160,7 @@ public class SpoolDefn : ParentLinkedDataObject<VendorDefn>, ITrackUsable, IEven
     //}
 
     private int spoolDefnID;
-    [XmlAttribute("ID"), JsonPropertyName("ID"), BsonIgnore]
+    [XmlAttribute("ID"), JsonIgnore, BsonIgnore]
     public int SpoolDefnId
     {
         get => spoolDefnID;
@@ -155,7 +174,7 @@ public class SpoolDefn : ParentLinkedDataObject<VendorDefn>, ITrackUsable, IEven
     /// <value>
     ///   <c>true</c> if [stop using]; otherwise, <c>false</c>.
     /// </value>
-    [XmlAttribute("stopUsing")]
+    [XmlAttribute("stopUsing"),JsonIgnore]
     public bool? StopUsing
     {
         get => stopUsing ?? false;
@@ -212,7 +231,7 @@ public class SpoolDefn : ParentLinkedDataObject<VendorDefn>, ITrackUsable, IEven
     /// <value>
     /// The vendor identifier.
     /// </value>
-    [XmlAttribute("VendID"), BsonIgnore]
+    [XmlAttribute("VendID"), BsonIgnore,JsonIgnore]
     public int VendorDefnId
     {
         get => vendorID;
@@ -248,11 +267,12 @@ public class SpoolDefn : ParentLinkedDataObject<VendorDefn>, ITrackUsable, IEven
             OnPropertyChanged(nameof(FilteredInventory));
         }
     }
-    [BsonIgnore]
+    [BsonIgnore, JsonIgnore]
     public bool CanAdd => Inventory?.Count < MaxInventory;
 
-    [BsonIgnore]
+    [BsonIgnore, JsonIgnore]
     public int MaxAllowed => MaxInventory;
+    [JsonIgnore]  // inventory is only stored in the database as part of the SpoolDefn document and is not shared
     public virtual ObservableCollection<InventorySpool> Inventory
     {
         get; set;
@@ -484,27 +504,30 @@ public class SpoolDefn : ParentLinkedDataObject<VendorDefn>, ITrackUsable, IEven
         if (dataObject is InventorySpool inventory)
             Inventory.Remove(inventory);
         base.DeleteMe(dataObject, lite);
-        Singleton<LiteDBDal>.Instance.Update(Parent);
+        lite.Update(Parent);
+        //Singleton<LiteDBDal>.Instance.Update(Parent);
     }
-    //public override void LinkChildren<ParentType>(ParentType parent)
-    //{
-    //    if (parent is Models.VendorDefn defn)
-    //    {
-    //        Vendor = defn;
-    //        foreach (var inv in Inventory)
-    //            inv.LinkChildren<Models.SpoolDefn>(this);
-    //    }
-    //}
-    //internal override void UpdateContainedItemsForJson()
-    //{
-    //    foreach (var inv in Inventory)
-    //    {
-    //        //if (inv.IsValid && !inv.InDatabase)
-    //        //    inv.AssignKey(Document.Counters.NextID(inv));
+#if SUPPORTJSON
+    public override void LinkChildren<ParentType>(ParentType parent)
+    {
+        if (parent is Models.VendorDefn defn)
+        {
+            Vendor = defn;
+            foreach (var inv in Inventory)
+                inv.LinkChildren<Models.SpoolDefn>(this);
+        }
+    }
+    internal override void UpdateContainedItemsForJson()
+    {
+        foreach (var inv in Inventory)
+        {
+            if (inv.IsValid && !inv.InDatabase)
+                inv.AssignKey(Document.Counters.NextID(inv));
 
-    //        //inv.UpdateContainedItemsForJson();
-    //    }
-    //}
+            inv.UpdateContainedItemsForJson();
+        }
+    }
+#endif
     /*        #region IEditableObject Implementation
             struct BackupData
             {

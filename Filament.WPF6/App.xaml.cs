@@ -53,8 +53,9 @@ public partial class App : Application
         //bool NeedMigration = DAL.Abstraction.DataAccessSelector == DAL.DataAccessSelector.SqlServer ? WPF6.Properties.Settings.Default.SqlServerNeedsMigration : true;
         //DAL.Abstraction.SeedData() ;
         //DAL.Abstraction.VerifySeed();
-
-        //Singleton<DataDefinitions.JsonSupport.JsonDAL>.Instance.InitializeFromFile(Path.Combine(dataDir, "TestFilamentData.JSON"));
+#if SUPPORTJSON
+        Singleton<DataDefinitions.JsonSupport.JsonDAL>.Instance.InitializeFromFile(Path.Combine(dataDir, "TestFilamentData.JSON"));
+#endif
         //Trace.WriteLine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),"Information");
         Singleton<LiteDBDal>.Instance.Initialize(FileLocator.DatabasePath(UIPlatform.WPF, Settings.Default.DataPath));
     }

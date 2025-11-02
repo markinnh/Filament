@@ -59,13 +59,13 @@ public class Setting : DataDefinitions.DatabaseObject
     //    else
     //        ReportKeyAlreadyInitialized();
     //}
-    protected override void SaveToJsonDatabase()
-    {
-        //if (Document != null)
-        //{
-        //    Document.Add(this);
-        //}
-    }
+    //protected override void SaveToJsonDatabase()
+    //{
+    //    //if (Document != null)
+    //    //{
+    //    //    Document.Add(this);
+    //    //}
+    //}
     public void SetValue(object value)
     {
         if (value != null)

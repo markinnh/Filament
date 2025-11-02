@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace DataDefinitions.LiteDBSupport;
 
-public interface ISupportDelete
+public interface IDeleteSupport
 {
     void Delete(ILiteDBDAL lite);
 }

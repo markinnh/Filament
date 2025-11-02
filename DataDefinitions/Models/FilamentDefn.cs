@@ -6,21 +6,22 @@ using MyLibraryStandard.Attributes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-
+using json = System.Text.Json;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Xml.Serialization;
 
 namespace DataDefinitions.Models;
+
 public enum MaterialModifier
 {
-    None=0,
-    Matte=1,
-    Silk=2,
-    Tough=4,
-    HighFlow=8,
-    CarbonFiber=16
+    None = 0,
+    Matte = 1,
+    Silk = 2,
+    Tough = 4,
+    HighFlow = 8,
+    CarbonFiber = 16
 }
 // this is called from the static part of a class, so there will be no sender provided,
 // all it currently does is say one of the objects is undergoing a database operation of 
@@ -29,10 +30,64 @@ public delegate void InDataOpsChangedHandler(EventArgs args);
 /// <summary>
 /// Allows for definition of 3d print filament. Default FilamentDefn is Generic PLA
 /// </summary>
-public class FilamentDefn : DataDefinitions.DatabaseObject, ITrackUsable, ISupportRemoval,IEventListener //,IEditableObject
+public class FilamentDefn : DataDefinitions.DatabaseObject, ITrackUsable, ISupportRemoval, IEventListener, ISharingSupport
+#if SUPPORTDELETE
+    ,IDeleteSupport
+#endif//,IEditableObject
 {
+    internal const string FilamentDefnIdentifier = "A1B2C3D4-E5F6-4789-ABCD-EF0123456789";
 
-    
+    /// <summary>
+    /// Standard filament diameter in mm
+    /// </summary>
+    public const double StandardFilamentDiameter = 1.75;
+    /// <summary>
+    /// Large filament diameter in mm
+    /// </summary>
+    public const double LargeFilamentDiameter = 3.0;
+    /// <summary>
+    /// Default shelf-life in days
+    /// </summary>
+    public const int DefaultShelfLife = 180;  // in days
+
+    #region Sharing Support
+    internal static Guid identifier = new(FilamentDefnIdentifier);
+    [JsonIgnore, BsonIgnore]
+    public Guid SharingID => identifier;
+    private bool isSelected;
+    [JsonIgnore, BsonIgnore]
+    public bool IsSelectedForSharing
+    {
+        get => isSelected;
+        set => Set(ref isSelected, value);
+    }
+    [JsonIgnore, BsonIgnore]
+    private bool alreadyInDatabase;
+    [JsonIgnore, BsonIgnore]
+    public bool NotAlreadyInDatabase
+    {
+        get => alreadyInDatabase;
+        set => Set(ref alreadyInDatabase, value);
+    }
+
+    public string SerializeForSharing()
+    {
+        json.JsonSerializerOptions options = new()
+        {
+            WriteIndented = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            Converters = { new JsonStringEnumConverter() }
+        };
+        return json.JsonSerializer.Serialize(this, typeof(FilamentDefn), options);
+    }
+    public string SuggestedFileNameForSharing()
+    {
+        var safeName = string.Join('-', Material?.ShortName, Vendor?.Name ?? Enhancement).Split(System.IO.Path.GetInvalidFileNameChars());
+        return $"{safeName}_{DateTime.Now:yyyyMMddHHmmss}.json";
+    }
+    #endregion
+
+    #region Data Operations State Management
     public static event InDataOpsChangedHandler InDataOpsChanged;
 
     private static bool inDataOps;
@@ -49,33 +104,33 @@ public class FilamentDefn : DataDefinitions.DatabaseObject, ITrackUsable, ISuppo
     }
     [JsonIgnore, BsonIgnore]
     public override bool InDataOperations => InDataOps;
+    #endregion
+
+    #region Editing and Validation
     [JsonIgnore, BsonIgnore]
     public override bool CanEdit => base.CanEdit /* && !isIntrinsic */;
     [JsonIgnore, BsonIgnore]
     public override bool InDatabase => FilamentDefnId != default;
     [JsonIgnore, BsonIgnore]
-    public override bool SupportsDelete => !IsIntrinsic;
+    public override bool SupportsDelete => !IsIntrinsic;  // TODO: Modify this to check for dependencies too.  Actually, it checks for Dependencies in the Remove method in the Browser ViewModel.  FilamentDefn does not have direct access to the database.
     [XmlIgnore, JsonIgnore, BsonIgnore]
-    public override bool IsModified { get => base.IsModified ; set => base.IsModified = value; }
+    public override bool IsModified
+    {
+        get => base.IsModified; set => base.IsModified = value;
+    }
     [JsonIgnore, BsonIgnore]
-    public override bool IsValid => !double.IsNaN(Diameter);
+    public override bool IsValid => !double.IsNaN(Diameter) && MaterialId != default;
+    #endregion
+
+    #region Actual Data
     /// <summary>
     /// Database identifier for FilamentDefn
     /// </summary>
-    [JsonPropertyName("ID"), BsonId]
-    public int FilamentDefnId { get; set; }
-    /// <summary>
-    /// Standard filament diameter in mm
-    /// </summary>
-    public const double StandardFilamentDiameter = 1.75;
-    /// <summary>
-    /// Large filament diameter in mm
-    /// </summary>
-    public const double LargeFilamentDiameter = 3.0;
-    /// <summary>
-    /// Default shelf-life in days
-    /// </summary>
-    public const int DefaultShelfLife = 180;  // in days
+    [JsonIgnore, BsonId]
+    public int FilamentDefnId
+    {
+        get; set;
+    }
 
     private double diameter = StandardFilamentDiameter;
     /// <summary>
@@ -84,7 +139,7 @@ public class FilamentDefn : DataDefinitions.DatabaseObject, ITrackUsable, ISuppo
     /// <value>
     /// The diameter.
     /// </value>
-    [Affected(Names = new string[] { nameof(MgPerMM),nameof(IsValid) }), XmlAttribute("diameter")]
+    [Affected(Names = new string[] { nameof(MgPerMM), nameof(IsValid) }), XmlAttribute("diameter")]
     public double Diameter
     {
         get => diameter;
@@ -98,13 +153,13 @@ public class FilamentDefn : DataDefinitions.DatabaseObject, ITrackUsable, ISuppo
     /// <value>
     ///   <c>true</c> if [stop using]; otherwise, <c>false</c>.
     /// </value>
-    [XmlAttribute("notUsed")]
+    [XmlAttribute("notUsed"), JsonIgnore]
     public bool? StopUsing
     {
         get => stopUsing ?? false;
         set => Set(ref stopUsing, value);
     }
-    
+
     //public bool EventsMapped => (InDataOpsChanged?.GetInvocationList().Cast<InDataOpsChangedHandler>().Contains(FilamentDefn_InDataOpsChanged) ?? false) && (DensityAlias?.IsLinkedToNotifyContainer ?? false);
     //private double density = DefinedDensity.BasicPLADensity;
     ///// <summary>
@@ -121,25 +176,10 @@ public class FilamentDefn : DataDefinitions.DatabaseObject, ITrackUsable, ISuppo
     /// <value>
     /// The type of the material.
     /// </value>
-    [Affected(Names = new string[] { nameof(MgPerMM) }), XmlAttribute("material"), JsonPropertyName("Material")]
-    public MaterialType MaterialType { get => materialType; set => Set<MaterialType>(ref materialType, value); }
-
-    public int MaterialId
+    [Affected(Names = new string[] { nameof(MgPerMM) }), JsonIgnore]
+    public MaterialType MaterialType
     {
-        get;
-        set;
-    }
-    
-    private Material material;
-    [BsonIgnore]
-    public Material Material
-    {
-        get => material;
-        set
-        {
-            if (Set(ref material, value) && MaterialId == default && Material != null)
-                MaterialId = Material.MaterialId;
-        }
+        get => materialType; set => Set<MaterialType>(ref materialType, value);
     }
 
     private string enhancement;
@@ -154,6 +194,7 @@ public class FilamentDefn : DataDefinitions.DatabaseObject, ITrackUsable, ISuppo
     /// <summary>
     /// Modifiers, as 3d printing has evolved so has the types of filaments available
     /// </summary>
+    [JsonIgnore, BsonIgnore]
     public MaterialModifier Modifier
     {
         get => modifier;
@@ -164,31 +205,44 @@ public class FilamentDefn : DataDefinitions.DatabaseObject, ITrackUsable, ISuppo
     /// <summary>
     /// Allows for a vendor specific density for various filaments, Bambu PLA as an example
     /// </summary>
+    [JsonIgnore]
     public int? VendorID
     {
         get => vendorID;
         set
         {
-            var needsUpdate = value != null && !EqualityComparer<int?>.Default.Equals(value, vendorID);
+            var needsUpdate = value != null && value != default && !EqualityComparer<int?>.Default.Equals(value, vendorID);
             Set(ref vendorID, value);
-            if(needsUpdate && Singleton<LiteDBDal>.Instance.Vendors != null)
-                Vendor=Singleton<LiteDBDal>.Instance.Vendors.Where(v=> v.VendorDefnId == vendorID).FirstOrDefault();
+            if (needsUpdate && Singleton<LiteDBDal>.Instance.Vendors != null)
+                Vendor = Singleton<LiteDBDal>.Instance.Vendors.Where(v => v.VendorDefnId == vendorID).FirstOrDefault();
         }
     }
-
-    private VendorDefn vendor;
+#nullable enable
+    private string? vendorName;
     [BsonIgnore]
+    public string? VendorName
+    {
+        get => vendorName;
+        set => vendorName = value;
+    }
+#nullable disable
+    private VendorDefn vendor;
+    [BsonIgnore, JsonIgnore]
     public VendorDefn Vendor
     {
         get => vendor;
-        set => Set(ref vendor, value);
+        set
+        {
+            if (Set(ref vendor, value))
+                VendorName = Vendor?.Name;
+        }
     }
 
     private double density;
     /// <summary>
     /// Reference to contained DensityAlias
     /// </summary>
-    [Affected(Names = new[] { nameof(MgPerMM) }), JsonPropertyName("Alias")]
+    [Affected(Names = new[] { nameof(MgPerMM) }), JsonPropertyName("Density")]
     public double Density
     {
         get => density;
@@ -206,6 +260,27 @@ public class FilamentDefn : DataDefinitions.DatabaseObject, ITrackUsable, ISuppo
         get => isIntrinsic;
         set => Set<bool>(ref isIntrinsic, value);
     }
+    [JsonIgnore]
+    public int MaterialId
+    {
+        get;
+        set;
+    }
+
+    private Material material;
+    [BsonIgnore]
+    public Material Material
+    {
+        get => material;
+        set
+        {
+            if (Set(ref material, value) && MaterialId == default && Material != null)
+                MaterialId = Material.MaterialId;
+        }
+    }
+
+    #endregion
+
     #region UI Assist Items, not mapped
     /// <summary>
     /// flag used by the UI to <b>show</b> or <b>hide</b> features
@@ -278,6 +353,22 @@ public class FilamentDefn : DataDefinitions.DatabaseObject, ITrackUsable, ISuppo
 
         InDataOpsChanged -= FilamentDefn_InDataOpsChanged;
     }
+#if SUPPORTDELETE
+    public void Delete(ILiteDBDAL dBDal)
+    {
+        if (dBDal == null)
+            throw new ArgumentNullException(nameof(dBDal), $"the {nameof(dBDal)} argument was not passed to the {nameof(Delete)} method for {GetType().Name}");
+        if (FilamentDefnId != default)
+        {
+            dBDal.Filaments.Remove(this);
+            dBDal.Remove(this);
+            FilamentDefnId = default;
+            InDataOps = false;
+            SetContainedModifiedState(false);
+            ReleaseEventHandlers();
+        }
+    }
+#endif
     ~FilamentDefn()
     {
         //if (densityAlias != null)
@@ -301,7 +392,10 @@ public class FilamentDefn : DataDefinitions.DatabaseObject, ITrackUsable, ISuppo
     /// The shelf life in days.
     /// </value>
     [JsonIgnore, XmlAttribute("shelfLife")]
-    public int ShelfLifeInDays { get => shelfLife; set => Set<int>(ref shelfLife, value); }
+    public int ShelfLifeInDays
+    {
+        get => shelfLife; set => Set<int>(ref shelfLife, value);
+    }
     /// <summary>
     /// Initializes a new instance of the <see cref="FilamentDefn"/> class.
     /// </summary>
@@ -324,7 +418,7 @@ public class FilamentDefn : DataDefinitions.DatabaseObject, ITrackUsable, ISuppo
         Init();
         Diameter = StandardFilamentDiameter;
         //DensityUnion = new DefinedDensity(DefinedDensity.BasicPLADensity);
-        Density= Constants.BasicPLADensity;
+        Density = Constants.BasicPLADensity;
         MaterialType = MaterialType.PLA;
     }
     /// <summary>
@@ -365,8 +459,32 @@ public class FilamentDefn : DataDefinitions.DatabaseObject, ITrackUsable, ISuppo
     /// The milligrams per millimeter (mg/mm)
     /// </value>
     [Description("Milligrams per millimeter"), JsonIgnore, BsonIgnore]
-    public double MgPerMM =>!double.IsNaN(Density)? FilamentMath.FilamentVolumeInCubicCentimeters(Diameter / 2, 1.0) * Density * 1000 :double.NaN;
+    public double MgPerMM => !double.IsNaN(Density) ? FilamentMath.FilamentVolumeInCubicCentimeters(Diameter / 2, 1.0) * Density * 1000 : double.NaN;
 
+    public override bool HasDependencies(ILiteDBDAL lite)
+    {
+        if (lite == null)
+            throw new ArgumentNullException(nameof(lite), $"A null argument for {nameof(ILiteDBDAL)} was passed to the HasDependencies method for {GetType().Name}");
+
+        foreach (var vend in lite.Vendors)
+        {
+            if(vend.SpoolDefns?.Count == 0)
+                continue;
+            foreach (var sp in vend.SpoolDefns)
+            {
+                if (sp.Inventory?.Count == 0)
+                    continue;
+                foreach (var inv in sp.Inventory)
+                {
+                    if (inv.FilamentDefnId == FilamentDefnId)
+                        return true;
+                }
+            }
+
+        }
+        return false;
+        // no dependencies found
+    }
     //public override void UpdateItem()
     //{
     // TODO: Rewrite to support JsonDocument
@@ -415,16 +533,16 @@ public class FilamentDefn : DataDefinitions.DatabaseObject, ITrackUsable, ISuppo
     {
         //DensityAlias.LinkChildren(this);
     }
-    protected override void SaveToJsonDatabase()
-    {
-        //if (Document != null)
-        //    Document.Filaments.Add(this);
-    }
+    //protected override void SaveToJsonDatabase()
+    //{
+    //    //if (Document != null)
+    //    //    Document.Filaments.Add(this);
+    //}
     internal override int KeyID => FilamentDefnId;
-    internal override void UpdateContainedItemsForJson()
-    {
-        //DensityAlias.UpdateContainedItemsForJson();
-    }
+    //internal override void UpdateContainedItemsForJson()
+    //{
+    //    DensityAlias.UpdateContainedItemsForJson();
+    //}
     //protected override void AssignKey(int myID)
     //{
     //    if (Document != null)
@@ -463,7 +581,7 @@ public class FilamentDefn : DataDefinitions.DatabaseObject, ITrackUsable, ISuppo
                 return (RemovalResult.HasReferences, references);
             else
                 //TODO : code to remove the FilamentDefn from the database
-                System.Diagnostics.Trace.WriteLine("Unfinished code in Remove method in FilamentDefn.","Information");
+                System.Diagnostics.Trace.WriteLine("Unfinished code in Remove method in FilamentDefn.", "Information");
         }
         throw new NotImplementedException();
     }

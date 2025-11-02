@@ -16,7 +16,7 @@ public class Observable : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler PropertyChanged;
 
-    protected virtual bool Set<T>(ref T target, T value, bool blockUpdate = false, [CallerMemberName] string propertyName = null)
+    protected virtual bool Set<T>(ref T target, T value, bool blockModifiedUpdate = false, [CallerMemberName] string propertyName = null)
     {
         if (!string.IsNullOrEmpty(propertyName))
         {
@@ -25,7 +25,7 @@ public class Observable : INotifyPropertyChanged
                 target = value;
                 OnPropertyChanged(propertyName);
 
-                if (propertyName != nameof(ITrackModified.IsModified) && this is ITrackModified track && !track.InDataOperations)
+                if (propertyName != nameof(ITrackModified.IsModified) && this is ITrackModified track && !track.InDataOperations && !blockModifiedUpdate)
                     track.IsModified = true;
                 
                 UpdateAffected(propertyName);
